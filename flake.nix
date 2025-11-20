@@ -13,7 +13,7 @@
       in
       {
         devShells.default = pkgs.mkShell {
-          packages = with pkgs; [ nodejs_22 jq ];
+          packages = with pkgs; [ nodejs_22 ];
         };
       }
     );
