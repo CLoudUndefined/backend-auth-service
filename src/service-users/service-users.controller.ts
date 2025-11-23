@@ -84,7 +84,7 @@ export class ServiceUsersController {
     @ApiParam({
         name: 'id',
         description: 'Service user ID',
-        example: 1
+        example: 1,
     })
     @ApiResponse({
         status: 200,

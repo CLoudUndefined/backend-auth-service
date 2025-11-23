@@ -17,7 +17,7 @@ export class AppsController {
     @ApiResponse({
         status: 201,
         description: 'App created successfully',
-        type: AppResponseDto
+        type: AppResponseDto,
     })
     @ApiResponse({
         status: 400,
@@ -34,7 +34,7 @@ export class AppsController {
     @Get()
     @ApiOperation({
         summary: 'Get all apps (God only)',
-        description: 'Returns a list of all applications. Only accessible to users with god-mode privileges'
+        description: 'Returns a list of all applications. Only accessible to users with god-mode privileges',
     })
     @ApiResponse({
         status: 200,
@@ -121,23 +121,24 @@ export class AppsController {
     @ApiParam({
         name: 'id',
         description: 'App ID',
-        example: 1 })
+        example: 1,
+    })
     @ApiResponse({
         status: 200,
         description: 'App deleted',
-        type: MessageResponseDto
+        type: MessageResponseDto,
     })
     @ApiResponse({
         status: 401,
-        description: 'Unauthorized'
+        description: 'Unauthorized',
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only view own apps or requires god-mode'
+        description: 'Forbidden - can only view own apps or requires god-mode',
     })
     @ApiResponse({
         status: 404,
-        description: 'App not found'
+        description: 'App not found',
     })
     async remove(@Param('id', ParseIntPipe) id: number): Promise<MessageResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');

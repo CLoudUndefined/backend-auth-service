@@ -14,7 +14,7 @@ export class RegisterDto {
     @ApiProperty({
         example: 'S@perDuper5ecret_Pa55w0rd2004',
         description: 'Password for the new account. Must be at least 12 characters long.',
-        minLength: 12
+        minLength: 12,
     })
     @IsNotEmpty({ message: 'Password is required' })
     @IsString()

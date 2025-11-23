@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ServiceUserResponseDto } from "src/service-users/dto/service-user-response.dto";
+import { ServiceUserResponseDto } from 'src/service-users/dto/service-user-response.dto';
 
 export class AppResponseDto {
     @ApiProperty({
@@ -10,14 +10,14 @@ export class AppResponseDto {
 
     @ApiProperty({
         example: 'My Cat Chat App',
-        description: 'Application name'
+        description: 'Application name',
     })
     name: string;
 
     @ApiProperty({
         example: 'Best app for talking about cats',
         description: 'Application description',
-        nullable: true
+        nullable: true,
     })
     description: string | null;
 

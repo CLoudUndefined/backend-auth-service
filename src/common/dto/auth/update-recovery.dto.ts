@@ -19,7 +19,7 @@ export class UpdateRecoveryDto {
     newQuestion: string;
 
     @ApiProperty({
-        example: '\'Ula\'ula \'alani melemele',
+        example: "'Ula'ula 'alani melemele",
         description: 'New answer to the security question',
     })
     @IsNotEmpty()

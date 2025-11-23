@@ -4,7 +4,7 @@ import { IsString, IsNotEmpty, MinLength, MaxLength } from 'class-validator';
 export class ChangePasswordDto {
     @ApiProperty({
         example: 'S@perDuper5ecret_Pa55w0rd2004',
-        description: 'Current active password'
+        description: 'Current active password',
     })
     @IsNotEmpty({ message: 'Password is required' })
     @IsString()
@@ -13,7 +13,7 @@ export class ChangePasswordDto {
     @ApiProperty({
         example: 'MegaPa55w0rd2008_AlEx',
         description: 'New password to set. Must be at least 12 characters.',
-        minLength: 12
+        minLength: 12,
     })
     @IsNotEmpty({ message: 'Password is required' })
     @IsString()

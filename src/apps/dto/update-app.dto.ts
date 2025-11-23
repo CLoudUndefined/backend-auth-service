@@ -5,7 +5,7 @@ export class UpdateAppDto {
     @ApiProperty({
         example: 'My Cat Chat App (renamed)',
         description: 'New name for the application',
-        required: false
+        required: false,
     })
     @IsOptional()
     @IsString()
@@ -15,7 +15,7 @@ export class UpdateAppDto {
     @ApiProperty({
         example: 'Best app for talking about cats (updated description)',
         description: 'New description',
-        required: false
+        required: false,
     })
     @IsOptional()
     @IsString()

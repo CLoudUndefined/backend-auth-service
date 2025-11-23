@@ -45,7 +45,7 @@ export class AuthController {
     @ApiResponse({
         status: 200,
         description: 'Login successful',
-        type: LoginResponseDto
+        type: LoginResponseDto,
     })
     @ApiResponse({
         status: 400,
@@ -72,7 +72,8 @@ export class AuthController {
     })
     @ApiResponse({
         status: 400,
-        description: 'Validation failed or new password too weak', })
+        description: 'Validation failed or new password too weak',
+    })
     @ApiResponse({
         status: 401,
         description: 'Unauthorized or Wrong old password',

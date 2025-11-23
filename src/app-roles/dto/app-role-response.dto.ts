@@ -16,7 +16,7 @@ export class AppRoleResponseDto {
     @ApiProperty({
         example: 'Can manage content',
         description: 'Role Description',
-        nullable: true
+        nullable: true,
     })
     description: string | null;
 

@@ -7,6 +7,6 @@ import { AppUsersModule } from './app-users/app-users.module';
 import { AppRolesModule } from './app-roles/app-roles.module';
 
 @Module({
-  imports: [ServiceUsersModule, AuthModule, AppsModule, AppAuthModule, AppUsersModule, AppRolesModule]
+    imports: [ServiceUsersModule, AuthModule, AppsModule, AppAuthModule, AppUsersModule, AppRolesModule],
 })
 export class AppModule {}

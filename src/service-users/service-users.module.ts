@@ -2,6 +2,6 @@ import { Module } from '@nestjs/common';
 import { ServiceUsersController } from './service-users.controller';
 
 @Module({
-  controllers: [ServiceUsersController],
+    controllers: [ServiceUsersController],
 })
 export class ServiceUsersModule {}

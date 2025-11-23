@@ -4,7 +4,7 @@ import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 export class CreateAppDto {
     @ApiProperty({
         example: 'My Cat Chat App',
-        description: 'Name of the application. Must be unique per user.'
+        description: 'Name of the application. Must be unique per user.',
     })
     @IsNotEmpty()
     @IsString()
@@ -14,7 +14,7 @@ export class CreateAppDto {
     @ApiProperty({
         example: 'Best app for talking about cats',
         description: 'Optional description of the application',
-        required: false
+        required: false,
     })
     @IsOptional()
     @IsString()

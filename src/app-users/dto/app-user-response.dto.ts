@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AppRoleResponseDto } from "src/app-roles/dto/app-role-response.dto";
+import { AppRoleResponseDto } from 'src/app-roles/dto/app-role-response.dto';
 
 export class AppUserResponseDto {
     @ApiProperty({
@@ -10,7 +10,7 @@ export class AppUserResponseDto {
 
     @ApiProperty({
         example: 'developer@example.com',
-        description: 'User email'
+        description: 'User email',
     })
     email: string;
 

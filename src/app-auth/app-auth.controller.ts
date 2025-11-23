@@ -42,7 +42,10 @@ export class AppAuthController {
         status: 409,
         description: 'User email already exists in this app',
     })
-    async register(@Param('appId', ParseIntPipe) appId: number, @Body() registerDto: RegisterDto): Promise<AppUserResponseDto> {
+    async register(
+        @Param('appId', ParseIntPipe) appId: number,
+        @Body() registerDto: RegisterDto,
+    ): Promise<AppUserResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
@@ -105,7 +108,10 @@ export class AppAuthController {
         status: 404,
         description: 'App not found',
     })
-    async changePassword(@Param('appId', ParseIntPipe) appId: number, @Body() changePasswordDto: ChangePasswordDto): Promise<MessageResponseDto> {
+    async changePassword(
+        @Param('appId', ParseIntPipe) appId: number,
+        @Body() changePasswordDto: ChangePasswordDto,
+    ): Promise<MessageResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
@@ -128,7 +134,10 @@ export class AppAuthController {
         status: 404,
         description: 'App or User not found',
     })
-    async recoveryAsk(@Param('appId', ParseIntPipe) appId: number, @Body() recoveryAskDto: RecoveryAskDto): Promise<RecoveryAskResponseDto> {
+    async recoveryAsk(
+        @Param('appId', ParseIntPipe) appId: number,
+        @Body() recoveryAskDto: RecoveryAskDto,
+    ): Promise<RecoveryAskResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
@@ -155,7 +164,10 @@ export class AppAuthController {
         status: 404,
         description: 'App or User not found',
     })
-    async recoveryReset(@Param('appId', ParseIntPipe) appId: number, @Body() recoveryResetDto: RecoveryResetDto): Promise<MessageResponseDto> {
+    async recoveryReset(
+        @Param('appId', ParseIntPipe) appId: number,
+        @Body() recoveryResetDto: RecoveryResetDto,
+    ): Promise<MessageResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
@@ -187,7 +199,10 @@ export class AppAuthController {
         status: 404,
         description: 'App not found',
     })
-    async updateRecovery(@Param('appId', ParseIntPipe) appId: number, @Body() updateRecoveryDto: UpdateRecoveryDto): Promise<UpdateRecoveryResponseDto> {
+    async updateRecovery(
+        @Param('appId', ParseIntPipe) appId: number,
+        @Body() updateRecoveryDto: UpdateRecoveryDto,
+    ): Promise<UpdateRecoveryResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 }

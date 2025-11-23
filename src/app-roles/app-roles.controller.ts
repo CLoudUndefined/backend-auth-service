@@ -40,7 +40,10 @@ export class AppRolesController {
         status: 404,
         description: 'App not found',
     })
-    async create(@Param('appId', ParseIntPipe) appId: number, @Body() createDto: CreateAppRoleDto): Promise<AppRoleResponseDto> {
+    async create(
+        @Param('appId', ParseIntPipe) appId: number,
+        @Body() createDto: CreateAppRoleDto,
+    ): Promise<AppRoleResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
@@ -51,7 +54,8 @@ export class AppRolesController {
     })
     @ApiParam({
         name: 'appId',
-        description: 'App ID', example: 1,
+        description: 'App ID',
+        example: 1,
     })
     @ApiResponse({
         status: 200,
@@ -106,7 +110,10 @@ export class AppRolesController {
         status: 404,
         description: 'App or Role not found',
     })
-    async findOne(@Param('appId', ParseIntPipe) appId: number, @Param('roleId', ParseIntPipe) roleId: number): Promise<AppRoleResponseDto> {
+    async findOne(
+        @Param('appId', ParseIntPipe) appId: number,
+        @Param('roleId', ParseIntPipe) roleId: number,
+    ): Promise<AppRoleResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
@@ -146,7 +153,11 @@ export class AppRolesController {
         status: 404,
         description: 'App or Role not found',
     })
-    async update(@Param('appId', ParseIntPipe) appId: number, @Param('roleId', ParseIntPipe) roleId: number, @Body() updateDto: UpdateAppRoleDto): Promise<AppRoleResponseDto> {
+    async update(
+        @Param('appId', ParseIntPipe) appId: number,
+        @Param('roleId', ParseIntPipe) roleId: number,
+        @Body() updateDto: UpdateAppRoleDto,
+    ): Promise<AppRoleResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
@@ -167,7 +178,8 @@ export class AppRolesController {
     })
     @ApiResponse({
         status: 200,
-        description: 'Role deleted', type: MessageResponseDto,
+        description: 'Role deleted',
+        type: MessageResponseDto,
     })
     @ApiResponse({
         status: 401,
@@ -185,7 +197,10 @@ export class AppRolesController {
         status: 409,
         description: 'Conflict - Cannot delete role currently assigned to users',
     })
-    async remove(@Param('appId', ParseIntPipe) appId: number, @Param('roleId', ParseIntPipe) roleId: number): Promise<MessageResponseDto> {
+    async remove(
+        @Param('appId', ParseIntPipe) appId: number,
+        @Param('roleId', ParseIntPipe) roleId: number,
+    ): Promise<MessageResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 }
