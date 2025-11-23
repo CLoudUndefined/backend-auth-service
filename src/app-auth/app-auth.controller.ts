@@ -10,7 +10,7 @@ import { RecoveryResetDto } from 'src/common/dto/auth/recovery-reset.dto';
 import { RegisterDto } from 'src/common/dto/auth/register.dto';
 import { UpdateRecoveryResponseDto } from 'src/common/dto/auth/update-recovery-response.dto';
 import { UpdateRecoveryDto } from 'src/common/dto/auth/update-recovery.dto';
-import { MessageResponseDto } from 'src/common/dto/message-response.dto';5
+import { MessageResponseDto } from 'src/common/dto/message-response.dto';
 
 @ApiTags('App Auth (App-Users)')
 @Controller('apps/:appId/auth')
