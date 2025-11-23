@@ -21,6 +21,11 @@ export class ServiceUsersController {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
+    @Get(':id')
+    async findOne(@Param('id', ParseIntPipe) id: number): Promise<ServiceUserResponseDto> {
+        throw new NotImplementedException('Logic not implemented yet');
+    }
+
     @Delete(':id')
     async remove(@Param('id', ParseIntPipe) id: number): Promise<MessageResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
