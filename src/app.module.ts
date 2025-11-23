@@ -4,8 +4,9 @@ import { AuthModule } from './auth/auth.module';
 import { AppsModule } from './apps/apps.module';
 import { AppAuthModule } from './app-auth/app-auth.module';
 import { AppUsersModule } from './app-users/app-users.module';
+import { AppRolesModule } from './app-roles/app-roles.module';
 
 @Module({
-  imports: [ServiceUsersModule, AuthModule, AppsModule, AppAuthModule, AppUsersModule]
+  imports: [ServiceUsersModule, AuthModule, AppsModule, AppAuthModule, AppUsersModule, AppRolesModule]
 })
 export class AppModule {}
