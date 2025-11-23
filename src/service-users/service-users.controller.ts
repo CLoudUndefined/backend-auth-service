@@ -1,7 +1,6 @@
 import { Controller, NotImplementedException, Get, Put, Delete, Body, Param, ParseIntPipe } from '@nestjs/common';
 import { UpdateServiceUserRequestDto } from './dto/update-service-user-request';
 import { ServiceUserResponseDto } from './dto/service-user-response.dto';
-import { DeleteServiceUserResponseDto } from './dto/delete-service-user-response.dto';
 import { MessageResponseDto } from 'src/common/dto/message-response.dto';
 
 @Controller('service-users')
