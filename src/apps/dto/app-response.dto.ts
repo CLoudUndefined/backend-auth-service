@@ -35,13 +35,13 @@ export class AppResponseDto {
 
     @ApiProperty({
         example: '2025-11-23T12:34:56.000Z',
-        description: 'Timestamp when the service user was created',
+        description: 'Timestamp when the app was created',
     })
     createdAt: Date;
 
     @ApiProperty({
         example: '2025-11-23T12:34:56.000Z',
-        description: 'Timestamp when the service user was last updated',
+        description: 'Timestamp when the app was last updated',
     })
     updatedAt: Date;
 }
