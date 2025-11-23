@@ -1,4 +1,4 @@
-import { Body, Controller, NotImplementedException, Post } from '@nestjs/common';
+import { Body, Controller, NotImplementedException, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { ChangePasswordDto } from 'src/common/dto/auth/change-password.dto';
 import { LoginResponseDto } from 'src/common/dto/auth/login-response.dto';
 import { LoginDto } from 'src/common/dto/auth/login.dto';
@@ -14,32 +14,32 @@ import { ServiceUserResponseDto } from 'src/service-users/dto/service-user-respo
 @Controller('apps/:appId/auth')
 export class AppAuthController {
     @Post('register')
-    async register(@Body() registerDto: RegisterDto): Promise<ServiceUserResponseDto> {
+    async register(@Param('appId', ParseIntPipe) appId: number, @Body() registerDto: RegisterDto): Promise<ServiceUserResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
     @Post('login')
-    async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
+    async login(@Param('appId', ParseIntPipe) appId: number, @Body() loginDto: LoginDto): Promise<LoginResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
     @Post('change-password')
-    async changePassword(@Body() changePasswordDto: ChangePasswordDto): Promise<MessageResponseDto> {
+    async changePassword(@Param('appId', ParseIntPipe) appId: number, @Body() changePasswordDto: ChangePasswordDto): Promise<MessageResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
     @Post('recovery/ask')
-    async recoveryAsk(@Body() recoveryAskDto: RecoveryAskDto): Promise<RecoveryAskResponseDto> {
+    async recoveryAsk(@Param('appId', ParseIntPipe) appId: number, @Body() recoveryAskDto: RecoveryAskDto): Promise<RecoveryAskResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
     @Post('recovery/reset')
-    async recoveryReset(@Body() recoveryResetDto: RecoveryResetDto): Promise<MessageResponseDto> {
+    async recoveryReset(@Param('appId', ParseIntPipe) appId: number, @Body() recoveryResetDto: RecoveryResetDto): Promise<MessageResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
     @Post('recovery/update')
-    async updateRecovery(@Body() updateRecoveryDto: UpdateRecoveryDto): Promise<UpdateRecoveryResponseDto> {
+    async updateRecovery(@Param('appId', ParseIntPipe) appId: number, @Body() updateRecoveryDto: UpdateRecoveryDto): Promise<UpdateRecoveryResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 }
