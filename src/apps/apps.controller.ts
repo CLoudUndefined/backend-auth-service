@@ -22,7 +22,7 @@ export class AppsController {
     }
 
     @Put(':id')
-    async update(@Param('id', ParseIntPipe) id: number, @Body() updateAppDto: UpdateAppDto): Promise<AppResponseDto> {
+    async update(@Param('id', ParseIntPipe) id: number, @Body() updateDto: UpdateAppDto): Promise<AppResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
