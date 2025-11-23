@@ -8,7 +8,7 @@ export class UpdateAppUserDto {
         required: false,
     })
     @IsEmail({}, { message: 'Email must be valid' })
-    @IsNotEmpty({ message: 'Email is required' })
+    @IsOptional()
     @MaxLength(255, { message: 'Email must not exceed 255 characters' })
     email?: string;
 
