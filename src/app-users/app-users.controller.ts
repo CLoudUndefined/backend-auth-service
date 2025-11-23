@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, NotImplementedException, Param, ParseIntPipe, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotImplementedException, Param, ParseIntPipe, Put, Query } from '@nestjs/common';
 import { AppUserResponseDto } from './dto/app-user-response.dto';
 import { MessageResponseDto } from 'src/common/dto/message-response.dto';
 import { UpdateAppUserDto } from './dto/update-app-user.dto';
@@ -6,7 +6,7 @@ import { UpdateAppUserDto } from './dto/update-app-user.dto';
 @Controller('apps/:appId/users')
 export class AppUsersController {
     @Get()
-    async findAll(@Param('appId', ParseIntPipe) appId: number): Promise<AppUserResponseDto[]> {
+    async findAll(@Param('appId', ParseIntPipe) appId: number, @Query('roleId', new ParseIntPipe({ optional: true })) roleId?: number): Promise<AppUserResponseDto[]> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
