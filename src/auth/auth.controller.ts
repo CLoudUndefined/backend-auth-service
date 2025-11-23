@@ -8,7 +8,7 @@ import { RecoveryResetDto } from './dto/recovery-reset.dto';
 import { UpdateRecoveryDto } from './dto/update-recovery.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { RecoveryAskResponseDto } from './dto/recovery-ask-response.dto';
-import { MessageResponseDto } from './dto/message-response.dto';
+import { MessageResponseDto } from '../common/dto/message-response.dto';
 import { UpdateRecoveryResponseDto } from './dto/update-recovery-response.dto';
 
 @Controller('auth')
