@@ -2,6 +2,7 @@ import { Controller, NotImplementedException, Get, Put, Delete, Body, Param, Par
 import { UpdateServiceUserRequestDto } from './dto/update-service-user-request';
 import { ServiceUserResponseDto } from './dto/service-user-response.dto';
 import { MessageResponseDto } from 'src/common/dto/message-response.dto';
+import { AppResponseDto } from 'src/apps/dto/app-response.dto';
 
 @Controller('service-users')
 export class ServiceUsersController {
@@ -22,6 +23,11 @@ export class ServiceUsersController {
 
     @Delete(':id')
     async remove(@Param('id', ParseIntPipe) id: number): Promise<MessageResponseDto> {
+        throw new NotImplementedException('Logic not implemented yet');
+    }
+
+    @Get(':id/apps')
+    async findAllByUser(@Param('id', ParseIntPipe) id: number): Promise<AppResponseDto[]> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 }
