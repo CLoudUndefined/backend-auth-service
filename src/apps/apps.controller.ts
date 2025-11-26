@@ -4,6 +4,7 @@ import { AppResponseDto } from './dto/app-response.dto';
 import { UpdateAppRequestDto } from './dto/update-app-request.dto';
 import { MessageResponseDto } from 'src/common/dto/message-response.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CreateAppResponseDto } from './dto/create-app-response.dto';
 
 @ApiTags('Apps (Service Management)')
 @ApiBearerAuth('JWT-auth')
@@ -27,7 +28,7 @@ export class AppsController {
         status: 401,
         description: 'Unauthorized',
     })
-    async create(@Body() createAppDto: CreateAppRequestDto): Promise<AppResponseDto> {
+    async create(@Body() createAppDto: CreateAppRequestDto): Promise<CreateAppResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 

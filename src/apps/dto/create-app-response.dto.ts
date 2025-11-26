@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ServiceUserResponseDto } from 'src/service-users/dto/service-user-response.dto';
 
-export class AppResponseDto {
+export class CreateAppResponseDto {
     @ApiProperty({
         example: 1,
         description: 'App ID',
@@ -20,6 +20,12 @@ export class AppResponseDto {
         nullable: true,
     })
     description: string | null;
+
+    @ApiProperty({
+        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        description: 'Auto-generated secret key for signing JWTs within this app.',
+    })
+    secret: string;
 
     @ApiProperty({
         type: () => ServiceUserResponseDto,
