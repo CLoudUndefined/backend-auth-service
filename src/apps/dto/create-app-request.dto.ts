@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
-export class CreateAppRoleDto {
+export class CreateAppRequestDto {
     @ApiProperty({
-        example: 'Manager',
-        description: 'Unique name of the role within the app',
+        example: 'My Cat Chat App',
+        description: 'Name of the application. Must be unique per user.',
     })
     @IsNotEmpty()
     @IsString()
@@ -12,8 +12,8 @@ export class CreateAppRoleDto {
     name: string;
 
     @ApiProperty({
-        example: 'Can manage content',
-        description: 'Description of what this role can do',
+        example: 'Best app for talking about cats',
+        description: 'Optional description of the application',
         required: false,
     })
     @IsOptional()

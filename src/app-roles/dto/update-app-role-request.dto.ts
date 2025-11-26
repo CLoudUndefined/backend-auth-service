@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString, MaxLength } from 'class-validator';
 
-export class UpdateAppRoleDto {
+export class UpdateAppRoleRequestDto {
     @ApiProperty({
         example: 'Senior Manager',
         description: 'New name for the role',

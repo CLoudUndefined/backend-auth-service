@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { AppUserResponseDto } from './dto/app-user-response.dto';
 import { MessageResponseDto } from 'src/common/dto/message-response.dto';
-import { UpdateAppUserDto } from './dto/update-app-user.dto';
+import { UpdateAppUserRequestDto } from './dto/update-app-user-request.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('App Users (Management)')
@@ -149,7 +149,7 @@ export class AppUsersController {
     async update(
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
-        @Body() updateDto: UpdateAppUserDto,
+        @Body() updateDto: UpdateAppUserRequestDto,
     ): Promise<AppUserResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }

@@ -1,15 +1,15 @@
 import { Body, Controller, NotImplementedException, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AppUserResponseDto } from 'src/app-users/dto/app-user-response.dto';
-import { ChangePasswordDto } from 'src/common/dto/auth/change-password.dto';
+import { ChangePasswordRequestDto } from 'src/common/dto/auth/change-password-request.dto';
 import { LoginResponseDto } from 'src/common/dto/auth/login-response.dto';
-import { LoginDto } from 'src/common/dto/auth/login.dto';
+import { LoginRequestDto } from 'src/common/dto/auth/login-request.dto';
 import { RecoveryAskResponseDto } from 'src/common/dto/auth/recovery-ask-response.dto';
-import { RecoveryAskDto } from 'src/common/dto/auth/recovery-ask.dto';
-import { RecoveryResetDto } from 'src/common/dto/auth/recovery-reset.dto';
-import { RegisterDto } from 'src/common/dto/auth/register.dto';
+import { RecoveryAskRequestDto } from 'src/common/dto/auth/recovery-ask-request.dto';
+import { RecoveryResetRequestDto } from 'src/common/dto/auth/recovery-reset-request.dto';
+import { RegisterRequestDto } from 'src/common/dto/auth/register-request.dto';
 import { UpdateRecoveryResponseDto } from 'src/common/dto/auth/update-recovery-response.dto';
-import { UpdateRecoveryDto } from 'src/common/dto/auth/update-recovery.dto';
+import { UpdateRecoveryRequestDto } from 'src/common/dto/auth/update-recovery-request.dto';
 import { MessageResponseDto } from 'src/common/dto/message-response.dto';
 
 @ApiTags('App Auth (App-Users)')
@@ -44,7 +44,7 @@ export class AppAuthController {
     })
     async register(
         @Param('appId', ParseIntPipe) appId: number,
-        @Body() registerDto: RegisterDto,
+        @Body() RegisterRequestDto: RegisterRequestDto,
     ): Promise<AppUserResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
@@ -76,7 +76,7 @@ export class AppAuthController {
         status: 404,
         description: 'App not found',
     })
-    async login(@Param('appId', ParseIntPipe) appId: number, @Body() loginDto: LoginDto): Promise<LoginResponseDto> {
+    async login(@Param('appId', ParseIntPipe) appId: number, @Body() LoginRequestDto: LoginRequestDto): Promise<LoginResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
@@ -110,7 +110,7 @@ export class AppAuthController {
     })
     async changePassword(
         @Param('appId', ParseIntPipe) appId: number,
-        @Body() changePasswordDto: ChangePasswordDto,
+        @Body() ChangePasswordRequestDto: ChangePasswordRequestDto,
     ): Promise<MessageResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
@@ -136,7 +136,7 @@ export class AppAuthController {
     })
     async recoveryAsk(
         @Param('appId', ParseIntPipe) appId: number,
-        @Body() recoveryAskDto: RecoveryAskDto,
+        @Body() RecoveryAskRequestDto: RecoveryAskRequestDto,
     ): Promise<RecoveryAskResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
@@ -166,7 +166,7 @@ export class AppAuthController {
     })
     async recoveryReset(
         @Param('appId', ParseIntPipe) appId: number,
-        @Body() recoveryResetDto: RecoveryResetDto,
+        @Body() RecoveryResetRequestDto: RecoveryResetRequestDto,
     ): Promise<MessageResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
@@ -201,7 +201,7 @@ export class AppAuthController {
     })
     async updateRecovery(
         @Param('appId', ParseIntPipe) appId: number,
-        @Body() updateRecoveryDto: UpdateRecoveryDto,
+        @Body() UpdateRecoveryRequestDto: UpdateRecoveryRequestDto,
     ): Promise<UpdateRecoveryResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }

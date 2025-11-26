@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class UpdateRecoveryDto {
+export class UpdateRecoveryRequestDto {
     @ApiProperty({
         example: 'S@perDuper5ecret_Pa55w0rd2004',
         description: 'Current password for verification',

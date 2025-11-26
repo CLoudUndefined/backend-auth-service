@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, NotImplementedException, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import { AppRoleResponseDto } from './dto/app-role-response.dto';
-import { CreateAppRoleDto } from './dto/create-app-role.dto';
-import { UpdateAppRoleDto } from './dto/update-app-role.dto';
+import { CreateAppRoleRequestDto } from './dto/create-app-role-request.dto';
+import { UpdateAppRoleRequestDto } from './dto/update-app-role-request.dto';
 import { MessageResponseDto } from 'src/common/dto/message-response.dto';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
@@ -42,7 +42,7 @@ export class AppRolesController {
     })
     async create(
         @Param('appId', ParseIntPipe) appId: number,
-        @Body() createDto: CreateAppRoleDto,
+        @Body() createDto: CreateAppRoleRequestDto,
     ): Promise<AppRoleResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
@@ -156,7 +156,7 @@ export class AppRolesController {
     async update(
         @Param('appId', ParseIntPipe) appId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
-        @Body() updateDto: UpdateAppRoleDto,
+        @Body() updateDto: UpdateAppRoleRequestDto,
     ): Promise<AppRoleResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }

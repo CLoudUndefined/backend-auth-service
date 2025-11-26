@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, NotImplementedException, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
-import { CreateAppDto } from './dto/create-app.dto';
+import { CreateAppRequestDto } from './dto/create-app-request.dto';
 import { AppResponseDto } from './dto/app-response.dto';
-import { UpdateAppDto } from './dto/update-app.dto';
+import { UpdateAppRequestDto } from './dto/update-app-request.dto';
 import { MessageResponseDto } from 'src/common/dto/message-response.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
@@ -27,7 +27,7 @@ export class AppsController {
         status: 401,
         description: 'Unauthorized',
     })
-    async create(@Body() createAppDto: CreateAppDto): Promise<AppResponseDto> {
+    async create(@Body() createAppDto: CreateAppRequestDto): Promise<AppResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
@@ -109,7 +109,7 @@ export class AppsController {
         status: 404,
         description: 'App not found',
     })
-    async update(@Param('id', ParseIntPipe) id: number, @Body() updateDto: UpdateAppDto): Promise<AppResponseDto> {
+    async update(@Param('id', ParseIntPipe) id: number, @Body() updateDto: UpdateAppRequestDto): Promise<AppResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
