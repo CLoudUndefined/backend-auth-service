@@ -33,7 +33,7 @@ export class AppRolesController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only manage user with special permission',
+        description: 'Forbidden - requires role management permissions',
     })
     @ApiResponse({
         status: 404,
@@ -142,7 +142,7 @@ export class AppRolesController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only manage user with special permission',
+        description: 'Forbidden - requires role management permissions',
     })
     @ApiResponse({
         status: 404,
@@ -180,7 +180,7 @@ export class AppRolesController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only manage user with special permission',
+        description: 'Forbidden - requires role management permissions',
     })
     @ApiResponse({
         status: 404,

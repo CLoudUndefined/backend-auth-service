@@ -21,7 +21,11 @@ export class AppsController {
         status: 401,
         description: 'Unauthorized',
     })
-    async findOne(): Promise<AppResponseDto[]> {
+    @ApiResponse({
+        status: 404,
+        description: 'App not found',
+    })
+    async findOne(): Promise<AppResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
