@@ -6,7 +6,7 @@ import { MessageResponseDto } from 'src/common/dto/message-response.dto';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('App (Role)')
-@ApiBearerAuth('JWT-auth')
+@ApiBearerAuth('JWT-auth-app')
 @Controller('apps/:appId/roles')
 export class AppRolesController {
     @Post()

@@ -15,7 +15,7 @@ import { UpdateAppUserRequestDto } from './dto/update-app-user-request.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('App (Users)')
-@ApiBearerAuth('JWT-auth')
+@ApiBearerAuth('JWT-auth-app')
 @Controller('apps/:appId/users')
 export class AppUsersController {
     @Get()
