@@ -33,7 +33,7 @@ export class AppRolesController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only create user with special permission',
+        description: 'Forbidden - can only manage user with special permission',
     })
     @ApiResponse({
         status: 404,
