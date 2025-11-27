@@ -15,11 +15,11 @@ export class AppUserResponseDto {
     email: string;
 
     @ApiProperty({
-        type: () => AppRoleResponseDto,
-        description: 'Assigned role info',
-        nullable: true,
+        type: () => [AppRoleResponseDto],
+        description: 'Assigned roles',
+        isArray: true,
     })
-    role: AppRoleResponseDto | null;
+    roles: AppRoleResponseDto[];
 
     @ApiProperty({
         example: '2025-11-23T12:34:56.000Z',

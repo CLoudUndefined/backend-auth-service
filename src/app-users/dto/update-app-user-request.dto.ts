@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsInt, IsOptional, MaxLength } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsEmail, IsInt, IsNotEmpty, IsOptional, IsPositive, MaxLength } from 'class-validator';
 
 export class UpdateAppUserRequestDto {
     @ApiProperty({
@@ -7,9 +7,10 @@ export class UpdateAppUserRequestDto {
         description: 'New email for the user',
         required: false,
     })
-    @IsEmail({}, { message: 'Email must be valid' })
     @IsOptional()
-    @MaxLength(255, { message: 'Email must not exceed 255 characters' })
+    @IsNotEmpty()
+    @IsEmail()
+    @MaxLength(255)
     email?: string;
 
     @ApiProperty({
@@ -18,6 +19,9 @@ export class UpdateAppUserRequestDto {
         required: false,
     })
     @IsOptional()
-    @IsInt()
-    roleId?: number;
+    @IsArray()
+    @ArrayNotEmpty()
+    @IsInt({ each: true })
+    @IsPositive({ each: true })
+    roleIds?: number[];
 }
