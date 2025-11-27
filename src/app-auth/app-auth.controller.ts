@@ -13,7 +13,7 @@ import { MessageResponseDto } from 'src/common/dto/message-response.dto';
 import { AddRecoveryRequestDto } from 'src/common/dto/auth/add-recovery-request.dto';
 import { ListRecoveryResponseDto } from 'src/common/dto/auth/list-recovery-response.dto';
 
-@ApiTags('App Auth (App-Users)')
+@ApiTags('App (User Auth)')
 @Controller('apps/:appId/auth')
 export class AppAuthController {
     @Post('register')

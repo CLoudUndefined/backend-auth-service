@@ -13,7 +13,7 @@ import { AddRecoveryRequestDto } from 'src/common/dto/auth/add-recovery-request.
 import { UpdateRecoveryRequestDto } from 'src/common/dto/auth/update-recovery-request.dto';
 import { ListRecoveryResponseDto } from 'src/common/dto/auth/list-recovery-response.dto';
 
-@ApiTags('Platform Auth (Service Owners)')
+@ApiTags('Service (User Auth)')
 @Controller('auth')
 export class AuthController {
     @Post('register')

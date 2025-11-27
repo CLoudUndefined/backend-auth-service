@@ -5,7 +5,7 @@ import { UpdateAppRoleRequestDto } from './dto/update-app-role-request.dto';
 import { MessageResponseDto } from 'src/common/dto/message-response.dto';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
-@ApiTags('App Roles (Management)')
+@ApiTags('App (Role)')
 @ApiBearerAuth('JWT-auth')
 @Controller('apps/:appId/roles')
 export class AppRolesController {

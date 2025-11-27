@@ -2,7 +2,7 @@ import { Controller, Get, NotImplementedException, Param, ParseIntPipe } from '@
 import { PermissionResponseDto } from './dto/permission-response.dto';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-@ApiTags('Role Permissions')
+@ApiTags('App (Role Permission)')
 @Controller('apps/permissions')
 export class AppPermissionsController {
     @Get()

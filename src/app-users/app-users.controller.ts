@@ -14,7 +14,7 @@ import { MessageResponseDto } from 'src/common/dto/message-response.dto';
 import { UpdateAppUserRequestDto } from './dto/update-app-user-request.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-@ApiTags('App Users (Management)')
+@ApiTags('App (Users)')
 @ApiBearerAuth('JWT-auth')
 @Controller('apps/:appId/users')
 export class AppUsersController {
