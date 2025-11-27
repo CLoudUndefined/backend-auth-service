@@ -67,7 +67,7 @@ export class AppRolesController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only view user with special permission',
+        description: 'Forbidden - can only view roles with special permission',
     })
     @ApiResponse({
         status: 404,
@@ -101,7 +101,7 @@ export class AppRolesController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only view user with special permission',
+        description: 'Forbidden - can only view roles with special permission',
     })
     @ApiResponse({
         status: 404,

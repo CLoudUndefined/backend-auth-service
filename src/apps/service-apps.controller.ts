@@ -102,7 +102,7 @@ export class ServiceAppsController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only view own apps or requires god-mode',
+        description: 'Forbidden - can only manage own apps or requires god-mode',
     })
     @ApiResponse({
         status: 404,
@@ -135,7 +135,7 @@ export class ServiceAppsController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only view own apps or requires god-mode',
+        description: 'Forbidden - can only manage own apps or requires god-mode',
     })
     @ApiResponse({
         status: 404,
