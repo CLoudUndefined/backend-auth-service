@@ -17,6 +17,8 @@ export class CreateAppRoleRequestDto {
         required: false,
     })
     @IsOptional()
+    @IsNotEmpty()
     @IsString()
+    @MaxLength(1024)
     description?: string;
 }

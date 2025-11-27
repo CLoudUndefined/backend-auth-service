@@ -17,8 +17,9 @@ export class AppRoleResponseDto {
         example: 'Can manage content',
         description: 'Role Description',
         nullable: true,
+        required: false,
     })
-    description: string | null;
+    description?: string | null;
 
     @ApiProperty({
         example: '2025-11-23T12:34:56.000Z',
