@@ -7,8 +7,8 @@ export class UpdateAppRequestDto {
         description: 'New name for the application',
         required: false,
     })
-    @IsNotEmpty()
     @IsOptional()
+    @IsNotEmpty()
     @IsString()
     @MaxLength(255)
     name?: string;
@@ -18,8 +18,8 @@ export class UpdateAppRequestDto {
         description: 'New description',
         required: false,
     })
-    @IsNotEmpty()
     @IsOptional()
+    @IsNotEmpty()
     @IsString()
     @MaxLength(1024)
     description?: string;

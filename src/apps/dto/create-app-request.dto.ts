@@ -16,8 +16,8 @@ export class CreateAppRequestDto {
         description: 'Optional description of the application',
         required: false,
     })
-    @IsNotEmpty()
     @IsOptional()
+    @IsNotEmpty()
     @IsString()
     @MaxLength(1024)
     description?: string;
