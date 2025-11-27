@@ -6,13 +6,16 @@ import {
     NotImplementedException,
     Param,
     ParseIntPipe,
+    Post,
     Put,
     Query,
 } from '@nestjs/common';
 import { AppUserResponseDto } from './dto/app-user-response.dto';
 import { MessageResponseDto } from 'src/common/dto/message-response.dto';
 import { UpdateAppUserRequestDto } from './dto/update-app-user-request.dto';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AppRoleResponseDto } from 'src/app-roles/dto/app-role-response.dto';
+import { GetAppUsersQueryDto } from './dto/get-app-users-query.dto';
 
 @ApiTags('App (Users)')
 @ApiBearerAuth('JWT-auth-app')
@@ -176,6 +179,137 @@ export class AppUsersController {
     async remove(
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
+    ): Promise<MessageResponseDto> {
+        throw new NotImplementedException('Logic not implemented yet');
+    }
+
+    @Get(':userId/roles')
+    @ApiOperation({
+        summary: 'Get user roles',
+        description: 'Retrieves all roles assigned to the user.',
+    })
+    @ApiParam({
+        name: 'appId',
+        example: 1,
+    })
+    @ApiParam({
+        name: 'userId',
+        example: 2,
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'List of assigned roles',
+        type: AppRoleResponseDto,
+        isArray: true,
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'Unauthorized',
+    })
+    @ApiResponse({
+        status: 403,
+        description: 'Forbidden - can only view user with special permission',
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'App or User not found',
+    })
+    async getUserRoles(
+        @Param('appId', ParseIntPipe) appId: number,
+        @Param('userId', ParseIntPipe) userId: number,
+    ): Promise<AppUserResponseDto[]> {
+        throw new NotImplementedException('Logic not implemented yet');
+    }
+
+    @Post(':userId/roles/:roleId')
+    @ApiOperation({
+        summary: 'Add role to user',
+        description: 'Assigns a specific role to the user.',
+    })
+    @ApiParam({
+        name: 'appId',
+        example: 1,
+    })
+    @ApiParam({
+        name: 'userId',
+        example: 2,
+    })
+    @ApiParam({
+        name: 'roleId',
+        description: 'Role ID to assign',
+        example: 2,
+    })
+    @ApiResponse({
+        status: 201,
+        description: 'Role added successfully',
+        type: MessageResponseDto,
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'Validation failed',
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'Unauthorized',
+    })
+    @ApiResponse({
+        status: 403,
+        description: 'Forbidden - can only manage user with special permission',
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'App, User, or Role not found',
+    })
+    @ApiResponse({
+        status: 409,
+        description: 'Conflict - User already has this role',
+    })
+    async addRoleToUser(
+        @Param('appId', ParseIntPipe) appId: number,
+        @Param('userId', ParseIntPipe) userId: number,
+        @Param('roleId', ParseIntPipe) roleId: number,
+    ): Promise<MessageResponseDto> {
+        throw new NotImplementedException('Logic not implemented yet');
+    }
+
+    @Delete(':userId/roles/:roleId')
+    @ApiOperation({
+        summary: 'Remove role from user',
+        description: 'Removes a specific role from the user.',
+    })
+    @ApiParam({
+        name: 'appId',
+        example: 1,
+    })
+    @ApiParam({
+        name: 'userId',
+        example: 2,
+    })
+    @ApiParam({
+        name: 'roleId',
+        example: 3,
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Role removed successfully',
+        type: MessageResponseDto,
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'Unauthorized',
+    })
+    @ApiResponse({
+        status: 403,
+        description: 'Forbidden - can only manage user with special permission',
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'App, User, Role not found, or User does not have this role',
+    })
+    async removeRoleFromUser(
+        @Param('appId', ParseIntPipe) appId: number,
+        @Param('userId', ParseIntPipe) userId: number,
+        @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<MessageResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
