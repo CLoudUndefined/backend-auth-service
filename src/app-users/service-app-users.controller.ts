@@ -28,12 +28,6 @@ export class ServiceAppUsersController {
         description: 'App ID',
         example: 1,
     })
-    @ApiQuery({
-        name: 'roleId',
-        description: 'Filter by Role ID',
-        required: false,
-        type: Number,
-    })
     @ApiResponse({
         status: 200,
         description: 'List of users',
@@ -58,7 +52,7 @@ export class ServiceAppUsersController {
     })
     async findAll(
         @Param('appId', ParseIntPipe) appId: number,
-        @Query('roleId', new ParseIntPipe({ optional: true })) roleId?: number,
+        @Query() query: GetAppUsersQueryDto,
     ): Promise<AppUserResponseDto[]> {
         throw new NotImplementedException('Logic not implemented yet');
     }
