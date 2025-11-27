@@ -18,8 +18,9 @@ export class AppResponseDto {
         example: 'Best app for talking about cats',
         description: 'Application description',
         nullable: true,
+        required: false,
     })
-    description: string | null;
+    description?: string | null;
 
     @ApiProperty({
         type: () => ServiceUserResponseDto,
