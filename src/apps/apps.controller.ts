@@ -110,7 +110,10 @@ export class AppsController {
         status: 404,
         description: 'App not found',
     })
-    async update(@Param('id', ParseIntPipe) id: number, @Body() updateDto: UpdateAppRequestDto): Promise<AppResponseDto> {
+    async update(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() updateDto: UpdateAppRequestDto,
+    ): Promise<AppResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 

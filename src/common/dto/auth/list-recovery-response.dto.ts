@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { RecoveryQuestionDto } from "./recovery-question.dto";
+import { ApiProperty } from '@nestjs/swagger';
+import { RecoveryQuestionDto } from './recovery-question.dto';
 
 export class ListRecoveryResponseDto {
     @ApiProperty({
