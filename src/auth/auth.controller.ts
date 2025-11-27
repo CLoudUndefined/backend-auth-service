@@ -12,6 +12,7 @@ import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@ne
 import { AddRecoveryRequestDto } from 'src/common/dto/auth/add-recovery-request.dto';
 import { UpdateRecoveryRequestDto } from 'src/common/dto/auth/update-recovery-request.dto';
 import { ListRecoveryResponseDto } from 'src/common/dto/auth/list-recovery-response.dto';
+import { RefreshTokenRequestDto } from 'src/common/dto/auth/refresh-token-request.dto';
 
 @ApiTags('Service (User Auth)')
 @Controller('auth')
@@ -77,9 +78,31 @@ export class AuthController {
     })
     @ApiResponse({
         status: 401,
-        description: 'Unauthorized or Wrong old password',
+        description: 'Unauthorized',
     })
     async changePassword(@Body() changePasswordDto: ChangePasswordRequestDto): Promise<MessageResponseDto> {
+        throw new NotImplementedException('Logic not implemented yet');
+    }
+
+    @Post('refresh')
+    @ApiOperation({
+        summary: 'Refresh access token',
+        description: 'Exchanges a valid Refresh Token for a new Access Token and Refresh Token pair.',
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Tokens refreshed successfully',
+        type: LoginResponseDto,
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'Validation failed',
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'Invalid or expired Refresh Token',
+    })
+    async refresh(@Body() refreshDto: RefreshTokenRequestDto): Promise<LoginResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 

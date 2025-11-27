@@ -12,6 +12,7 @@ import { UpdateRecoveryRequestDto } from 'src/common/dto/auth/update-recovery-re
 import { MessageResponseDto } from 'src/common/dto/message-response.dto';
 import { AddRecoveryRequestDto } from 'src/common/dto/auth/add-recovery-request.dto';
 import { ListRecoveryResponseDto } from 'src/common/dto/auth/list-recovery-response.dto';
+import { RefreshTokenRequestDto } from 'src/common/dto/auth/refresh-token-request.dto';
 
 @ApiTags('App (User Auth)')
 @Controller('apps/:appId/auth')
@@ -113,6 +114,39 @@ export class AppAuthController {
         @Param('appId', ParseIntPipe) appId: number,
         @Body() changePasswordDto: ChangePasswordRequestDto,
     ): Promise<MessageResponseDto> {
+        throw new NotImplementedException('Logic not implemented yet');
+    }
+
+    @Post('refresh')
+    @ApiOperation({
+        summary: 'Refresh specific app user token',
+        description: 'Exchanges a valid Refresh Token for a new Access Token pair within the application context.',
+    })
+    @ApiParam({
+        name: 'appId',
+        example: 1,
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Tokens refreshed successfully',
+        type: LoginResponseDto,
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'Validation failed',
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'Invalid or expired Refresh Token',
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'App not found',
+    })
+    async refresh(
+        @Param('appId', ParseIntPipe) appId: number,
+        @Body() refreshDto: RefreshTokenRequestDto,
+    ): Promise<LoginResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
