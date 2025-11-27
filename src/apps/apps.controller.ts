@@ -16,7 +16,6 @@ export class AppsController {
         status: 200,
         description: 'App details found',
         type: AppResponseDto,
-        isArray: true,
     })
     @ApiResponse({
         status: 401,
