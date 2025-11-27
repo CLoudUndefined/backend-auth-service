@@ -6,7 +6,7 @@ export class ChangePasswordRequestDto {
         example: 'S@perDuper5ecret_Pa55w0rd2004',
         description: 'Current active password',
     })
-    @IsNotEmpty({ message: 'Password is required' })
+    @IsNotEmpty()
     @IsString()
     oldPassword: string;
 
@@ -15,7 +15,7 @@ export class ChangePasswordRequestDto {
         description: 'New password to set. Must be at least 12 characters.',
         minLength: 12,
     })
-    @IsNotEmpty({ message: 'Password is required' })
+    @IsNotEmpty()
     @IsString()
     @MinLength(12)
     @MaxLength(255)

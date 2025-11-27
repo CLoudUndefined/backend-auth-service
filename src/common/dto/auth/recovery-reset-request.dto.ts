@@ -6,8 +6,9 @@ export class RecoveryResetRequestDto {
         example: 'developer@example.com',
         description: 'Email address of the user resetting the password',
     })
-    @IsNotEmpty({ message: 'Email is required' })
-    @MaxLength(255, { message: 'Email must not exceed 255 characters' })
+    @IsNotEmpty()
+    @IsString()
+    @MaxLength(255)
     email: string;
 
     @ApiProperty({
@@ -16,6 +17,7 @@ export class RecoveryResetRequestDto {
     })
     @IsNotEmpty()
     @IsString()
+    @MaxLength(1024)
     answer: string;
 
     @ApiProperty({
@@ -23,9 +25,9 @@ export class RecoveryResetRequestDto {
         description: 'New password to be set',
         minLength: 12,
     })
-    @IsNotEmpty({ message: 'Password is required' })
+    @IsNotEmpty()
     @IsString()
-    @MinLength(12, { message: 'Password must be at least 12 characters long' })
-    @MaxLength(255, { message: 'Password must not exceed 255 characters' })
+    @MinLength(12)
+    @MaxLength(255)
     newPassword: string;
 }

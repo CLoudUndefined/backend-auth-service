@@ -6,7 +6,7 @@ export class RecoveryAskRequestDto {
         example: 'developer@example.com',
         description: 'Email address to find the recovery question for',
     })
-    @IsNotEmpty({ message: 'Email is required' })
+    @IsNotEmpty()
     @IsEmail()
     email: string;
 }

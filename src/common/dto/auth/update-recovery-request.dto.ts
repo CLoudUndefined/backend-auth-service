@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export class UpdateRecoveryRequestDto {
     @ApiProperty({
@@ -8,6 +8,7 @@ export class UpdateRecoveryRequestDto {
     })
     @IsNotEmpty()
     @IsString()
+    @MaxLength(255)
     currentPassword: string;
 
     @ApiProperty({
@@ -16,6 +17,7 @@ export class UpdateRecoveryRequestDto {
     })
     @IsNotEmpty()
     @IsString()
+    @MaxLength(1024)
     newQuestion: string;
 
     @ApiProperty({
@@ -24,5 +26,6 @@ export class UpdateRecoveryRequestDto {
     })
     @IsNotEmpty()
     @IsString()
+    @MaxLength(1024)
     newAnswer: string;
 }

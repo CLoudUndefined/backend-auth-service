@@ -5,6 +5,7 @@ export class RecoveryAskResponseDto {
         example: "What is your mother's maiden name?",
         description: 'The security question set by the user. Null if not set.',
         nullable: true,
+        required: false,
     })
-    question: string | null;
+    question?: string | null;
 }

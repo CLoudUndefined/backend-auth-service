@@ -6,9 +6,9 @@ export class RegisterRequestDto {
         example: 'developer@example.com',
         description: 'Email address for registration. Must be unique.',
     })
-    @IsEmail({}, { message: 'Email must be valid' })
-    @IsNotEmpty({ message: 'Email is required' })
-    @MaxLength(255, { message: 'Email must not exceed 255 characters' })
+    @IsNotEmpty()
+    @IsEmail()
+    @MaxLength(255)
     email: string;
 
     @ApiProperty({
@@ -16,10 +16,10 @@ export class RegisterRequestDto {
         description: 'Password for the new account. Must be at least 12 characters long.',
         minLength: 12,
     })
-    @IsNotEmpty({ message: 'Password is required' })
+    @IsNotEmpty()
     @IsString()
-    @MinLength(12, { message: 'Password must be at least 12 characters long' })
-    @MaxLength(255, { message: 'Password must not exceed 255 characters' })
+    @MinLength(12)
+    @MaxLength(255)
     password: string;
 
     @ApiProperty({
@@ -28,7 +28,9 @@ export class RegisterRequestDto {
         required: false,
     })
     @IsOptional()
+    @IsNotEmpty()
     @IsString()
+    @MaxLength(1024)
     recoveryQuestion?: string;
 
     @ApiProperty({
@@ -37,6 +39,8 @@ export class RegisterRequestDto {
         required: false,
     })
     @IsOptional()
+    @IsNotEmpty()
     @IsString()
+    @MaxLength(1024)
     recoveryAnswer?: string;
 }
