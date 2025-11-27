@@ -4,7 +4,7 @@ import { IsEmail, IsNotEmpty } from 'class-validator';
 export class RecoveryAskRequestDto {
     @ApiProperty({
         example: 'developer@example.com',
-        description: 'Email address to find the recovery question for',
+        description: 'Email address to find the recovery questions for',
     })
     @IsNotEmpty()
     @IsEmail()

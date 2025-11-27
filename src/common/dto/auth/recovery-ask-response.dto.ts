@@ -1,11 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { RecoveryQuestionDto } from './recovery-question.dto';
 
 export class RecoveryAskResponseDto {
     @ApiProperty({
-        example: "What is your mother's maiden name?",
+        type: [RecoveryQuestionDto],
         description: 'The security question set by the user. Null if not set.',
-        nullable: true,
-        required: false,
     })
-    question?: string | null;
+    questions: RecoveryQuestionDto[];
 }
