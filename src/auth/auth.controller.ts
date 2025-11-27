@@ -178,7 +178,7 @@ export class AuthController {
     })
     @ApiParam({
         name: 'recoveryId',
-        description: 'Recovery question ID',
+        example: 1,
     })
     @ApiResponse({
         status: 200,
@@ -212,7 +212,7 @@ export class AuthController {
     })
     @ApiParam({
         name: 'recoveryId',
-        description: 'Recovery question ID',
+        example: 1,
     })
     @ApiResponse({
         status: 200,
