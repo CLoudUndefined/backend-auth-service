@@ -50,7 +50,7 @@ export class AppUsersController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only view own apps or requires god-mode',
+        description: 'Forbidden - can only view user with special permission',
     })
     @ApiResponse({
         status: 404,
@@ -93,7 +93,7 @@ export class AppUsersController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only view own apps or requires god-mode',
+        description: 'Forbidden - can only view user with special permission',
     })
     @ApiResponse({
         status: 404,
@@ -136,7 +136,7 @@ export class AppUsersController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only view own apps or requires god-mode',
+        description: 'Forbidden - can only manage user with special permission',
     })
     @ApiResponse({
         status: 404,
@@ -180,7 +180,7 @@ export class AppUsersController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only view own apps or requires god-mode',
+        description: 'Forbidden - can only manage user with special permission',
     })
     @ApiResponse({
         status: 404,
