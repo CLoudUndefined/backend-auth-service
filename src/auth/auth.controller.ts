@@ -144,7 +144,6 @@ export class AuthController {
         status: 401,
         description: 'Unauthorized',
     })
-    @ApiBearerAuth('JWT-auth-service')
     async listRecovery(): Promise<ListRecoveryResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
