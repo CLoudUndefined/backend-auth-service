@@ -217,7 +217,7 @@ export class ServiceAppUsersController {
     async getUserRoles(
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
-    ): Promise<AppUserResponseDto[]> {
+    ): Promise<AppRoleResponseDto[]> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
