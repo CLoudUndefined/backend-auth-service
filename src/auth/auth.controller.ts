@@ -116,6 +116,10 @@ export class AuthController {
         description: 'List of recovery questions',
         type: ListRecoveryResponseDto,
     })
+    @ApiResponse({
+        status: 401,
+        description: 'Unauthorized'
+    })
     @ApiBearerAuth('JWT-auth-service')
     async listRecovery(): Promise<ListRecoveryResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
@@ -180,9 +184,18 @@ export class AuthController {
         description: 'Recovery question updated',
         type: MessageResponseDto,
     })
-    @ApiResponse({ status: 400, description: 'Validation failed' })
-    @ApiResponse({ status: 401, description: 'Unauthorized' })
-    @ApiResponse({ status: 404, description: 'Recovery question not found' })
+    @ApiResponse({
+        status: 400,
+        description: 'Validation failed',
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'Unauthorized',
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'Recovery question not found',
+    })
     async updateRecovery(@Param('recoveryId', ParseIntPipe) recoveryId: number, @Body() updateDto: UpdateRecoveryRequestDto): Promise<MessageResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
