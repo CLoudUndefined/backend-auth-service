@@ -34,7 +34,7 @@ export class AuthController {
         status: 409,
         description: 'Email already exists',
     })
-    async register(@Body() RegisterRequestDto: RegisterRequestDto): Promise<ServiceUserResponseDto> {
+    async register(@Body() registerDto: RegisterRequestDto): Promise<ServiceUserResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
@@ -56,7 +56,7 @@ export class AuthController {
         status: 401,
         description: 'Invalid email or password',
     })
-    async login(@Body() LoginRequestDto: LoginRequestDto): Promise<LoginResponseDto> {
+    async login(@Body() loginDto: LoginRequestDto): Promise<LoginResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
@@ -79,7 +79,7 @@ export class AuthController {
         status: 401,
         description: 'Unauthorized or Wrong old password',
     })
-    async changePassword(@Body() ChangePasswordRequestDto: ChangePasswordRequestDto): Promise<MessageResponseDto> {
+    async changePassword(@Body() changePasswordDto: ChangePasswordRequestDto): Promise<MessageResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
@@ -144,7 +144,7 @@ export class AuthController {
         status: 404,
         description: 'User with this email not found',
     })
-    async recoveryAsk(@Body() RecoveryAskRequestDto: RecoveryAskRequestDto): Promise<RecoveryAskResponseDto> {
+    async recoveryAsk(@Body() recoveryAskDto: RecoveryAskRequestDto): Promise<RecoveryAskResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
@@ -166,7 +166,7 @@ export class AuthController {
         status: 404,
         description: 'User not found',
     })
-    async recoveryReset(@Body() RecoveryResetRequestDto: RecoveryResetRequestDto): Promise<MessageResponseDto> {
+    async recoveryReset(@Body() recoveryResetDto: RecoveryResetRequestDto): Promise<MessageResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
