@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { ArrayUnique, IsArray, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, MaxLength } from 'class-validator';
 
 export class CreateAppRoleRequestDto {
     @ApiProperty({
@@ -21,4 +21,16 @@ export class CreateAppRoleRequestDto {
     @IsString()
     @MaxLength(1024)
     description?: string;
+
+    @ApiProperty({
+        example: [1, 2, 5],
+        description: 'Array of Permission IDs to assign to this role immediately',
+        required: false,
+    })
+    @IsOptional()
+    @IsArray()
+    @ArrayUnique()
+    @IsInt({ each: true })
+    @IsPositive({ each: true })
+    permissionIds?: number[];
 }

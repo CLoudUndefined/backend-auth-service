@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { PermissionResponseDto } from 'src/app-permissions/dto/permission-response.dto';
 
 export class AppRoleResponseDto {
     @ApiProperty({
@@ -20,6 +21,12 @@ export class AppRoleResponseDto {
         required: false,
     })
     description?: string | null;
+
+    @ApiProperty({
+        type: [PermissionResponseDto],
+        description: 'List of permissions assigned to this role',
+    })
+    permissions: PermissionResponseDto[];
 
     @ApiProperty({
         example: '2025-11-23T12:34:56.000Z',
