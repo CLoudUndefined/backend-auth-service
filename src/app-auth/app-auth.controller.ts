@@ -23,7 +23,6 @@ export class AppAuthController {
     })
     @ApiParam({
         name: 'appId',
-        description: 'Target App ID',
         example: 1,
     })
     @ApiResponse({
@@ -57,7 +56,6 @@ export class AppAuthController {
     })
     @ApiParam({
         name: 'appId',
-        description: 'Target App ID',
         example: 1,
     })
     @ApiResponse({
@@ -92,7 +90,6 @@ export class AppAuthController {
     })
     @ApiParam({
         name: 'appId',
-        description: 'Target App ID',
         example: 1,
     })
     @ApiResponse({
@@ -179,7 +176,6 @@ export class AppAuthController {
     })
     @ApiParam({
         name: 'appId',
-        description: 'Target App ID',
         example: 1,
     })
     @ApiResponse({
@@ -209,7 +205,6 @@ export class AppAuthController {
     })
     @ApiParam({
         name: 'appId',
-        description: 'Target App ID',
         example: 1,
     })
     @ApiResponse({
@@ -240,12 +235,10 @@ export class AppAuthController {
     })
     @ApiParam({
         name: 'appId',
-        description: 'Target App ID',
         example: 1,
     })
     @ApiParam({
         name: 'recoveryId',
-        description: 'Recovery question ID',
     })
     @ApiResponse({
         status: 200,
@@ -280,12 +273,10 @@ export class AppAuthController {
     })
     @ApiParam({
         name: 'appId',
-        description: 'Target App ID',
         example: 1,
     })
     @ApiParam({
         name: 'recoveryId',
-        description: 'Recovery question ID',
     })
     @ApiResponse({
         status: 200,

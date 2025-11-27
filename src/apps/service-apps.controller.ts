@@ -58,7 +58,6 @@ export class ServiceAppsController {
     })
     @ApiParam({
         name: 'id',
-        description: 'App ID',
         example: 1,
     })
     @ApiResponse({
@@ -86,7 +85,6 @@ export class ServiceAppsController {
     })
     @ApiParam({
         name: 'id',
-        description: 'App ID',
         example: 1,
     })
     @ApiResponse({
@@ -124,7 +122,6 @@ export class ServiceAppsController {
     })
     @ApiParam({
         name: 'id',
-        description: 'App ID',
         example: 1,
     })
     @ApiResponse({

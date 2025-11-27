@@ -83,7 +83,6 @@ export class ServiceUsersController {
     })
     @ApiParam({
         name: 'id',
-        description: 'Service user ID',
         example: 1,
     })
     @ApiResponse({
@@ -114,7 +113,6 @@ export class ServiceUsersController {
     })
     @ApiParam({
         name: 'id',
-        description: 'Service user ID to delete',
         example: 1,
     })
     @ApiResponse({
@@ -149,7 +147,6 @@ export class ServiceUsersController {
     })
     @ApiParam({
         name: 'id',
-        description: 'Service user ID',
         example: 1,
     })
     @ApiResponse({

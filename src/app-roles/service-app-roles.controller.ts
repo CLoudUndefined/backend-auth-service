@@ -16,7 +16,6 @@ export class ServiceAppRolesController {
     })
     @ApiParam({
         name: 'appId',
-        description: 'App ID',
         example: 1,
     })
     @ApiResponse({
@@ -85,12 +84,10 @@ export class ServiceAppRolesController {
     })
     @ApiParam({
         name: 'appId',
-        description: 'App ID',
         example: 1,
     })
     @ApiParam({
         name: 'roleId',
-        description: 'Role ID',
         example: 2,
     })
     @ApiResponse({
@@ -124,12 +121,10 @@ export class ServiceAppRolesController {
     })
     @ApiParam({
         name: 'appId',
-        description: 'App ID',
         example: 1,
     })
     @ApiParam({
         name: 'roleId',
-        description: 'Role ID',
         example: 2,
     })
     @ApiResponse({
@@ -168,12 +163,10 @@ export class ServiceAppRolesController {
     })
     @ApiParam({
         name: 'appId',
-        description: 'App ID',
         example: 1,
     })
     @ApiParam({
         name: 'roleId',
-        description: 'Role ID',
         example: 2,
     })
     @ApiResponse({
