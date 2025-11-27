@@ -7,7 +7,7 @@ import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@ne
 import { CreateAppResponseDto } from './dto/create-app-response.dto';
 
 @ApiTags('Apps (Management)')
-@ApiBearerAuth('JWT-auth')
+@ApiBearerAuth('JWT-auth-service')
 @Controller('apps')
 export class AppsController {
     @Post()

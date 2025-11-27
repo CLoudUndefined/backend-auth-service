@@ -6,7 +6,7 @@ import { AppResponseDto } from 'src/apps/dto/app-response.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Service (Users)')
-@ApiBearerAuth('JWT-auth')
+@ApiBearerAuth('JWT-auth-service')
 @Controller('service-users')
 export class ServiceUsersController {
     @Get('me')
