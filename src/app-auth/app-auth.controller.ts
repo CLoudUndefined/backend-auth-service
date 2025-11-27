@@ -1,4 +1,4 @@
-import { Body, Controller, NotImplementedException, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotImplementedException, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AppUserResponseDto } from 'src/app-users/dto/app-user-response.dto';
 import { ChangePasswordRequestDto } from 'src/common/dto/auth/change-password-request.dto';
@@ -11,6 +11,8 @@ import { RegisterRequestDto } from 'src/common/dto/auth/register-request.dto';
 import { UpdateRecoveryResponseDto } from 'src/common/dto/auth/update-recovery-response.dto';
 import { UpdateRecoveryRequestDto } from 'src/common/dto/auth/update-recovery-request.dto';
 import { MessageResponseDto } from 'src/common/dto/message-response.dto';
+import { AddRecoveryRequestDto } from 'src/common/dto/auth/add-recovery-request.dto';
+import { ListRecoveryResponseDto } from 'src/common/dto/auth/list-recovery-response.dto';
 
 @ApiTags('App Auth (App-Users)')
 @Controller('apps/:appId/auth')
@@ -115,6 +117,56 @@ export class AppAuthController {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
+    @Post('recovery')
+    @ApiBearerAuth('JWT-auth-app')
+    @ApiOperation({
+        summary: 'Add recovery question',
+        description: 'Adds a new security question for password recovery.',
+    })
+    @ApiResponse({
+        status: 201,
+        description: 'Recovery question added',
+        type: MessageResponseDto,
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'Validation failed',
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'Unauthorized',
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'App not found',
+    })
+    async addRecovery(@Param('appId', ParseIntPipe) appId: number, @Body() addDto: AddRecoveryRequestDto): Promise<MessageResponseDto> {
+        throw new NotImplementedException('Logic not implemented yet');
+    }
+
+    @Get('recovery')
+    @ApiBearerAuth('JWT-auth-app')
+    @ApiOperation({
+        summary: 'List recovery questions',
+        description: 'Returns all recovery questions for the authenticated app user.',
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'List of recovery questions',
+        type: ListRecoveryResponseDto,
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'Unauthorized'
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'App not found',
+    })
+    async listRecovery(@Param('appId', ParseIntPipe) appId: number): Promise<ListRecoveryResponseDto> {
+        throw new NotImplementedException('Logic not implemented yet');
+    }
+
     @Post('recovery/ask')
     @ApiOperation({
         summary: 'Ask recovery question',
@@ -199,10 +251,44 @@ export class AppAuthController {
         status: 404,
         description: 'App not found',
     })
-    async updateRecovery(
-        @Param('appId', ParseIntPipe) appId: number,
-        @Body() UpdateRecoveryRequestDto: UpdateRecoveryRequestDto,
-    ): Promise<UpdateRecoveryResponseDto> {
+    async updateRecovery(@Param('appId', ParseIntPipe) appId: number, @Param('recoveryId', ParseIntPipe) recoveryId: number, @Body() updateDto: UpdateRecoveryRequestDto): Promise<MessageResponseDto> {
+        throw new NotImplementedException('Logic not implemented yet');
+    }
+
+    @Delete('recovery/:recoveryId')
+    @ApiBearerAuth('JWT-auth-app')
+    @ApiOperation({
+        summary: 'Remove recovery question',
+        description: 'Removes a security question from the user.',
+    })
+    @ApiParam({
+        name: 'appId',
+        description: 'Target App ID',
+        example: 1,
+    })
+    @ApiParam({
+        name: 'recoveryId',
+        description: 'Recovery question ID',
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Recovery question removed',
+        type: MessageResponseDto,
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'Validation failed',
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'Unauthorized',
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'App or recovery question not found',
+    })
+    async removeRecovery(@Param('appId', ParseIntPipe) appId: number, @Param('recoveryId', ParseIntPipe) recoveryId: number): Promise<MessageResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 }
+
