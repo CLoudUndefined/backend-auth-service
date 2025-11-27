@@ -14,7 +14,7 @@ export class AppPermissionsController {
         status: 200,
         description: 'List of system permissions',
         type: PermissionResponseDto,
-        isArray: true
+        isArray: true,
     })
     async findAll(): Promise<PermissionResponseDto[]> {
         throw new NotImplementedException('Logic not implemented yet');
@@ -36,11 +36,9 @@ export class AppPermissionsController {
     })
     @ApiResponse({
         status: 404,
-        description: 'Permission not found'
+        description: 'Permission not found',
     })
-    async findOne(
-        @Param('permissionId', ParseIntPipe) permissionId: number,
-    ): Promise<PermissionResponseDto> {
+    async findOne(@Param('permissionId', ParseIntPipe) permissionId: number): Promise<PermissionResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 }

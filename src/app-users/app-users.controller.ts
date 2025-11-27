@@ -54,7 +54,7 @@ export class AppUsersController {
     })
     async findAll(
         @Param('appId', ParseIntPipe) appId: number,
-        @Query() query: GetAppUsersQueryDto
+        @Query() query: GetAppUsersQueryDto,
     ): Promise<AppUserResponseDto[]> {
         throw new NotImplementedException('Logic not implemented yet');
     }

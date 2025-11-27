@@ -8,7 +8,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 @Controller('apps/:appId')
 export class AppsController {
     @Get()
-    @ApiOperation({ 
+    @ApiOperation({
         summary: 'Get current app info',
         description: 'Returns public details about the application context.',
     })
@@ -48,9 +48,7 @@ export class AppsController {
         status: 404,
         description: 'App not found',
     })
-    async update(
-        @Body() updateDto: UpdateAppRequestDto,
-    ): Promise<AppResponseDto> {
+    async update(@Body() updateDto: UpdateAppRequestDto): Promise<AppResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 }
