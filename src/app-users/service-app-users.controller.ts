@@ -103,7 +103,7 @@ export class ServiceAppUsersController {
     @Put(':userId')
     @ApiOperation({
         summary: 'Update app user',
-        description: 'Updates user email or assigns a role.',
+        description: 'Updates user email.',
     })
     @ApiParam({
         name: 'appId',
