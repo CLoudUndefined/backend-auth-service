@@ -7,7 +7,7 @@ import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@ne
 
 @ApiTags('Service (Users)')
 @ApiBearerAuth('JWT-auth-service')
-@Controller('service-users')
+@Controller('service/users')
 export class ServiceUsersController {
     @Get('me')
     @ApiOperation({
