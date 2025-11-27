@@ -33,7 +33,7 @@ export class ServiceAppRolesController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only create own apps or requires god-mode',
+        description: 'Forbidden - can only manage roles for own apps or requires god-mode',
     })
     @ApiResponse({
         status: 404,
@@ -142,7 +142,7 @@ export class ServiceAppRolesController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only manage own apps or requires god-mode',
+        description: 'Forbidden - can only manage roles for own apps or requires god-mode',
     })
     @ApiResponse({
         status: 404,
@@ -180,7 +180,7 @@ export class ServiceAppRolesController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only manage own apps or requires god-mode',
+        description: 'Forbidden - can only manage roles for own apps or requires god-mode',
     })
     @ApiResponse({
         status: 404,
