@@ -83,7 +83,7 @@ export class AppAuthController {
     }
 
     @Post('change-password')
-    @ApiBearerAuth('JWT-auth')
+    @ApiBearerAuth('JWT-auth-app')
     @ApiOperation({
         summary: 'Change password',
         description: 'Allows an authenticated app-user to change their password.',
@@ -169,8 +169,8 @@ export class AppAuthController {
 
     @Post('recovery/ask')
     @ApiOperation({
-        summary: 'Ask recovery question',
-        description: 'Retrieves the recovery question for a user within this app.',
+        summary: 'Get recovery questions',
+        description: 'Retrieves the security questions for a user within this app.',
     })
     @ApiParam({
         name: 'appId',
@@ -179,12 +179,16 @@ export class AppAuthController {
     })
     @ApiResponse({
         status: 200,
-        description: 'Question retrieved',
+        description: 'Questions retrieved successfully',
         type: RecoveryAskResponseDto,
     })
     @ApiResponse({
+        status: 400,
+        description: 'Validation failed',
+    })
+    @ApiResponse({
         status: 404,
-        description: 'App or User not found',
+        description: 'App not found',
     })
     async recoveryAsk(
         @Param('appId', ParseIntPipe) appId: number,
@@ -195,8 +199,8 @@ export class AppAuthController {
 
     @Post('recovery/reset')
     @ApiOperation({
-        summary: 'Reset password via recovery',
-        description: 'Resets end-user password using the recovery answer.',
+        summary: 'Reset password',
+        description: 'Resets the password using the answer to the security question.',
     })
     @ApiParam({
         name: 'appId',
@@ -210,11 +214,11 @@ export class AppAuthController {
     })
     @ApiResponse({
         status: 400,
-        description: 'Wrong answer',
+        description: 'Wrong answer or invalid data',
     })
     @ApiResponse({
         status: 404,
-        description: 'App or User not found',
+        description: 'App not found',
     })
     async recoveryReset(
         @Param('appId', ParseIntPipe) appId: number,
@@ -223,21 +227,25 @@ export class AppAuthController {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
-    @Post('recovery/update')
-    @ApiBearerAuth('JWT-auth')
+    @Put('recovery/:recoveryId')
+    @ApiBearerAuth('JWT-auth-app')
     @ApiOperation({
-        summary: 'Update recovery data',
-        description: 'Updates security question for an authenticated app-user.',
+        summary: 'Update recovery question',
+        description: 'Updates an existing security question and/or answer.',
     })
     @ApiParam({
         name: 'appId',
         description: 'Target App ID',
         example: 1,
     })
+    @ApiParam({
+        name: 'recoveryId',
+        description: 'Recovery question ID',
+    })
     @ApiResponse({
         status: 200,
-        description: 'Updated successfully',
-        type: UpdateRecoveryResponseDto,
+        description: 'Recovery question updated',
+        type: MessageResponseDto,
     })
     @ApiResponse({
         status: 400,
@@ -249,7 +257,7 @@ export class AppAuthController {
     })
     @ApiResponse({
         status: 404,
-        description: 'App not found',
+        description: 'App or recovery question not found',
     })
     async updateRecovery(@Param('appId', ParseIntPipe) appId: number, @Param('recoveryId', ParseIntPipe) recoveryId: number, @Body() updateDto: UpdateRecoveryRequestDto): Promise<MessageResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
