@@ -25,7 +25,6 @@ export class AppUsersController {
     })
     @ApiParam({
         name: 'appId',
-        description: 'App ID',
         example: 1,
     })
     @ApiResponse({
@@ -64,13 +63,11 @@ export class AppUsersController {
     })
     @ApiParam({
         name: 'appId',
-        description: 'App ID',
         example: 1,
     })
     @ApiParam({
         name: 'userId',
-        description: 'User ID',
-        example: 10,
+        example: 2,
     })
     @ApiResponse({
         status: 200,
@@ -107,13 +104,11 @@ export class AppUsersController {
     })
     @ApiParam({
         name: 'appId',
-        description: 'App ID',
         example: 1,
     })
     @ApiParam({
         name: 'userId',
-        description: 'User ID',
-        example: 10,
+        example: 2,
     })
     @ApiResponse({
         status: 200,
@@ -155,13 +150,11 @@ export class AppUsersController {
     })
     @ApiParam({
         name: 'appId',
-        description: 'App ID',
         example: 1,
     })
     @ApiParam({
         name: 'userId',
-        description: 'User ID',
-        example: 10,
+        example: 2,
     })
     @ApiResponse({
         status: 200,
