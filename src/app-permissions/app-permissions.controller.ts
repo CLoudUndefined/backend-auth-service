@@ -13,7 +13,8 @@ export class AppPermissionsController {
     @ApiResponse({
         status: 200,
         description: 'List of system permissions',
-        type: [PermissionResponseDto],
+        type: PermissionResponseDto,
+        isArray: true
     })
     async findAll(): Promise<PermissionResponseDto[]> {
         throw new NotImplementedException('Logic not implemented yet');

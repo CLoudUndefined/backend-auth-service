@@ -53,13 +53,13 @@ export class ServiceAppRolesController {
     })
     @ApiParam({
         name: 'appId',
-        description: 'App ID',
         example: 1,
     })
     @ApiResponse({
         status: 200,
         description: 'List of roles',
-        type: [AppRoleResponseDto],
+        type: AppRoleResponseDto,
+        isArray: true,
     })
     @ApiResponse({
         status: 401,

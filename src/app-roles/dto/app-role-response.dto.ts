@@ -23,7 +23,8 @@ export class AppRoleResponseDto {
     description?: string | null;
 
     @ApiProperty({
-        type: [PermissionResponseDto],
+        type: PermissionResponseDto,
+        isArray: true,
         description: 'List of permissions assigned to this role',
     })
     permissions: PermissionResponseDto[];
