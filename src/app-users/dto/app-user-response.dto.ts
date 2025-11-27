@@ -15,7 +15,7 @@ export class AppUserResponseDto {
     email: string;
 
     @ApiProperty({
-        type: () => [AppRoleResponseDto],
+        type: AppRoleResponseDto,
         description: 'Assigned roles',
         isArray: true,
     })

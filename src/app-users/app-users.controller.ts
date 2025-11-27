@@ -120,7 +120,7 @@ export class AppUsersController {
     })
     @ApiResponse({
         status: 400,
-        description: 'Validation failed (e.g. Invalid Role ID)',
+        description: 'Validation failed',
     })
     @ApiResponse({
         status: 401,
@@ -217,7 +217,7 @@ export class AppUsersController {
     async getUserRoles(
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
-    ): Promise<AppUserResponseDto[]> {
+    ): Promise<AppRoleResponseDto[]> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 

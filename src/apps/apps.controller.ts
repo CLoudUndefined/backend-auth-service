@@ -4,7 +4,7 @@ import { UpdateAppRequestDto } from './dto/update-app-request.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Apps (Management)')
-@ApiBearerAuth('JWT-auth-service')
+@ApiBearerAuth('JWT-auth-app')
 @Controller('apps/:appId')
 export class AppsController {
     @Get()

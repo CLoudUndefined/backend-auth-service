@@ -23,7 +23,7 @@ export class AppResponseDto {
     description?: string | null;
 
     @ApiProperty({
-        type: () => ServiceUserResponseDto,
+        type: ServiceUserResponseDto,
         description: 'The service user who creates/owns this app',
     })
     owner: ServiceUserResponseDto;

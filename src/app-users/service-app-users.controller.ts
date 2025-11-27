@@ -120,7 +120,7 @@ export class ServiceAppUsersController {
     })
     @ApiResponse({
         status: 400,
-        description: 'Validation failed (e.g. Invalid Role ID)',
+        description: 'Validation failed',
     })
     @ApiResponse({
         status: 401,
