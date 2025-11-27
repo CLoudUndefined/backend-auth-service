@@ -107,6 +107,7 @@ export class AuthController {
     }
 
     @Get('recovery')
+    @ApiBearerAuth('JWT-auth-service')
     @ApiOperation({
         summary: 'List recovery questions',
         description: 'Returns all recovery questions for the authenticated user.',
@@ -204,7 +205,7 @@ export class AuthController {
     @ApiBearerAuth('JWT-auth-service')
     @ApiOperation({
         summary: 'Remove recovery question',
-        description: 'Removes a security question from the user account.',
+        description: 'Removes a security question from the user.',
     })
     @ApiParam({
         name: 'recoveryId',
