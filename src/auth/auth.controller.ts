@@ -1,16 +1,17 @@
-import { Body, Controller, NotImplementedException, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotImplementedException, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import { ServiceUserResponseDto } from 'src/service-users/dto/service-user-response.dto';
 import { RegisterRequestDto } from '../common/dto/auth/register-request.dto';
 import { LoginRequestDto } from '../common/dto/auth/login-request.dto';
 import { ChangePasswordRequestDto } from '../common/dto/auth/change-password-request.dto';
 import { RecoveryAskRequestDto } from '../common/dto/auth/recovery-ask-request.dto';
 import { RecoveryResetRequestDto } from '../common/dto/auth/recovery-reset-request.dto';
-import { UpdateRecoveryRequestDto } from '../common/dto/auth/update-recovery-request.dto';
 import { LoginResponseDto } from '../common/dto/auth/login-response.dto';
 import { RecoveryAskResponseDto } from '../common/dto/auth/recovery-ask-response.dto';
 import { MessageResponseDto } from '../common/dto/message-response.dto';
-import { UpdateRecoveryResponseDto } from '../common/dto/auth/update-recovery-response.dto';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AddRecoveryRequestDto } from 'src/common/dto/auth/add-recovery-request.dto';
+import { UpdateRecoveryRequestDto } from 'src/common/dto/auth/update-recovery-request.dto';
+import { ListRecoveryResponseDto } from 'src/common/dto/auth/list-recovery-response.dto';
 
 @ApiTags('Platform Auth (Service Owners)')
 @Controller('auth')
@@ -60,7 +61,7 @@ export class AuthController {
     }
 
     @Post('change-password')
-    @ApiBearerAuth('JWT-auth')
+    @ApiBearerAuth('JWT-auth-service')
     @ApiOperation({
         summary: 'Change password',
         description: 'Allows an authenticated user to change their password.',
@@ -82,14 +83,52 @@ export class AuthController {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
-    @Post('recovery/ask')
+    @Post('recovery')
+    @ApiBearerAuth('JWT-auth-service')
     @ApiOperation({
-        summary: 'Get recovery question',
-        description: 'Retrieves the security question associated with the provided email.',
+        summary: 'Add recovery question',
+        description: 'Adds a new security question for password recovery.',
+    })
+    @ApiResponse({
+        status: 201,
+        description: 'Recovery question added',
+        type: MessageResponseDto,
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'Validation failed',
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'Unauthorized',
+    })
+    async addRecovery(@Body() addDto: AddRecoveryRequestDto): Promise<MessageResponseDto> {
+        throw new NotImplementedException('Logic not implemented yet');
+    }
+
+    @Get('recovery')
+    @ApiOperation({
+        summary: 'List recovery questions',
+        description: 'Returns all recovery questions for the authenticated user.',
     })
     @ApiResponse({
         status: 200,
-        description: 'Question retrieved successfully',
+        description: 'List of recovery questions',
+        type: ListRecoveryResponseDto,
+    })
+    @ApiBearerAuth('JWT-auth-service')
+    async listRecovery(): Promise<ListRecoveryResponseDto> {
+        throw new NotImplementedException('Logic not implemented yet');
+    }
+
+    @Post('recovery/ask')
+    @ApiOperation({
+        summary: 'Get recovery questions',
+        description: 'Retrieves the security questions for the provided email.',
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Questions retrieved successfully',
         type: RecoveryAskResponseDto,
     })
     @ApiResponse({
@@ -126,26 +165,52 @@ export class AuthController {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
-    @Post('recovery/update')
-    @ApiBearerAuth('JWT-auth')
+    @Put('recovery/:recoveryId')
+    @ApiBearerAuth('JWT-auth-service')
     @ApiOperation({
-        summary: 'Update recovery info',
-        description: 'Updates the security question and answer for the authenticated user.',
+        summary: 'Update recovery question',
+        description: 'Updates an existing security question and/or answer.',
+    })
+    @ApiParam({
+        name: 'recoveryId',
+        description: 'Recovery question ID',
     })
     @ApiResponse({
         status: 200,
-        description: 'Recovery info updated',
-        type: UpdateRecoveryResponseDto,
+        description: 'Recovery question updated',
+        type: MessageResponseDto,
+    })
+    @ApiResponse({ status: 400, description: 'Validation failed' })
+    @ApiResponse({ status: 401, description: 'Unauthorized' })
+    @ApiResponse({ status: 404, description: 'Recovery question not found' })
+    async updateRecovery(@Param('recoveryId', ParseIntPipe) recoveryId: number, @Body() updateDto: UpdateRecoveryRequestDto): Promise<MessageResponseDto> {
+        throw new NotImplementedException('Logic not implemented yet');
+    }
+
+    @Delete('recovery/:recoveryId')
+    @ApiBearerAuth('JWT-auth-service')
+    @ApiOperation({
+        summary: 'Remove recovery question',
+        description: 'Removes a security question from the user account.',
+    })
+    @ApiParam({
+        name: 'recoveryId',
+        description: 'Recovery question ID',
     })
     @ApiResponse({
-        status: 400,
-        description: 'Validation failed',
+        status: 200,
+        description: 'Recovery question removed',
+        type: MessageResponseDto,
     })
     @ApiResponse({
         status: 401,
-        description: 'Unauthorized or Wrong password',
+        description: 'Unauthorized',
     })
-    async updateRecovery(@Body() UpdateRecoveryRequestDto: UpdateRecoveryRequestDto): Promise<UpdateRecoveryResponseDto> {
+    @ApiResponse({
+        status: 404,
+        description: 'Recovery question not found',
+    })
+    async removeRecovery(@Param('recoveryId', ParseIntPipe) recoveryId: number): Promise<MessageResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 }
