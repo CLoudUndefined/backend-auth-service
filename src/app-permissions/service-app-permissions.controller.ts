@@ -2,10 +2,10 @@ import { Controller, Get, NotImplementedException, Param, ParseIntPipe } from '@
 import { PermissionResponseDto } from './dto/permission-response.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-@ApiTags('App (Role Permission)')
-@ApiBearerAuth('JWT-auth-app')
-@Controller('apps/permissions')
-export class AppPermissionsController {
+@ApiTags('Service (App Role Permission)')
+@ApiBearerAuth('JWT-auth-service')
+@Controller('service/apps/permissions')
+export class ServiceAppPermissionsController {
     @Get()
     @ApiOperation({
         summary: 'List all available system permissions',

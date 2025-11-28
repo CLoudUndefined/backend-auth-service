@@ -23,12 +23,6 @@ export class CreateAppResponseDto {
     description?: string | null;
 
     @ApiProperty({
-        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-        description: 'Auto-generated secret key for signing JWTs within this app.',
-    })
-    secret: string;
-
-    @ApiProperty({
         type: ServiceUserResponseDto,
         description: 'The service user who creates/owns this app',
     })
