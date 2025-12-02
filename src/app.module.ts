@@ -7,9 +7,14 @@ import { AppUsersModule } from './app-users/app-users.module';
 import { AppRolesModule } from './app-roles/app-roles.module';
 import { AppPermissionsModule } from './app-permissions/app-permissions.module';
 import { DatabaseModule } from './database/database.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
     imports: [
+        ConfigModule.forRoot({
+            isGlobal: true,
+            envFilePath: '.env',
+        }),
         ServiceUsersModule,
         AuthModule,
         AppsModule,

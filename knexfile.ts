@@ -1,5 +1,8 @@
 import { Knex } from 'knex';
 import { knexSnakeCaseMappers } from 'objection';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 // TODO: In the future, divide this config into development and production
 const config: Knex.Config = {
