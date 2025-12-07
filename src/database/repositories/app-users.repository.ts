@@ -71,15 +71,69 @@ export class AppUsersRepository {
     }
 
     async removeRole(userId: number, roleId: number): Promise<ApplicationUserModel | undefined> {
-        return ApplicationUserModel.transaction(async (trx) => {
-            const user = await ApplicationUserModel.query(trx).findById(userId);
+        const user = await this.userModel.query().findById(userId);
 
-            if (!user) {
-                return undefined;
-            }
+        if (!user) {
+            return undefined;
+        }
 
-            await user.$relatedQuery('roles').unrelate().where('id', roleId);
-            return user.$fetchGraph('roles');
+        await user.$relatedQuery('roles').unrelate().where('id', roleId);
+        return user.$fetchGraph('roles');
+    }
+
+    async createRefreshToken(
+        userId: number,
+        tokenHash: string,
+        expiresAt: Date,
+    ): Promise<ApplicationUserRefreshTokenModel> {
+        return this.refreshTokenModel.query().insert({
+            userId,
+            tokenHash,
+            expiresAt,
         });
+    }
+
+    async findRefreshTokenByHash(tokenHash: string): Promise<ApplicationUserRefreshTokenModel | undefined> {
+        return this.refreshTokenModel.query().findOne({ tokenHash });
+    }
+
+    async findRefreshTokensByUserId(userId: number): Promise<ApplicationUserRefreshTokenModel[]> {
+        return this.refreshTokenModel.query().where({ userId });
+    }
+
+    async deleteRefreshToken(id: number): Promise<number> {
+        return this.refreshTokenModel.query().deleteById(id);
+    }
+
+    async deleteAllUserRefreshTokens(userId: number): Promise<number> {
+        return this.refreshTokenModel.query().where({ userId }).delete();
+    }
+
+    async createRecovery(userId: number, question: string, answerHash: string): Promise<ApplicationUserRecoveryModel> {
+        return this.recoveryModel.query().insert({
+            userId,
+            question,
+            answerHash,
+        });
+    }
+
+    async findRecoveriesByUserId(userId: number): Promise<ApplicationUserRecoveryModel[]> {
+        return this.recoveryModel.query().where({ userId });
+    }
+
+    async updateRecovery(
+        id: number,
+        data: Partial<Pick<ApplicationUserRecoveryModel, 'question' | 'answerHash'>>,
+    ): Promise<ApplicationUserRecoveryModel | undefined> {
+        return this.recoveryModel.query().patchAndFetchById(id, data);
+    }
+
+    async deleteRecovery(id: number): Promise<number> {
+        return this.recoveryModel.query().deleteById(id);
+    }
+
+    async exists(appId: number, email: string): Promise<boolean> {
+        const result = await this.userModel.query().where({ appId, email }).select(1).first();
+        return !!result;
     }
 }
