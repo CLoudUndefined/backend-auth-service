@@ -1,12 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import type { ModelClass } from 'objection';
 import { ServiceUserRecoveryModel } from 'src/database/models/service-user-recovery.model';
 import { ServiceUserRefreshTokenModel } from 'src/database/models/service-user-refresh-token.model';
 import { ServiceUserModel } from 'src/database/models/service-user.model';
 
 @Injectable()
 export class ServiceUsersRepository {
+    constructor(
+        @Inject(ServiceUserModel) private userModel: ModelClass<ServiceUserModel>,
+        @Inject(ServiceUserRecoveryModel) private recoveryModel: ModelClass<ServiceUserRecoveryModel>,
+        @Inject(ServiceUserRefreshTokenModel) private refreshTokenModel: ModelClass<ServiceUserRefreshTokenModel>,
+    ) {}
+
     async create(email: string, passwordHash: string, isGod?: boolean): Promise<ServiceUserModel> {
-        return ServiceUserModel.query().insert({
+        return this.userModel.query().insert({
             email,
             passwordHash,
             isGod: isGod ?? false,
@@ -15,26 +22,26 @@ export class ServiceUsersRepository {
     }
 
     async findById(id: number): Promise<ServiceUserModel | undefined> {
-        return ServiceUserModel.query().findById(id);
+        return this.userModel.query().findById(id);
     }
 
     async findByEmail(email: string): Promise<ServiceUserModel | undefined> {
-        return ServiceUserModel.query().findOne({ email });
+        return this.userModel.query().findOne({ email });
     }
 
     async findAll(): Promise<ServiceUserModel[]> {
-        return ServiceUserModel.query();
+        return this.userModel.query();
     }
 
     async update(
         id: number,
         data: Partial<Pick<ServiceUserModel, 'email' | 'passwordHash' | 'isGod' | 'isBanned'>>,
     ): Promise<ServiceUserModel | undefined> {
-        return ServiceUserModel.query().patchAndFetchById(id, data);
+        return this.userModel.query().patchAndFetchById(id, data);
     }
 
     async delete(id: number): Promise<number> {
-        return ServiceUserModel.query().deleteById(id);
+        return this.userModel.query().deleteById(id);
     }
 
     async createRefreshToken(
@@ -42,7 +49,7 @@ export class ServiceUsersRepository {
         tokenHash: string,
         expiresAt: Date,
     ): Promise<ServiceUserRefreshTokenModel> {
-        return ServiceUserRefreshTokenModel.query().insert({
+        return this.refreshTokenModel.query().insert({
             userId,
             tokenHash,
             expiresAt,
@@ -50,23 +57,23 @@ export class ServiceUsersRepository {
     }
 
     async findRefreshTokenByHash(tokenHash: string): Promise<ServiceUserRefreshTokenModel | undefined> {
-        return ServiceUserRefreshTokenModel.query().findOne({ tokenHash });
+        return this.refreshTokenModel.query().findOne({ tokenHash });
     }
 
     async findRefreshTokensByUserId(userId: number): Promise<ServiceUserRefreshTokenModel[]> {
-        return ServiceUserRefreshTokenModel.query().where('userId', userId);
+        return this.refreshTokenModel.query().where({ userId });
     }
 
     async deleteRefreshToken(id: number): Promise<number> {
-        return ServiceUserRefreshTokenModel.query().deleteById(id);
+        return this.refreshTokenModel.query().deleteById(id);
     }
 
     async deleteAllUserRefreshTokens(userId: number): Promise<number> {
-        return ServiceUserRefreshTokenModel.query().where('userId', userId).delete();
+        return this.refreshTokenModel.query().where({ userId }).delete();
     }
 
     async createRecovery(userId: number, question: string, answerHash: string): Promise<ServiceUserRecoveryModel> {
-        return ServiceUserRecoveryModel.query().insert({
+        return this.recoveryModel.query().insert({
             userId,
             question,
             answerHash,
@@ -74,22 +81,22 @@ export class ServiceUsersRepository {
     }
 
     async findRecoveriesByUserId(userId: number): Promise<ServiceUserRecoveryModel[]> {
-        return ServiceUserRecoveryModel.query().where('userId', userId);
+        return this.recoveryModel.query().where({ userId });
     }
 
     async updateRecovery(
         id: number,
         data: Partial<Pick<ServiceUserRecoveryModel, 'question' | 'answerHash'>>,
     ): Promise<ServiceUserRecoveryModel | undefined> {
-        return ServiceUserRecoveryModel.query().patchAndFetchById(id, data);
+        return this.recoveryModel.query().patchAndFetchById(id, data);
     }
 
     async deleteRecovery(id: number): Promise<number> {
-        return ServiceUserRecoveryModel.query().deleteById(id);
+        return this.recoveryModel.query().deleteById(id);
     }
 
     async exists(email: string): Promise<boolean> {
-        const result = await this.findByEmail(email);
+        const result = await this.userModel.query().where({ email }).select(1).first();
         return !!result;
     }
 }

@@ -1,10 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import type { ModelClass } from 'objection';
 import { ApplicationRoleModel } from 'src/database/models/application-role.model';
 
 @Injectable()
 export class AppRolesRepository {
+    constructor(@Inject(ApplicationRoleModel) private model: ModelClass<ApplicationRoleModel>) {}
+
     async create(appId: number, name: string, description?: string): Promise<ApplicationRoleModel> {
-        return ApplicationRoleModel.query().insert({
+        return this.model.query().insert({
             appId,
             name,
             description,
@@ -12,27 +15,27 @@ export class AppRolesRepository {
     }
 
     async findById(id: number): Promise<ApplicationRoleModel | undefined> {
-        return ApplicationRoleModel.query().findById(id).withGraphFetched('permissions');
+        return this.model.query().findById(id);
     }
 
     async findAllByApp(appId: number): Promise<ApplicationRoleModel[]> {
-        return ApplicationRoleModel.query().where({ appId }).withGraphFetched('permissions');
+        return this.model.query().where({ appId });
     }
 
     async update(
         id: number,
         data: Partial<Pick<ApplicationRoleModel, 'name' | 'description'>>,
     ): Promise<ApplicationRoleModel | undefined> {
-        return ApplicationRoleModel.query().patchAndFetchById(id, data);
+        return this.model.query().patchAndFetchById(id, data);
     }
 
     async delete(id: number): Promise<number> {
-        return ApplicationRoleModel.query().deleteById(id);
+        return this.model.query().deleteById(id);
     }
 
     async setPermissions(roleId: number, permissionIds: number[]): Promise<ApplicationRoleModel | undefined> {
         return ApplicationRoleModel.transaction(async (trx) => {
-            const role = await ApplicationRoleModel.query(trx).findById(roleId);
+            const role = await this.model.query(trx).findById(roleId);
 
             if (!role) {
                 return undefined;
@@ -44,7 +47,7 @@ export class AppRolesRepository {
                 await role.$relatedQuery('permissions', trx).relate(permissionIds);
             }
 
-            return ApplicationRoleModel.query(trx).findById(roleId).withGraphFetched('permissions');
+            return this.model.query(trx).findById(roleId).withGraphFetched('permissions');
         });
     }
 }
