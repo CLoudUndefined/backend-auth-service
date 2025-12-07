@@ -1,9 +1,9 @@
 import { Knex } from 'knex';
 
 export async function seed(knex: Knex): Promise<void> {
-    await knex('application_permissions').del();
+    await knex('applicationPermissions').del();
 
-    await knex('application_permissions').insert([
+    await knex('applicationPermissions').insert([
         {
             id: 1,
             name: 'users.read',

@@ -1,21 +1,33 @@
 import { Knex } from 'knex';
 import * as bcrypt from 'bcrypt';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 export async function seed(knex: Knex): Promise<void> {
-    await knex('service_users').del();
+    await knex('serviceUsers').del();
 
-    const passwordHash = await bcrypt.hash('Arrive.Slabs.Doubt.Research7', 10);
+    const godEmail = process.env.GOD_USER_EMAIL;
+    const godPassword = process.env.GOD_USER_PASSWORD;
 
-    await knex('service_users').insert([
+    if (!godPassword) {
+        throw new Error('GOD_USER_PASSWORD must be set in .env file');
+    }
+
+    if (!godEmail) {
+        throw new Error('GOD_USER_EMAIL must be set in .env file');
+    }
+
+    const passwordHash = await bcrypt.hash(godPassword, 10);
+
+    await knex('serviceUsers').insert([
         {
-            email: 'god@system.local',
+            email: godEmail,
             passwordHash: passwordHash,
             isGod: true,
         },
     ]);
 
     console.log('God service user created');
-    console.log('Email: god@system.local');
-    console.log('Password: `Arrive.Slabs.Doubt.Research7`');
-    console.log('Please change this password after first login');
+    console.log('Credits provided from .env file');
 }
