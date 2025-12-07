@@ -4,7 +4,7 @@ import { BaseModel } from './base.model';
 
 export class ApplicationPermissionModel extends BaseModel {
     static get tableName() {
-        return 'application_permissions';
+        return 'applicationPermissions';
     }
 
     name!: string;
@@ -20,13 +20,13 @@ export class ApplicationPermissionModel extends BaseModel {
                 relation: Model.ManyToManyRelation,
                 modelClass: ApplicationRoleModel,
                 join: {
-                    from: 'application_permissions.id',
+                    from: 'applicationPermissions.id',
                     through: {
-                        from: 'application_role_permission.permissionId',
-                        to: 'application_role_permission.roleId',
+                        from: 'applicationRolePermission.permissionId',
+                        to: 'applicationRolePermission.roleId',
                         extra: ['createdAt'],
                     },
-                    to: 'application_roles.id',
+                    to: 'applicationRoles.id',
                 },
             },
         };

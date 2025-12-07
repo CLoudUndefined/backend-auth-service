@@ -4,7 +4,7 @@ import type { ApplicationRoleModel } from './application-role.model';
 
 export class ApplicationUserRoleModel extends Model {
     static get tableName() {
-        return 'application_user_role';
+        return 'applicationUserRole';
     }
 
     static get idColumn() {

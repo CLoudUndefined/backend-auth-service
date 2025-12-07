@@ -28,7 +28,7 @@ export class ApplicationModel extends BaseModelWithUpdate {
                 modelClass: ServiceUserModel,
                 join: {
                     from: 'applications.ownerId',
-                    to: 'service_users.id',
+                    to: 'serviceUsers.id',
                 },
             },
             users: {
@@ -36,7 +36,7 @@ export class ApplicationModel extends BaseModelWithUpdate {
                 modelClass: ApplicationUserModel,
                 join: {
                     from: 'applications.id',
-                    to: 'application_users.appId',
+                    to: 'applicationUsers.appId',
                 },
             },
             roles: {
@@ -44,7 +44,7 @@ export class ApplicationModel extends BaseModelWithUpdate {
                 modelClass: ApplicationRoleModel,
                 join: {
                     from: 'applications.id',
-                    to: 'application_roles.appId',
+                    to: 'applicationRoles.appId',
                 },
             },
         };

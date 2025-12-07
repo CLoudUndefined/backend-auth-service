@@ -7,7 +7,7 @@ import type { ApplicationRoleModel } from './application-role.model';
 
 export class ApplicationUserModel extends BaseModelWithUpdate {
     static get tableName() {
-        return 'application_users';
+        return 'applicationUsers';
     }
 
     appId!: number;
@@ -31,7 +31,7 @@ export class ApplicationUserModel extends BaseModelWithUpdate {
                 relation: Model.BelongsToOneRelation,
                 modelClass: ApplicationModel,
                 join: {
-                    from: 'application_users.appId',
+                    from: 'applicationUsers.appId',
                     to: 'applications.id',
                 },
             },
@@ -39,29 +39,29 @@ export class ApplicationUserModel extends BaseModelWithUpdate {
                 relation: Model.HasManyRelation,
                 modelClass: ApplicationUserRecoveryModel,
                 join: {
-                    from: 'application_users.id',
-                    to: 'application_user_recoveries.userId',
+                    from: 'applicationUsers.id',
+                    to: 'applicationUserRecoveries.userId',
                 },
             },
             refreshTokens: {
                 relation: Model.HasManyRelation,
                 modelClass: ApplicationUserRefreshTokenModel,
                 join: {
-                    from: 'application_users.id',
-                    to: 'application_user_refresh_tokens.userId',
+                    from: 'applicationUsers.id',
+                    to: 'applicationUserRefreshTokens.userId',
                 },
             },
             roles: {
                 relation: Model.ManyToManyRelation,
                 modelClass: ApplicationRoleModel,
                 join: {
-                    from: 'application_users.id',
+                    from: 'applicationUsers.id',
                     through: {
-                        from: 'application_user_role.userId',
-                        to: 'application_user_role.roleId',
+                        from: 'applicationUserRole.userId',
+                        to: 'applicationUserRole.roleId',
                         extra: ['createdAt'],
                     },
-                    to: 'application_roles.id',
+                    to: 'applicationRoles.id',
                 },
             },
         };

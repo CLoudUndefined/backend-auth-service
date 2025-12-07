@@ -4,7 +4,7 @@ import type { ServiceUserModel } from './service-user.model';
 
 export class ServiceUserRefreshTokenModel extends BaseModel {
     static get tableName() {
-        return 'service_user_refresh_tokens';
+        return 'serviceUserRefreshTokens';
     }
 
     userId!: number;
@@ -21,8 +21,8 @@ export class ServiceUserRefreshTokenModel extends BaseModel {
                 relation: Model.BelongsToOneRelation,
                 modelClass: ServiceUserModel,
                 join: {
-                    from: 'service_user_refresh_tokens.userId',
-                    to: 'service_users.id',
+                    from: 'serviceUserRefreshTokens.userId',
+                    to: 'serviceUsers.id',
                 },
             },
         };

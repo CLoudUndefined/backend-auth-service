@@ -6,7 +6,7 @@ import type { ApplicationPermissionModel } from './application-permission.model'
 
 export class ApplicationRoleModel extends BaseModelWithUpdate {
     static get tableName() {
-        return 'application_roles';
+        return 'applicationRoles';
     }
 
     appId!: number;
@@ -28,7 +28,7 @@ export class ApplicationRoleModel extends BaseModelWithUpdate {
                 relation: Model.BelongsToOneRelation,
                 modelClass: ApplicationModel,
                 join: {
-                    from: 'application_roles.appId',
+                    from: 'applicationRoles.appId',
                     to: 'applications.id',
                 },
             },
@@ -36,26 +36,26 @@ export class ApplicationRoleModel extends BaseModelWithUpdate {
                 relation: Model.ManyToManyRelation,
                 modelClass: ApplicationUserModel,
                 join: {
-                    from: 'application_roles.id',
+                    from: 'applicationRoles.id',
                     through: {
-                        from: 'application_user_role.roleId',
-                        to: 'application_user_role.userId',
+                        from: 'applicationUserRole.roleId',
+                        to: 'applicationUserRole.userId',
                         extra: ['createdAt'],
                     },
-                    to: 'application_users.id',
+                    to: 'applicationUsers.id',
                 },
             },
             permissions: {
                 relation: Model.ManyToManyRelation,
                 modelClass: ApplicationPermissionModel,
                 join: {
-                    from: 'application_roles.id',
+                    from: 'applicationRoles.id',
                     through: {
-                        from: 'application_role_permission.roleId',
-                        to: 'application_role_permission.permissionId',
+                        from: 'applicationRolePermission.roleId',
+                        to: 'applicationRolePermission.permissionId',
                         extra: ['createdAt'],
                     },
-                    to: 'application_permissions.id',
+                    to: 'applicationPermissions.id',
                 },
             },
         };

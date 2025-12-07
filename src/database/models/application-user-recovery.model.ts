@@ -4,7 +4,7 @@ import { BaseModelWithUpdate } from './base-with-update.model';
 
 export class ApplicationUserRecoveryModel extends BaseModelWithUpdate {
     static get tableName() {
-        return 'application_user_recoveries';
+        return 'applicationUserRecoveries';
     }
 
     userId!: number;
@@ -21,8 +21,8 @@ export class ApplicationUserRecoveryModel extends BaseModelWithUpdate {
                 relation: Model.BelongsToOneRelation,
                 modelClass: ApplicationUserModel,
                 join: {
-                    from: 'application_user_recoveries.userId',
-                    to: 'application_users.id',
+                    from: 'applicationUserRecoveries.userId',
+                    to: 'applicationUsers.id',
                 },
             },
         };

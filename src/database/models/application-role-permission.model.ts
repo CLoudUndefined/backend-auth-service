@@ -2,9 +2,9 @@ import { Model } from 'objection';
 import type { ApplicationRoleModel } from './application-role.model';
 import type { ApplicationPermissionModel } from './application-permission.model';
 
-export class ApplicationRolePermission extends Model {
+export class ApplicationRolePermissionModel extends Model {
     static get tableName() {
-        return 'application_role_permission';
+        return 'applicationRolePermission';
     }
 
     static get idColumn() {

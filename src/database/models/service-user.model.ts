@@ -6,7 +6,7 @@ import type { ServiceUserRefreshTokenModel } from './service-user-refresh-token.
 
 export class ServiceUserModel extends BaseModelWithUpdate {
     static get tableName() {
-        return 'service_users';
+        return 'serviceUsers';
     }
 
     email!: string;
@@ -28,7 +28,7 @@ export class ServiceUserModel extends BaseModelWithUpdate {
                 relation: Model.HasManyRelation,
                 modelClass: ApplicationModel,
                 join: {
-                    from: 'service_users.id',
+                    from: 'serviceUsers.id',
                     to: 'applications.ownerId',
                 },
             },
@@ -36,16 +36,16 @@ export class ServiceUserModel extends BaseModelWithUpdate {
                 relation: Model.HasManyRelation,
                 modelClass: ServiceUserRecoveryModel,
                 join: {
-                    from: 'service_users.id',
-                    to: 'service_user_recoveries.userId',
+                    from: 'serviceUsers.id',
+                    to: 'serviceUserRecoveries.userId',
                 },
             },
             refreshTokens: {
                 relation: Model.HasManyRelation,
                 modelClass: ServiceUserRefreshTokenModel,
                 join: {
-                    from: 'service_users.id',
-                    to: 'service_user_refresh_tokens.userId',
+                    from: 'serviceUsers.id',
+                    to: 'serviceUserRefreshTokens.userId',
                 },
             },
         };

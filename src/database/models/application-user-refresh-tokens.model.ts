@@ -4,7 +4,7 @@ import { BaseModel } from './base.model';
 
 export class ApplicationUserRefreshTokenModel extends BaseModel {
     static get tableName() {
-        return 'application_user_refresh_tokens';
+        return 'applicationUserRefreshTokens';
     }
 
     userId!: number;
@@ -21,8 +21,8 @@ export class ApplicationUserRefreshTokenModel extends BaseModel {
                 relation: Model.BelongsToOneRelation,
                 modelClass: ApplicationUserModel,
                 join: {
-                    from: 'application_user_refresh_tokens.userId',
-                    to: 'application_users.id',
+                    from: 'applicationUserRefreshTokens.userId',
+                    to: 'applicationUsers.id',
                 },
             },
         };
