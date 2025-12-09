@@ -1,5 +1,5 @@
 import { Model } from 'objection';
-import type { ApplicationRoleModel } from './application-role.model';
+import { ApplicationRoleModel } from './application-role.model';
 import { BaseModel } from './base.model';
 
 export class ApplicationPermissionModel extends BaseModel {
@@ -7,14 +7,13 @@ export class ApplicationPermissionModel extends BaseModel {
         return 'applicationPermissions';
     }
 
-    name!: string;
+    name: string;
 
     description?: string;
 
     roles?: ApplicationRoleModel[];
 
     static get relationMappings() {
-        const ApplicationRoleModel = require('./application-role.model');
         return {
             roles: {
                 relation: Model.ManyToManyRelation,

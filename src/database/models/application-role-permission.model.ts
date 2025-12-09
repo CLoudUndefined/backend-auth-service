@@ -11,8 +11,8 @@ export class ApplicationRolePermissionModel extends Model {
         return ['roleId', 'permissionId'];
     }
 
-    roleId!: number;
-    permissionId!: number;
+    roleId: number;
+    permissionId: number;
     createdAt: Date;
 
     role?: ApplicationRoleModel;

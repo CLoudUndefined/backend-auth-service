@@ -1,16 +1,16 @@
 import { Model } from 'objection';
-import type { ApplicationModel } from './application.model';
+import { ApplicationModel } from './application.model';
 import { BaseModelWithUpdate } from './base-with-update.model';
-import type { ApplicationUserModel } from './application-user.model';
-import type { ApplicationPermissionModel } from './application-permission.model';
+import { ApplicationUserModel } from './application-user.model';
+import { ApplicationPermissionModel } from './application-permission.model';
 
 export class ApplicationRoleModel extends BaseModelWithUpdate {
     static get tableName() {
         return 'applicationRoles';
     }
 
-    appId!: number;
-    name!: string;
+    appId: number;
+    name: string;
 
     description?: string;
 
@@ -19,10 +19,6 @@ export class ApplicationRoleModel extends BaseModelWithUpdate {
     permissions?: ApplicationPermissionModel[];
 
     static get relationMappings() {
-        const ApplicationModel = require('./application.model');
-        const ApplicationUserModel = require('./application-user.model');
-        const ApplicationPermissionModel = require('./application-permission.model');
-
         return {
             app: {
                 relation: Model.BelongsToOneRelation,

@@ -2,7 +2,7 @@ import { ModelOptions, QueryContext } from 'objection';
 import { BaseModel } from './base.model';
 
 export class BaseModelWithUpdate extends BaseModel {
-    updatedAt!: Date;
+    updatedAt: Date;
 
     $beforeInsert(queryContext: QueryContext): Promise<any> | void {
         super.$beforeInsert(queryContext);

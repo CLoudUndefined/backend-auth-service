@@ -11,8 +11,8 @@ export class ApplicationUserRoleModel extends Model {
         return ['userId', 'roleId'];
     }
 
-    userId!: number;
-    roleId!: number;
+    userId: number;
+    roleId: number;
     createdAt: Date;
 
     user?: ApplicationUserModel;

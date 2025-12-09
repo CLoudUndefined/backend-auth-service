@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { ApiProxyAuthenticationRequiredResponse } from '@nestjs/swagger';
 import type { ModelClass } from 'objection';
 import { ApplicationUserRecoveryModel } from 'src/database/models/application-user-recovery.model';
 import { ApplicationUserRefreshTokenModel } from 'src/database/models/application-user-refresh-tokens.model';

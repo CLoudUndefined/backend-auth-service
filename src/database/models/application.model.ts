@@ -1,16 +1,17 @@
 import { Model } from 'objection';
 import { BaseModelWithUpdate } from './base-with-update.model';
-import type { ServiceUserModel } from './service-user.model';
-import type { ApplicationUserModel } from './application-user.model';
+import { ServiceUserModel } from './service-user.model';
+import { ApplicationUserModel } from './application-user.model';
+import { ApplicationRoleModel } from './application-role.model';
 
 export class ApplicationModel extends BaseModelWithUpdate {
     static get tableName() {
         return 'applications';
     }
 
-    ownerId!: number;
-    name!: string;
-    encryptedSecret!: string;
+    ownerId: number;
+    name: string;
+    encryptedSecret: string;
 
     description?: string;
 
@@ -18,10 +19,6 @@ export class ApplicationModel extends BaseModelWithUpdate {
     users?: ApplicationUserModel[];
 
     static get relationMappings() {
-        const ServiceUserModel = require('./service-user.model');
-        const ApplicationUserModel = require('./application-user.model');
-        const ApplicationRoleModel = require('./application-role.model');
-
         return {
             owner: {
                 relation: Model.BelongsToOneRelation,

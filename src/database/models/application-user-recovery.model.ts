@@ -1,5 +1,5 @@
 import { Model } from 'objection';
-import type { ApplicationUserModel } from './application-user.model';
+import { ApplicationUserModel } from './application-user.model';
 import { BaseModelWithUpdate } from './base-with-update.model';
 
 export class ApplicationUserRecoveryModel extends BaseModelWithUpdate {
@@ -7,15 +7,13 @@ export class ApplicationUserRecoveryModel extends BaseModelWithUpdate {
         return 'applicationUserRecoveries';
     }
 
-    userId!: number;
-    question!: string;
-    answerHash!: string;
+    userId: number;
+    question: string;
+    answerHash: string;
 
     user?: ApplicationUserModel;
 
     static get relationMappings() {
-        const ApplicationUserModel = require('./application-user.model');
-
         return {
             user: {
                 relation: Model.BelongsToOneRelation,

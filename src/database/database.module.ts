@@ -28,34 +28,31 @@ const knexProvider = {
     },
 };
 
+const repositories = [
+    AppPermissionsRepository,
+    AppRolesRepository,
+    AppsRepository,
+    AppUsersRepository,
+    ServiceUsersRepository,
+];
+
+const models = [
+    ApplicationPermissionModel,
+    ApplicationRoleModel,
+    ApplicationRolePermissionModel,
+    ApplicationModel,
+    ApplicationUserModel,
+    ApplicationUserRoleModel,
+    ApplicationUserRecoveryModel,
+    ApplicationUserRefreshTokenModel,
+    ServiceUserModel,
+    ServiceUserRecoveryModel,
+    ServiceUserRefreshTokenModel,
+];
+
 @Global()
 @Module({
-    providers: [
-        knexProvider,
-        AppPermissionsRepository,
-        AppRolesRepository,
-        AppsRepository,
-        AppUsersRepository,
-        ServiceUsersRepository,
-        ApplicationPermissionModel,
-        ApplicationRoleModel,
-        ApplicationRolePermissionModel,
-        ApplicationModel,
-        ApplicationUserModel,
-        ApplicationUserRoleModel,
-        ApplicationUserRecoveryModel,
-        ApplicationUserRefreshTokenModel,
-        ServiceUserModel,
-        ServiceUserRecoveryModel,
-        ServiceUserRefreshTokenModel,
-    ],
-    exports: [
-        knexProvider,
-        AppPermissionsRepository,
-        AppRolesRepository,
-        AppsRepository,
-        AppUsersRepository,
-        ServiceUsersRepository,
-    ],
+    providers: [knexProvider, ...repositories, ...models],
+    exports: [...repositories],
 })
 export class DatabaseModule {}
