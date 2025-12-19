@@ -7,9 +7,10 @@ import { ServiceUserModel } from 'src/database/models/service-user.model';
 @Injectable()
 export class ServiceUsersRepository {
     constructor(
-        @Inject(ServiceUserModel) private userModel: ModelClass<ServiceUserModel>,
-        @Inject(ServiceUserRecoveryModel) private recoveryModel: ModelClass<ServiceUserRecoveryModel>,
-        @Inject(ServiceUserRefreshTokenModel) private refreshTokenModel: ModelClass<ServiceUserRefreshTokenModel>,
+        @Inject(ServiceUserModel) private readonly userModel: ModelClass<ServiceUserModel>,
+        @Inject(ServiceUserRecoveryModel) readonly recoveryModel: ModelClass<ServiceUserRecoveryModel>,
+        @Inject(ServiceUserRefreshTokenModel)
+        private readonly refreshTokenModel: ModelClass<ServiceUserRefreshTokenModel>,
     ) {}
 
     async create(email: string, passwordHash: string, isGod?: boolean): Promise<ServiceUserModel> {

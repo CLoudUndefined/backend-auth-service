@@ -4,7 +4,7 @@ import { ApplicationPermissionModel } from 'src/database/models/application-perm
 
 @Injectable()
 export class AppPermissionsRepository {
-    constructor(@Inject(ApplicationPermissionModel) private model: ModelClass<ApplicationPermissionModel>) {}
+    constructor(@Inject(ApplicationPermissionModel) private readonly model: ModelClass<ApplicationPermissionModel>) {}
 
     async findAll(): Promise<ApplicationPermissionModel[]> {
         return this.model.query();
