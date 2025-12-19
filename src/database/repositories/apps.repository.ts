@@ -4,7 +4,7 @@ import { ApplicationModel } from 'src/database/models/application.model';
 
 @Injectable()
 export class AppsRepository {
-    constructor(@Inject(ApplicationModel) private model: ModelClass<ApplicationModel>) {}
+    constructor(@Inject(ApplicationModel) private readonly model: ModelClass<ApplicationModel>) {}
 
     async create(
         ownerId: number,

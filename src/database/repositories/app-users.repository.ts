@@ -1,5 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ApiProxyAuthenticationRequiredResponse } from '@nestjs/swagger';
 import type { ModelClass } from 'objection';
 import { ApplicationUserRecoveryModel } from 'src/database/models/application-user-recovery.model';
 import { ApplicationUserRefreshTokenModel } from 'src/database/models/application-user-refresh-tokens.model';
@@ -8,10 +7,10 @@ import { ApplicationUserModel } from 'src/database/models/application-user.model
 @Injectable()
 export class AppUsersRepository {
     constructor(
-        @Inject(ApplicationUserModel) private userModel: ModelClass<ApplicationUserModel>,
-        @Inject(ApplicationUserRecoveryModel) private recoveryModel: ModelClass<ApplicationUserRecoveryModel>,
+        @Inject(ApplicationUserModel) private readonly userModel: ModelClass<ApplicationUserModel>,
+        @Inject(ApplicationUserRecoveryModel) private readonly recoveryModel: ModelClass<ApplicationUserRecoveryModel>,
         @Inject(ApplicationUserRefreshTokenModel)
-        private refreshTokenModel: ModelClass<ApplicationUserRefreshTokenModel>,
+        private readonly refreshTokenModel: ModelClass<ApplicationUserRefreshTokenModel>,
     ) {}
 
     async create(appId: number, email: string, passwordHash: string): Promise<ApplicationUserModel> {

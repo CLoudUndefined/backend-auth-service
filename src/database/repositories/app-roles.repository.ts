@@ -4,7 +4,7 @@ import { ApplicationRoleModel } from 'src/database/models/application-role.model
 
 @Injectable()
 export class AppRolesRepository {
-    constructor(@Inject(ApplicationRoleModel) private model: ModelClass<ApplicationRoleModel>) {}
+    constructor(@Inject(ApplicationRoleModel) private readonly model: ModelClass<ApplicationRoleModel>) {}
 
     async create(appId: number, name: string, description?: string): Promise<ApplicationRoleModel> {
         return this.model.query().insert({
