@@ -16,7 +16,7 @@ export class ServiceUsersService {
 
         const passwordHash = await bcrypt.hash(plainPassword, 10);
 
-        return await this.serviceUsersRepository.create(email, passwordHash, true);
+        return await this.serviceUsersRepository.create(email, passwordHash, false);
     }
 
     async findByEmail(email: string): Promise<ServiceUserModel | undefined> {
