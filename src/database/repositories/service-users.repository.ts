@@ -14,7 +14,7 @@ export class ServiceUsersRepository {
     ) {}
 
     async create(email: string, passwordHash: string, isGod?: boolean): Promise<ServiceUserModel> {
-        return this.userModel.query().insert({
+        return this.userModel.query().insertAndFetch({
             email,
             passwordHash,
             isGod: isGod ?? false,
