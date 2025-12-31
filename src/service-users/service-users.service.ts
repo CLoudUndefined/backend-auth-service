@@ -26,4 +26,10 @@ export class ServiceUsersService {
     async findById(id: number): Promise<ServiceUserModel | undefined> {
         return await this.serviceUsersRepository.findById(id);
     }
+
+    async saveRefreshToken(userId: number, token: string, expiresAt: Date): Promise<void> {
+        const tokenHash = await bcrypt.hash(token, 10);
+
+        await this.serviceUsersRepository.createRefreshToken(userId, tokenHash, expiresAt);
+    }
 }

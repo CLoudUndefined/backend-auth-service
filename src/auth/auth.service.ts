@@ -1,4 +1,57 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { LoginRequestDto } from 'src/common/dto/auth/login-request.dto';
+import { LoginResponseDto } from 'src/common/dto/auth/login-response.dto';
+import { RegisterRequestDto } from 'src/common/dto/auth/register-request.dto';
+import { ServiceUserModel } from 'src/database/models/service-user.model';
+import { ServiceUsersService } from 'src/service-users/service-users.service';
+import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
-export class AuthService {}
+export class AuthService {
+    constructor(
+        private readonly serviceUsersService: ServiceUsersService,
+        private readonly jwtService: JwtService,
+    ) {}
+
+    async register(registerDto: RegisterRequestDto): Promise<ServiceUserModel> {
+        return await this.serviceUsersService.create(registerDto.email, registerDto.password);
+    }
+
+    async login(loginDto: LoginRequestDto): Promise<LoginResponseDto> {
+        const user = await this.serviceUsersService.findByEmail(loginDto.email);
+
+        if (!user) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
+        if (user.isBanned) {
+            throw new ForbiddenException('User is banned');
+        }
+
+        const isPasswordValid = await bcrypt.compare(loginDto.password, user.passwordHash);
+        if (!isPasswordValid) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
+        const accessToken = this.jwtService.sign(
+            {
+                sub: user.id,
+                email: user.email,
+                isGod: user.isGod,
+            },
+            { expiresIn: '15m' },
+        );
+
+        const refreshToken = crypto.randomBytes(64).toString('hex');
+
+        await this.serviceUsersService.saveRefreshToken(
+            user.id,
+            refreshToken,
+            new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        );
+
+        return { accessToken, refreshToken };
+    }
+}
