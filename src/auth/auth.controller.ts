@@ -13,10 +13,13 @@ import { AddRecoveryRequestDto } from 'src/common/dto/auth/add-recovery-request.
 import { UpdateRecoveryRequestDto } from 'src/common/dto/auth/update-recovery-request.dto';
 import { ListRecoveryResponseDto } from 'src/common/dto/auth/list-recovery-response.dto';
 import { RefreshTokenRequestDto } from 'src/common/dto/auth/refresh-token-request.dto';
+import { AuthService } from './auth.service';
 
 @ApiTags('Service (User Auth)')
 @Controller('auth')
 export class AuthController {
+    constructor(private readonly authService: AuthService) {}
+
     @Post('register')
     @ApiOperation({
         summary: 'Register a new service user',
@@ -36,7 +39,7 @@ export class AuthController {
         description: 'Email already exists',
     })
     async register(@Body() registerDto: RegisterRequestDto): Promise<ServiceUserResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        return await this.authService.register(registerDto);
     }
 
     @Post('login')
@@ -58,7 +61,7 @@ export class AuthController {
         description: 'Invalid email or password',
     })
     async login(@Body() loginDto: LoginRequestDto): Promise<LoginResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        return await this.authService.login(loginDto);
     }
 
     @Post('change-password')
