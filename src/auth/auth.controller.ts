@@ -125,7 +125,7 @@ export class AuthController {
         status: 401,
         description: 'Unauthorized',
     })
-    async addRecovery(@Body() addDto: AddRecoveryRequestDto): Promise<MessageResponseDto> {
+    async addRecovery(@Body() addRecoveryDto: AddRecoveryRequestDto): Promise<MessageResponseDto> {
         throw new NotImplementedException('Logic not implemented yet');
     }
 
