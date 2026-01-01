@@ -1,4 +1,10 @@
-import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+    BadRequestException,
+    ForbiddenException,
+    Injectable,
+    NotFoundException,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { LoginRequestDto } from 'src/common/dto/auth/login-request.dto';
 import { LoginResponseDto } from 'src/common/dto/auth/login-response.dto';
 import { RegisterRequestDto } from 'src/common/dto/auth/register-request.dto';
@@ -7,6 +13,7 @@ import { ServiceUsersService } from 'src/service-users/service-users.service';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
+import { ChangePasswordRequestDto } from 'src/common/dto/auth/change-password-request.dto';
 
 @Injectable()
 export class AuthService {
@@ -53,5 +60,29 @@ export class AuthService {
         );
 
         return { accessToken, refreshToken };
+    }
+
+    async changePassword(userId: number, changePasswordDto: ChangePasswordRequestDto): Promise<void> {
+        const user = await this.serviceUsersService.findById(userId);
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        if (changePasswordDto.newPassword == changePasswordDto.oldPassword) {
+            throw new BadRequestException('New password must be different');
+        }
+
+        const isOldPasswordValid = await bcrypt.compare(changePasswordDto.oldPassword, user.passwordHash);
+
+        if (!isOldPasswordValid) {
+            throw new UnauthorizedException('Current password is incorrect');
+        }
+
+        const newPasswordHash = await bcrypt.hash(changePasswordDto.newPassword, 10);
+
+        await this.serviceUsersService.updatePassword(user.id, newPasswordHash);
+
+        await this.serviceUsersService.deleteAllRefreshTokens(userId);
     }
 }

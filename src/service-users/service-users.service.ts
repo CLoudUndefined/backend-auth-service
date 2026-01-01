@@ -32,4 +32,12 @@ export class ServiceUsersService {
 
         await this.serviceUsersRepository.createRefreshToken(userId, tokenHash, expiresAt);
     }
+
+    async updatePassword(userId: number, passwordHash: string): Promise<void> {
+        await this.serviceUsersRepository.update(userId, { passwordHash });
+    }
+
+    async deleteAllRefreshTokens(userId: number): Promise<void> {
+        await this.serviceUsersRepository.deleteAllUserRefreshTokens(userId);
+    }
 }
