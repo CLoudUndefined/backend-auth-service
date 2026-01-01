@@ -125,8 +125,8 @@ export class AuthController {
         status: 401,
         description: 'Invalid or expired Refresh Token',
     })
-    async refresh(@Body() refreshDto: RefreshTokenRequestDto): Promise<LoginResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+    async refreshToken(@Body() refreshTokenDto: RefreshTokenRequestDto): Promise<LoginResponseDto> {
+        return await this.authService.refreshToken(refreshTokenDto.refreshToken);
     }
 
     @Post('recovery')
