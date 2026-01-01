@@ -3,7 +3,7 @@ import { IsNotEmpty, IsString } from 'class-validator';
 
 export class RefreshTokenRequestDto {
     @ApiProperty({
-        example: 'dcc434-82e3-4...',
+        example: 'dcc43482efa34...',
         description: 'Valid Refresh Token issued during login',
     })
     @IsNotEmpty()

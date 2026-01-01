@@ -52,10 +52,11 @@ export class AuthService {
         );
 
         const refreshToken = crypto.randomBytes(64).toString('hex');
+        const refreshTokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
 
         await this.serviceUsersService.saveRefreshToken(
             user.id,
-            refreshToken,
+            refreshTokenHash,
             new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         );
 
@@ -84,5 +85,48 @@ export class AuthService {
         await this.serviceUsersService.updatePassword(user.id, newPasswordHash);
 
         await this.serviceUsersService.deleteAllRefreshTokens(userId);
+    }
+
+    async refreshToken(refreshToken: string): Promise<LoginResponseDto> {
+        const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+
+        const storedToken = await this.serviceUsersService.findRefreshTokenByHash(tokenHash);
+
+        if (!storedToken) {
+            throw new NotFoundException('Invalid refresh token');
+        }
+
+        if (new Date() > storedToken.expiresAt) {
+            await this.serviceUsersService.deleteRefreshTokenById(storedToken.id);
+            throw new UnauthorizedException('Refresh token expired');
+        }
+
+        const user = await this.serviceUsersService.findById(storedToken.userId);
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        const accessToken = this.jwtService.sign(
+            {
+                sub: user.id,
+                email: user.email,
+                isGod: user.isGod,
+            },
+            { expiresIn: '15m' },
+        );
+
+        await this.serviceUsersService.deleteRefreshTokenById(storedToken.id);
+
+        const newRefreshToken = crypto.randomBytes(64).toString('hex');
+        const newRefreshTokenHash = crypto.createHash('sha256').update(newRefreshToken).digest('hex');
+
+        await this.serviceUsersService.saveRefreshToken(
+            user.id,
+            newRefreshTokenHash,
+            new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        );
+
+        return { accessToken, refreshToken: newRefreshToken };
     }
 }

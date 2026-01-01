@@ -2,6 +2,7 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { ServiceUsersRepository } from 'src/database/repositories/service-users.repository';
 import * as bcrypt from 'bcrypt';
 import type { ServiceUserModel } from 'src/database/models/service-user.model';
+import { ServiceUserRefreshTokenModel } from 'src/database/models/service-user-refresh-token.model';
 
 @Injectable()
 export class ServiceUsersService {
@@ -27,9 +28,7 @@ export class ServiceUsersService {
         return await this.serviceUsersRepository.findById(id);
     }
 
-    async saveRefreshToken(userId: number, token: string, expiresAt: Date): Promise<void> {
-        const tokenHash = await bcrypt.hash(token, 10);
-
+    async saveRefreshToken(userId: number, tokenHash: string, expiresAt: Date): Promise<void> {
         await this.serviceUsersRepository.createRefreshToken(userId, tokenHash, expiresAt);
     }
 
@@ -37,7 +36,15 @@ export class ServiceUsersService {
         await this.serviceUsersRepository.update(userId, { passwordHash });
     }
 
+    async deleteRefreshTokenById(id: number): Promise<void> {
+        await this.serviceUsersRepository.deleteRefreshToken(id);
+    }
+
     async deleteAllRefreshTokens(userId: number): Promise<void> {
         await this.serviceUsersRepository.deleteAllUserRefreshTokens(userId);
+    }
+
+    async findRefreshTokenByHash(tokenHash: string): Promise<ServiceUserRefreshTokenModel | undefined> {
+        return await this.serviceUsersRepository.findRefreshTokenByHash(tokenHash);
     }
 }
