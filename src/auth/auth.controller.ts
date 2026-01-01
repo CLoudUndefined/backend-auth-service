@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, NotImplementedException, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    NotImplementedException,
+    Param,
+    ParseIntPipe,
+    Post,
+    Put,
+    UseGuards,
+} from '@nestjs/common';
 import { ServiceUserResponseDto } from 'src/service-users/dto/service-user-response.dto';
 import { RegisterRequestDto } from '../common/dto/auth/register-request.dto';
 import { LoginRequestDto } from '../common/dto/auth/login-request.dto';
@@ -14,6 +25,9 @@ import { UpdateRecoveryRequestDto } from 'src/common/dto/auth/update-recovery-re
 import { ListRecoveryResponseDto } from 'src/common/dto/auth/list-recovery-response.dto';
 import { RefreshTokenRequestDto } from 'src/common/dto/auth/refresh-token-request.dto';
 import { AuthService } from './auth.service';
+import { ServiceUser } from 'src/common/decorators/service-user.decorator';
+import { ServiceUserModel } from 'src/database/models/service-user.model';
+import { JwtServiceAuthGuard } from './guards/jwt-service-auth.guard';
 
 @ApiTags('Service (User Auth)')
 @Controller('auth')
@@ -65,6 +79,7 @@ export class AuthController {
     }
 
     @Post('change-password')
+    @UseGuards(JwtServiceAuthGuard)
     @ApiBearerAuth('JWT-auth-service')
     @ApiOperation({
         summary: 'Change password',
@@ -83,8 +98,13 @@ export class AuthController {
         status: 401,
         description: 'Unauthorized',
     })
-    async changePassword(@Body() changePasswordDto: ChangePasswordRequestDto): Promise<MessageResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+    async changePassword(
+        @ServiceUser() user: ServiceUserModel,
+        @Body() changePasswordDto: ChangePasswordRequestDto,
+    ): Promise<MessageResponseDto> {
+        await this.authService.changePassword(user.id, changePasswordDto);
+
+        return { message: 'Password changed successfully' };
     }
 
     @Post('refresh')
