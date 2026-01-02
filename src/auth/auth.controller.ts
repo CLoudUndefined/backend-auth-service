@@ -1,15 +1,4 @@
-import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    NotImplementedException,
-    Param,
-    ParseIntPipe,
-    Post,
-    Put,
-    UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
 import { ServiceUserResponseDto } from 'src/service-users/dto/service-user-response.dto';
 import { RegisterRequestDto } from '../common/dto/auth/register-request.dto';
 import { LoginRequestDto } from '../common/dto/auth/login-request.dto';
@@ -17,7 +6,6 @@ import { ChangePasswordRequestDto } from '../common/dto/auth/change-password-req
 import { RecoveryAskRequestDto } from '../common/dto/auth/recovery-ask-request.dto';
 import { RecoveryResetRequestDto } from '../common/dto/auth/recovery-reset-request.dto';
 import { LoginResponseDto } from '../common/dto/auth/login-response.dto';
-import { RecoveryAskResponseDto } from '../common/dto/auth/recovery-ask-response.dto';
 import { MessageResponseDto } from '../common/dto/message-response.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AddRecoveryRequestDto } from 'src/common/dto/auth/add-recovery-request.dto';
@@ -187,7 +175,7 @@ export class AuthController {
     @ApiResponse({
         status: 200,
         description: 'Questions retrieved successfully',
-        type: RecoveryAskResponseDto,
+        type: ListRecoveryResponseDto,
     })
     @ApiResponse({
         status: 400,
@@ -197,7 +185,7 @@ export class AuthController {
         status: 404,
         description: 'User with this email not found',
     })
-    async recoveryAsk(@Body() recoveryAskDto: RecoveryAskRequestDto): Promise<RecoveryAskResponseDto> {
+    async recoveryAsk(@Body() recoveryAskDto: RecoveryAskRequestDto): Promise<ListRecoveryResponseDto> {
         return this.authService.recoveryAsk(recoveryAskDto.email);
     }
 
