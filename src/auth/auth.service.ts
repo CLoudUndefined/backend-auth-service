@@ -28,25 +28,26 @@ export class AuthService {
         private readonly jwtService: JwtService,
     ) {}
 
+    private async verifyCredentialOrThrow(stringPlain: string, stringHash: string): Promise<void> {
+        const isValid = await bcrypt.compare(stringPlain, stringHash);
+
+        if (!isValid) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+    }
+
     async register(registerDto: RegisterRequestDto): Promise<ServiceUserModel> {
         return this.serviceUsersService.create(registerDto.email, registerDto.password);
     }
 
     async login(loginDto: LoginRequestDto): Promise<LoginResponseDto> {
-        const user = await this.serviceUsersService.findByEmail(loginDto.email);
-
-        if (!user) {
-            throw new UnauthorizedException('Invalid credentials');
-        }
+        const user = await this.serviceUsersService.findByEmailOrThrow(loginDto.email);
 
         if (user.isBanned) {
             throw new ForbiddenException('User is banned');
         }
 
-        const isPasswordValid = await bcrypt.compare(loginDto.password, user.passwordHash);
-        if (!isPasswordValid) {
-            throw new UnauthorizedException('Invalid credentials');
-        }
+        await this.verifyCredentialOrThrow(loginDto.password, user.passwordHash);
 
         const accessToken = this.jwtService.sign(
             {
@@ -70,21 +71,13 @@ export class AuthService {
     }
 
     async changePassword(userId: number, changePasswordDto: ChangePasswordRequestDto): Promise<void> {
-        const user = await this.serviceUsersService.findById(userId);
-
-        if (!user) {
-            throw new NotFoundException('User not found');
-        }
+        const user = await this.serviceUsersService.findByIdOrThrow(userId);
 
         if (changePasswordDto.newPassword == changePasswordDto.oldPassword) {
             throw new BadRequestException('New password must be different');
         }
 
-        const isOldPasswordValid = await bcrypt.compare(changePasswordDto.oldPassword, user.passwordHash);
-
-        if (!isOldPasswordValid) {
-            throw new UnauthorizedException('Current password is incorrect');
-        }
+        await this.verifyCredentialOrThrow(changePasswordDto.oldPassword, user.passwordHash);
 
         const newPasswordHash = await bcrypt.hash(changePasswordDto.newPassword, 10);
 
@@ -107,11 +100,7 @@ export class AuthService {
             throw new UnauthorizedException('Refresh token expired');
         }
 
-        const user = await this.serviceUsersService.findById(storedToken.userId);
-
-        if (!user) {
-            throw new NotFoundException('User not found');
-        }
+        const user = await this.serviceUsersService.findByIdOrThrow(storedToken.userId);
 
         const accessToken = this.jwtService.sign(
             {
@@ -169,27 +158,15 @@ export class AuthService {
     }
 
     async recoveryReset(recoveryResetDto: RecoveryResetRequestDto): Promise<void> {
-        const user = await this.serviceUsersService.findByEmail(recoveryResetDto.email);
+        const user = await this.serviceUsersService.findByEmailOrThrow(recoveryResetDto.email);
 
-        if (!user) {
-            throw new NotFoundException('User not found');
-        }
-
-        const recovery = await this.serviceUsersService.findRecoveryById(recoveryResetDto.recoveryId);
-
-        if (!recovery) {
-            throw new NotFoundException('Recovery question not found');
-        }
+        const recovery = await this.serviceUsersService.findRecoveryByIdOrThrow(recoveryResetDto.recoveryId);
 
         if (recovery.userId !== user.id) {
             throw new ForbiddenException('This recovery question does not belong to this user');
         }
 
-        const isAnswerCorrect = await bcrypt.compare(recoveryResetDto.answer, recovery.answerHash);
-
-        if (!isAnswerCorrect) {
-            throw new UnauthorizedException('Wrong answer to the question');
-        }
+        await this.verifyCredentialOrThrow(recoveryResetDto.answer, recovery.answerHash);
 
         const newPasswordHash = await bcrypt.hash(recoveryResetDto.newPassword, 10);
 
@@ -203,27 +180,15 @@ export class AuthService {
         recoveryId: number,
         updateRecoveryDto: UpdateRecoveryRequestDto,
     ): Promise<void> {
-        const user = await this.serviceUsersService.findById(userId);
+        const user = await this.serviceUsersService.findByIdOrThrow(userId);
 
-        if (!user) {
-            throw new NotFoundException('User not found');
-        }
-
-        const recovery = await this.serviceUsersService.findRecoveryById(recoveryId);
-
-        if (!recovery) {
-            throw new NotFoundException('Recovery question not found');
-        }
+        const recovery = await this.serviceUsersService.findRecoveryByIdOrThrow(recoveryId);
 
         if (recovery.userId !== user.id) {
             throw new ForbiddenException('This recovery question not belong to this user');
         }
 
-        const isPasswordValid = await bcrypt.compare(updateRecoveryDto.currentPassword, user.passwordHash);
-
-        if (!isPasswordValid) {
-            throw new UnauthorizedException('Invalid credentials');
-        }
+        await this.verifyCredentialOrThrow(updateRecoveryDto.currentPassword, user.passwordHash);
 
         const newAnswerHash = await bcrypt.hash(updateRecoveryDto.newAnswer, 10);
 
@@ -235,27 +200,15 @@ export class AuthService {
         recoveryId: number,
         removeRecoveryDto: RemoveRecoveryRequestDto,
     ): Promise<void> {
-        const user = await this.serviceUsersService.findById(userId);
+        const user = await this.serviceUsersService.findByIdOrThrow(userId);
 
-        if (!user) {
-            throw new NotFoundException('User not found');
-        }
-
-        const recovery = await this.serviceUsersService.findRecoveryById(recoveryId);
-
-        if (!recovery) {
-            throw new NotFoundException('Recovery question not found');
-        }
+        const recovery = await this.serviceUsersService.findRecoveryByIdOrThrow(recoveryId);
 
         if (recovery.userId !== user.id) {
             throw new ForbiddenException('This recovery question not belong to this user');
         }
 
-        const isPasswordValid = await bcrypt.compare(removeRecoveryDto.currentPassword, user.passwordHash);
-
-        if (!isPasswordValid) {
-            throw new UnauthorizedException('Invalid credentials');
-        }
+        await this.verifyCredentialOrThrow(removeRecoveryDto.currentPassword, user.passwordHash);
 
         await this.serviceUsersService.deleteRecovery(recoveryId);
     }

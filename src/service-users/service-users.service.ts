@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ServiceUsersRepository } from 'src/database/repositories/service-users.repository';
 import * as bcrypt from 'bcrypt';
 import type { ServiceUserModel } from 'src/database/models/service-user.model';
@@ -25,8 +25,28 @@ export class ServiceUsersService {
         return this.serviceUsersRepository.findByEmail(email);
     }
 
+    async findByEmailOrThrow(email: string): Promise<ServiceUserModel> {
+        const user = await this.findByEmail(email);
+
+        if (!user) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
+        return user;
+    }
+
     async findById(id: number): Promise<ServiceUserModel | undefined> {
         return this.serviceUsersRepository.findById(id);
+    }
+
+    async findByIdOrThrow(id: number): Promise<ServiceUserModel> {
+        const user = await this.findById(id);
+
+        if (!user) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
+        return user;
     }
 
     async saveRefreshToken(userId: number, tokenHash: string, expiresAt: Date): Promise<void> {
@@ -59,6 +79,16 @@ export class ServiceUsersService {
 
     async findRecoveryById(id: number): Promise<ServiceUserRecoveryModel | undefined> {
         return this.serviceUsersRepository.findRecoveryById(id);
+    }
+
+    async findRecoveryByIdOrThrow(id: number): Promise<ServiceUserRecoveryModel> {
+        const recovery = await this.serviceUsersRepository.findRecoveryById(id);
+
+        if (!recovery) {
+            throw new NotFoundException('Invalid credentials');
+        }
+
+        return recovery;
     }
 
     async updateRecovery(id: number, question: string, answerHash: string): Promise<void> {
