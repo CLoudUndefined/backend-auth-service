@@ -41,7 +41,7 @@ export class AuthService {
     }
 
     async login(loginDto: LoginRequestDto): Promise<LoginResponseDto> {
-        const user = await this.serviceUsersService.findByEmailOrThrow(loginDto.email);
+        const user = await this.serviceUsersService.findByEmailOrThrow(loginDto.email, 'Invalid credentials');
 
         if (user.isBanned) {
             throw new ForbiddenException('User is banned');
@@ -71,7 +71,7 @@ export class AuthService {
     }
 
     async changePassword(userId: number, changePasswordDto: ChangePasswordRequestDto): Promise<void> {
-        const user = await this.serviceUsersService.findByIdOrThrow(userId);
+        const user = await this.serviceUsersService.findByIdOrThrow(userId, 'Invalid credentials');
 
         if (changePasswordDto.newPassword === changePasswordDto.oldPassword) {
             throw new BadRequestException('New password must be different');
@@ -100,7 +100,7 @@ export class AuthService {
             throw new UnauthorizedException('Refresh token expired');
         }
 
-        const user = await this.serviceUsersService.findByIdOrThrow(storedToken.userId);
+        const user = await this.serviceUsersService.findByIdOrThrow(storedToken.userId, 'Invalid credentials');
 
         if (user.isBanned) {
             throw new ForbiddenException('User is banned');
@@ -162,9 +162,12 @@ export class AuthService {
     }
 
     async resetPasswordByRecovery(recoveryResetDto: RecoveryResetRequestDto): Promise<void> {
-        const user = await this.serviceUsersService.findByEmailOrThrow(recoveryResetDto.email);
+        const user = await this.serviceUsersService.findByEmailOrThrow(recoveryResetDto.email, 'Invalid credentials');
 
-        const recovery = await this.serviceUsersService.findRecoveryByIdOrThrow(recoveryResetDto.recoveryId);
+        const recovery = await this.serviceUsersService.findRecoveryByIdOrThrow(
+            recoveryResetDto.recoveryId,
+            'Invalid credentials',
+        );
 
         if (recovery.userId !== user.id) {
             throw new ForbiddenException('This recovery question does not belong to this user');
@@ -184,9 +187,9 @@ export class AuthService {
         recoveryId: number,
         updateRecoveryDto: UpdateRecoveryRequestDto,
     ): Promise<void> {
-        const user = await this.serviceUsersService.findByIdOrThrow(userId);
+        const user = await this.serviceUsersService.findByIdOrThrow(userId, 'Invalid credentials');
 
-        const recovery = await this.serviceUsersService.findRecoveryByIdOrThrow(recoveryId);
+        const recovery = await this.serviceUsersService.findRecoveryByIdOrThrow(recoveryId, 'Invalid credentials');
 
         if (recovery.userId !== user.id) {
             throw new ForbiddenException('Recovery question not found');
@@ -204,9 +207,9 @@ export class AuthService {
         recoveryId: number,
         removeRecoveryDto: RemoveRecoveryRequestDto,
     ): Promise<void> {
-        const user = await this.serviceUsersService.findByIdOrThrow(userId);
+        const user = await this.serviceUsersService.findByIdOrThrow(userId, 'Invalid credentials');
 
-        const recovery = await this.serviceUsersService.findRecoveryByIdOrThrow(recoveryId);
+        const recovery = await this.serviceUsersService.findRecoveryByIdOrThrow(recoveryId, 'Invalid credentials');
 
         if (recovery.userId !== user.id) {
             throw new ForbiddenException('Recovery question not found');
