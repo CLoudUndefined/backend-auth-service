@@ -25,11 +25,11 @@ export class ServiceUsersService {
         return this.serviceUsersRepository.findByEmail(email);
     }
 
-    async findByEmailOrThrow(email: string): Promise<ServiceUserModel> {
+    async findByEmailOrThrow(email: string, message: string = 'User not found'): Promise<ServiceUserModel> {
         const user = await this.findByEmail(email);
 
         if (!user) {
-            throw new UnauthorizedException('Invalid credentials');
+            throw new UnauthorizedException(message);
         }
 
         return user;
@@ -39,11 +39,11 @@ export class ServiceUsersService {
         return this.serviceUsersRepository.findById(id);
     }
 
-    async findByIdOrThrow(id: number): Promise<ServiceUserModel> {
+    async findByIdOrThrow(id: number, message: string = 'User not found'): Promise<ServiceUserModel> {
         const user = await this.findById(id);
 
         if (!user) {
-            throw new UnauthorizedException('Invalid credentials');
+            throw new UnauthorizedException(message);
         }
 
         return user;
@@ -81,11 +81,14 @@ export class ServiceUsersService {
         return this.serviceUsersRepository.findRecoveryById(id);
     }
 
-    async findRecoveryByIdOrThrow(id: number): Promise<ServiceUserRecoveryModel> {
+    async findRecoveryByIdOrThrow(
+        id: number,
+        message: string = 'Recovery question not found',
+    ): Promise<ServiceUserRecoveryModel> {
         const recovery = await this.serviceUsersRepository.findRecoveryById(id);
 
         if (!recovery) {
-            throw new NotFoundException('Invalid credentials');
+            throw new NotFoundException(message);
         }
 
         return recovery;
