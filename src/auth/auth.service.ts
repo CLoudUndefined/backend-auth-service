@@ -20,12 +20,15 @@ import { RecoveryAskResponseDto } from 'src/common/dto/auth/recovery-ask-respons
 import { RecoveryResetRequestDto } from 'src/common/dto/auth/recovery-reset-request.dto';
 import { UpdateRecoveryRequestDto } from 'src/common/dto/auth/update-recovery-request.dto';
 import { RemoveRecoveryRequestDto } from 'src/common/dto/auth/remove-recovery-request.dto';
+import { ConfigService } from '@nestjs/config';
+import ms, { StringValue } from 'ms';
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly serviceUsersService: ServiceUsersService,
         private readonly jwtService: JwtService,
+        private readonly configService: ConfigService,
     ) {}
 
     private async verifyCredentialOrThrow(stringPlain: string, stringHash: string): Promise<void> {
@@ -49,14 +52,11 @@ export class AuthService {
 
         await this.verifyCredentialOrThrow(loginDto.password, user.passwordHash);
 
-        const accessToken = this.jwtService.sign(
-            {
-                sub: user.id,
-                email: user.email,
-                isGod: user.isGod,
-            },
-            { expiresIn: '15m' },
-        );
+        const accessToken = this.jwtService.sign({
+            sub: user.id,
+            email: user.email,
+            isGod: user.isGod,
+        });
 
         const refreshToken = crypto.randomBytes(64).toString('hex');
         const refreshTokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
@@ -64,7 +64,7 @@ export class AuthService {
         await this.serviceUsersService.createRefreshToken(
             user.id,
             refreshTokenHash,
-            new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            new Date(Date.now() + ms(this.configService.getOrThrow<StringValue>('JWT_REFRESH_TOKEN_EXPIRES_IN', '7d'))),
         );
 
         return { accessToken, refreshToken };
@@ -106,14 +106,11 @@ export class AuthService {
             throw new ForbiddenException('User is banned');
         }
 
-        const accessToken = this.jwtService.sign(
-            {
-                sub: user.id,
-                email: user.email,
-                isGod: user.isGod,
-            },
-            { expiresIn: '15m' },
-        );
+        const accessToken = this.jwtService.sign({
+            sub: user.id,
+            email: user.email,
+            isGod: user.isGod,
+        });
 
         await this.serviceUsersService.deleteRefreshTokenById(storedToken.id);
 
@@ -123,7 +120,7 @@ export class AuthService {
         await this.serviceUsersService.createRefreshToken(
             user.id,
             newRefreshTokenHash,
-            new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            new Date(Date.now() + ms(this.configService.getOrThrow<StringValue>('JWT_REFRESH_TOKEN_EXPIRES_IN', '7d'))),
         );
 
         return { accessToken, refreshToken: newRefreshToken };

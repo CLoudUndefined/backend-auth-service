@@ -48,7 +48,7 @@ const models = [
     ServiceUserModel,
     ServiceUserRecoveryModel,
     ServiceUserRefreshTokenModel,
-].map(model => ({
+].map((model) => ({
     provide: model,
     useValue: model,
 }));
