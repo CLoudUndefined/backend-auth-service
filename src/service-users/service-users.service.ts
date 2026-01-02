@@ -3,6 +3,7 @@ import { ServiceUsersRepository } from 'src/database/repositories/service-users.
 import * as bcrypt from 'bcrypt';
 import type { ServiceUserModel } from 'src/database/models/service-user.model';
 import { ServiceUserRefreshTokenModel } from 'src/database/models/service-user-refresh-token.model';
+import { ServiceUserRecoveryModel } from 'src/database/models/service-user-recovery.model';
 
 @Injectable()
 export class ServiceUsersService {
@@ -46,5 +47,25 @@ export class ServiceUsersService {
 
     async findRefreshTokenByHash(tokenHash: string): Promise<ServiceUserRefreshTokenModel | undefined> {
         return await this.serviceUsersRepository.findRefreshTokenByHash(tokenHash);
+    }
+
+    async saveRecovery(userId: number, question: string, answerHash: string): Promise<void> {
+        await this.serviceUsersRepository.createRecovery(userId, question, answerHash);
+    }
+
+    async findRecoveriesByUserId(userId: number): Promise<ServiceUserRecoveryModel[]> {
+        return await this.serviceUsersRepository.findRecoveriesByUserId(userId);
+    }
+
+    async findRecoveryById(id: number): Promise<ServiceUserRecoveryModel | undefined> {
+        return await this.serviceUsersRepository.findRecoveryById(id);
+    }
+
+    async updateRecovery(id: number, question: string, answerHash: string): Promise<void> {
+        await this.serviceUsersRepository.updateRecovery(id, { question, answerHash });
+    }
+
+    async deleteRecovery(id: number): Promise<void> {
+        await this.serviceUsersRepository.deleteRecovery(id);
     }
 }
