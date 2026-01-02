@@ -3,6 +3,7 @@ import { BaseModelWithUpdate } from './base-with-update.model';
 import { ServiceUserModel } from './service-user.model';
 import { ApplicationUserModel } from './application-user.model';
 import { ApplicationRoleModel } from './application-role.model';
+import { Exclude } from 'class-transformer';
 
 export class ApplicationModel extends BaseModelWithUpdate {
     static get tableName() {
@@ -11,6 +12,8 @@ export class ApplicationModel extends BaseModelWithUpdate {
 
     ownerId: number;
     name: string;
+
+    @Exclude()
     encryptedSecret: string;
 
     description?: string;
