@@ -24,8 +24,8 @@ export class AppsRepository {
         return this.model.query().findById(id);
     }
 
-    async findAllByOwner(ownerId: number): Promise<ApplicationModel[]> {
-        return this.model.query().where({ ownerId });
+    async findAllByOwnerId(ownerId: number): Promise<ApplicationModel[]> {
+        return this.model.query().where({ ownerId }).withGraphFetched('owner');
     }
 
     async findAll(): Promise<ApplicationModel[]> {
@@ -45,6 +45,11 @@ export class AppsRepository {
 
     async exists(ownerId: number, name: string): Promise<boolean> {
         const result = await this.model.query().where({ ownerId, name }).select(1).first();
+        return !!result;
+    }
+
+    async existsByOwnerId(ownerId: number): Promise<boolean> {
+        const result = await this.model.query().where({ ownerId }).select(1).first();
         return !!result;
     }
 }

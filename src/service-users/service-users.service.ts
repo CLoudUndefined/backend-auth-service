@@ -4,10 +4,16 @@ import * as bcrypt from 'bcrypt';
 import type { ServiceUserModel } from 'src/database/models/service-user.model';
 import { ServiceUserRefreshTokenModel } from 'src/database/models/service-user-refresh-token.model';
 import { ServiceUserRecoveryModel } from 'src/database/models/service-user-recovery.model';
+import { AppsRepository } from 'src/database/repositories/apps.repository';
+import { AppResponseDto } from 'src/apps/dto/app-response.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class ServiceUsersService {
-    constructor(private readonly serviceUsersRepository: ServiceUsersRepository) {}
+    constructor(
+        private readonly serviceUsersRepository: ServiceUsersRepository,
+        private readonly appsRepository: AppsRepository,
+    ) {}
 
     async create(email: string, plainPassword: string): Promise<ServiceUserModel> {
         const existingUser = await this.existsByEmail(email);
@@ -19,6 +25,33 @@ export class ServiceUsersService {
         const passwordHash = await bcrypt.hash(plainPassword, 10);
 
         return this.serviceUsersRepository.create(email, passwordHash, false);
+    }
+
+    async update(id: number, email: string): Promise<ServiceUserModel> {
+        const existingUser = await this.findByEmail(email);
+
+        if (existingUser && existingUser.id !== id) {
+            throw new ConflictException('Email already in use');
+        }
+
+        const updated = await this.serviceUsersRepository.update(id, { email });
+
+        if (!updated) {
+            throw new NotFoundException('User not found');
+        }
+
+        return updated;
+    }
+
+    async delete(id: number): Promise<void> {
+        await this.findByIdOrThrow(id);
+
+        const hasApps = await this.appsRepository.existsByOwnerId(id);
+        if (hasApps) {
+            throw new ConflictException('Cannot delete user with existing applications');
+        }
+
+        await this.serviceUsersRepository.delete(id);
     }
 
     async findByEmail(email: string): Promise<ServiceUserModel | undefined> {
@@ -47,6 +80,15 @@ export class ServiceUsersService {
         }
 
         return user;
+    }
+
+    async findAll(): Promise<ServiceUserModel[]> {
+        return this.serviceUsersRepository.findAll();
+    }
+
+    async findAllAppsByOwnerId(id: number): Promise<AppResponseDto[]> {
+        const apps = await this.appsRepository.findAllByOwnerId(id);
+        return plainToInstance(AppResponseDto, apps);
     }
 
     async createRefreshToken(userId: number, tokenHash: string, expiresAt: Date): Promise<void> {
