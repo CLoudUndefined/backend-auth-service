@@ -61,7 +61,7 @@ export class AuthService {
         const refreshToken = crypto.randomBytes(64).toString('hex');
         const refreshTokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
 
-        await this.serviceUsersService.saveRefreshToken(
+        await this.serviceUsersService.createRefreshToken(
             user.id,
             refreshTokenHash,
             new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
@@ -73,7 +73,7 @@ export class AuthService {
     async changePassword(userId: number, changePasswordDto: ChangePasswordRequestDto): Promise<void> {
         const user = await this.serviceUsersService.findByIdOrThrow(userId);
 
-        if (changePasswordDto.newPassword == changePasswordDto.oldPassword) {
+        if (changePasswordDto.newPassword === changePasswordDto.oldPassword) {
             throw new BadRequestException('New password must be different');
         }
 
@@ -102,6 +102,10 @@ export class AuthService {
 
         const user = await this.serviceUsersService.findByIdOrThrow(storedToken.userId);
 
+        if (user.isBanned) {
+            throw new ForbiddenException('User is banned');
+        }
+
         const accessToken = this.jwtService.sign(
             {
                 sub: user.id,
@@ -116,7 +120,7 @@ export class AuthService {
         const newRefreshToken = crypto.randomBytes(64).toString('hex');
         const newRefreshTokenHash = crypto.createHash('sha256').update(newRefreshToken).digest('hex');
 
-        await this.serviceUsersService.saveRefreshToken(
+        await this.serviceUsersService.createRefreshToken(
             user.id,
             newRefreshTokenHash,
             new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
@@ -128,7 +132,7 @@ export class AuthService {
     async addRecovery(userId: number, addRecoveryDto: AddRecoveryRequestDto): Promise<void> {
         const answerHash = await bcrypt.hash(addRecoveryDto.recoveryAnswer, 10);
 
-        await this.serviceUsersService.saveRecovery(userId, addRecoveryDto.recoveryQuestion, answerHash);
+        await this.serviceUsersService.createRecovery(userId, addRecoveryDto.recoveryQuestion, answerHash);
     }
 
     async listRecovery(userId: number): Promise<ListRecoveryResponseDto> {
@@ -141,7 +145,7 @@ export class AuthService {
         };
     }
 
-    async recoveryAsk(email: string): Promise<RecoveryAskResponseDto> {
+    async askRecoveryQuestions(email: string): Promise<RecoveryAskResponseDto> {
         const user = await this.serviceUsersService.findByEmail(email);
 
         if (!user) {
@@ -157,7 +161,7 @@ export class AuthService {
         };
     }
 
-    async recoveryReset(recoveryResetDto: RecoveryResetRequestDto): Promise<void> {
+    async resetPasswordByRecovery(recoveryResetDto: RecoveryResetRequestDto): Promise<void> {
         const user = await this.serviceUsersService.findByEmailOrThrow(recoveryResetDto.email);
 
         const recovery = await this.serviceUsersService.findRecoveryByIdOrThrow(recoveryResetDto.recoveryId);
@@ -185,7 +189,7 @@ export class AuthService {
         const recovery = await this.serviceUsersService.findRecoveryByIdOrThrow(recoveryId);
 
         if (recovery.userId !== user.id) {
-            throw new ForbiddenException('This recovery question not belong to this user');
+            throw new ForbiddenException('Recovery question not found');
         }
 
         await this.verifyCredentialOrThrow(updateRecoveryDto.currentPassword, user.passwordHash);
@@ -205,7 +209,7 @@ export class AuthService {
         const recovery = await this.serviceUsersService.findRecoveryByIdOrThrow(recoveryId);
 
         if (recovery.userId !== user.id) {
-            throw new ForbiddenException('This recovery question not belong to this user');
+            throw new ForbiddenException('Recovery question not found');
         }
 
         await this.verifyCredentialOrThrow(removeRecoveryDto.currentPassword, user.passwordHash);

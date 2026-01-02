@@ -10,7 +10,7 @@ export class ServiceUsersService {
     constructor(private readonly serviceUsersRepository: ServiceUsersRepository) {}
 
     async create(email: string, plainPassword: string): Promise<ServiceUserModel> {
-        const existingUser = await this.serviceUsersRepository.findByEmail(email);
+        const existingUser = await this.existsByEmail(email);
 
         if (existingUser) {
             throw new ConflictException('User with this email already exists');
@@ -49,7 +49,7 @@ export class ServiceUsersService {
         return user;
     }
 
-    async saveRefreshToken(userId: number, tokenHash: string, expiresAt: Date): Promise<void> {
+    async createRefreshToken(userId: number, tokenHash: string, expiresAt: Date): Promise<void> {
         await this.serviceUsersRepository.createRefreshToken(userId, tokenHash, expiresAt);
     }
 
@@ -69,7 +69,7 @@ export class ServiceUsersService {
         return this.serviceUsersRepository.findRefreshTokenByHash(tokenHash);
     }
 
-    async saveRecovery(userId: number, question: string, answerHash: string): Promise<void> {
+    async createRecovery(userId: number, question: string, answerHash: string): Promise<void> {
         await this.serviceUsersRepository.createRecovery(userId, question, answerHash);
     }
 
@@ -97,5 +97,9 @@ export class ServiceUsersService {
 
     async deleteRecovery(id: number): Promise<void> {
         await this.serviceUsersRepository.deleteRecovery(id);
+    }
+
+    async existsByEmail(email: string): Promise<boolean> {
+        return this.serviceUsersRepository.existsByEmail(email);
     }
 }

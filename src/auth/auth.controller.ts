@@ -181,12 +181,8 @@ export class AuthController {
         status: 400,
         description: 'Validation failed',
     })
-    @ApiResponse({
-        status: 404,
-        description: 'User with this email not found',
-    })
-    async recoveryAsk(@Body() recoveryAskDto: RecoveryAskRequestDto): Promise<ListRecoveryResponseDto> {
-        return this.authService.recoveryAsk(recoveryAskDto.email);
+    async askRecoveryQuestions(@Body() recoveryAskDto: RecoveryAskRequestDto): Promise<ListRecoveryResponseDto> {
+        return this.authService.askRecoveryQuestions(recoveryAskDto.email);
     }
 
     @Post('recovery/reset')
@@ -207,8 +203,8 @@ export class AuthController {
         status: 404,
         description: 'User not found',
     })
-    async recoveryReset(@Body() recoveryResetDto: RecoveryResetRequestDto): Promise<MessageResponseDto> {
-        await this.authService.recoveryReset(recoveryResetDto);
+    async resetPasswordByRecovery(@Body() recoveryResetDto: RecoveryResetRequestDto): Promise<MessageResponseDto> {
+        await this.authService.resetPasswordByRecovery(recoveryResetDto);
 
         return { message: 'Password reset successfully' };
     }
