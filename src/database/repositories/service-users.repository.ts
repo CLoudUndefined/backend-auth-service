@@ -86,7 +86,7 @@ export class ServiceUsersRepository {
     }
 
     async findRecoveryById(id: number): Promise<ServiceUserRecoveryModel | undefined> {
-        return this.recoveryModel.query().findOne({ id });
+        return this.recoveryModel.query().findById(id);
     }
 
     async updateRecovery(
@@ -100,7 +100,7 @@ export class ServiceUsersRepository {
         return this.recoveryModel.query().deleteById(id);
     }
 
-    async exists(email: string): Promise<boolean> {
+    async existsByEmail(email: string): Promise<boolean> {
         const result = await this.userModel.query().where({ email }).select(1).first();
         return !!result;
     }
