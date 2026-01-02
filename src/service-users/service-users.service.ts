@@ -18,15 +18,15 @@ export class ServiceUsersService {
 
         const passwordHash = await bcrypt.hash(plainPassword, 10);
 
-        return await this.serviceUsersRepository.create(email, passwordHash, false);
+        return this.serviceUsersRepository.create(email, passwordHash, false);
     }
 
     async findByEmail(email: string): Promise<ServiceUserModel | undefined> {
-        return await this.serviceUsersRepository.findByEmail(email);
+        return this.serviceUsersRepository.findByEmail(email);
     }
 
     async findById(id: number): Promise<ServiceUserModel | undefined> {
-        return await this.serviceUsersRepository.findById(id);
+        return this.serviceUsersRepository.findById(id);
     }
 
     async saveRefreshToken(userId: number, tokenHash: string, expiresAt: Date): Promise<void> {
@@ -46,7 +46,7 @@ export class ServiceUsersService {
     }
 
     async findRefreshTokenByHash(tokenHash: string): Promise<ServiceUserRefreshTokenModel | undefined> {
-        return await this.serviceUsersRepository.findRefreshTokenByHash(tokenHash);
+        return this.serviceUsersRepository.findRefreshTokenByHash(tokenHash);
     }
 
     async saveRecovery(userId: number, question: string, answerHash: string): Promise<void> {
@@ -54,11 +54,11 @@ export class ServiceUsersService {
     }
 
     async findRecoveriesByUserId(userId: number): Promise<ServiceUserRecoveryModel[]> {
-        return await this.serviceUsersRepository.findRecoveriesByUserId(userId);
+        return this.serviceUsersRepository.findRecoveriesByUserId(userId);
     }
 
     async findRecoveryById(id: number): Promise<ServiceUserRecoveryModel | undefined> {
-        return await this.serviceUsersRepository.findRecoveryById(id);
+        return this.serviceUsersRepository.findRecoveryById(id);
     }
 
     async updateRecovery(id: number, question: string, answerHash: string): Promise<void> {

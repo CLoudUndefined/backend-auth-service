@@ -42,7 +42,7 @@ export class AuthController {
         description: 'Email already exists',
     })
     async register(@Body() registerDto: RegisterRequestDto): Promise<ServiceUserResponseDto> {
-        return await this.authService.register(registerDto);
+        return this.authService.register(registerDto);
     }
 
     @Post('login')
@@ -64,7 +64,7 @@ export class AuthController {
         description: 'Invalid email or password',
     })
     async login(@Body() loginDto: LoginRequestDto): Promise<LoginResponseDto> {
-        return await this.authService.login(loginDto);
+        return this.authService.login(loginDto);
     }
 
     @Post('change-password')
@@ -115,7 +115,7 @@ export class AuthController {
         description: 'Invalid or expired Refresh Token',
     })
     async refreshToken(@Body() refreshTokenDto: RefreshTokenRequestDto): Promise<LoginResponseDto> {
-        return await this.authService.refreshToken(refreshTokenDto.refreshToken);
+        return this.authService.refreshToken(refreshTokenDto.refreshToken);
     }
 
     @Post('recovery')

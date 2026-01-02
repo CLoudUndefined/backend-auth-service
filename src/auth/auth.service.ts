@@ -29,7 +29,7 @@ export class AuthService {
     ) {}
 
     async register(registerDto: RegisterRequestDto): Promise<ServiceUserModel> {
-        return await this.serviceUsersService.create(registerDto.email, registerDto.password);
+        return this.serviceUsersService.create(registerDto.email, registerDto.password);
     }
 
     async login(loginDto: LoginRequestDto): Promise<LoginResponseDto> {
