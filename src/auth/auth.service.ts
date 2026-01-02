@@ -14,6 +14,12 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
 import { ChangePasswordRequestDto } from 'src/common/dto/auth/change-password-request.dto';
+import { AddRecoveryRequestDto } from 'src/common/dto/auth/add-recovery-request.dto';
+import { ListRecoveryResponseDto } from 'src/common/dto/auth/list-recovery-response.dto';
+import { RecoveryAskResponseDto } from 'src/common/dto/auth/recovery-ask-response.dto';
+import { RecoveryResetRequestDto } from 'src/common/dto/auth/recovery-reset-request.dto';
+import { UpdateRecoveryRequestDto } from 'src/common/dto/auth/update-recovery-request.dto';
+import { RemoveRecoveryRequestDto } from 'src/common/dto/auth/remove-recovery-request.dto';
 
 @Injectable()
 export class AuthService {
@@ -128,5 +134,129 @@ export class AuthService {
         );
 
         return { accessToken, refreshToken: newRefreshToken };
+    }
+
+    async addRecovery(userId: number, addRecoveryDto: AddRecoveryRequestDto): Promise<void> {
+        const answerHash = await bcrypt.hash(addRecoveryDto.recoveryAnswer, 10);
+
+        await this.serviceUsersService.saveRecovery(userId, addRecoveryDto.recoveryQuestion, answerHash);
+    }
+
+    async listRecovery(userId: number): Promise<ListRecoveryResponseDto> {
+        const recoveries = await this.serviceUsersService.findRecoveriesByUserId(userId);
+
+        return {
+            questions: recoveries.map((recovery) => {
+                return { id: recovery.id, question: recovery.question };
+            }),
+        };
+    }
+
+    async recoveryAsk(email: string): Promise<RecoveryAskResponseDto> {
+        const user = await this.serviceUsersService.findByEmail(email);
+
+        if (!user) {
+            return { questions: [] };
+        }
+
+        const recoveries = await this.serviceUsersService.findRecoveriesByUserId(user.id);
+
+        return {
+            questions: recoveries.map((recovery) => {
+                return { id: recovery.id, question: recovery.question };
+            }),
+        };
+    }
+
+    async recoveryReset(recoveryResetDto: RecoveryResetRequestDto): Promise<void> {
+        const user = await this.serviceUsersService.findByEmail(recoveryResetDto.email);
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        const recovery = await this.serviceUsersService.findRecoveryById(recoveryResetDto.recoveryId);
+
+        if (!recovery) {
+            throw new NotFoundException('Recovery question not found');
+        }
+
+        if (recovery.userId !== user.id) {
+            throw new ForbiddenException('This recovery question does not belong to this user');
+        }
+
+        const isAnswerCorrect = await bcrypt.compare(recoveryResetDto.answer, recovery.answerHash);
+
+        if (!isAnswerCorrect) {
+            throw new UnauthorizedException('Wrong answer to the question');
+        }
+
+        const newPasswordHash = await bcrypt.hash(recoveryResetDto.newPassword, 10);
+
+        await this.serviceUsersService.updatePassword(user.id, newPasswordHash);
+
+        await this.serviceUsersService.deleteAllRefreshTokens(user.id);
+    }
+
+    async updateRecovery(
+        userId: number,
+        recoveryId: number,
+        updateRecoveryDto: UpdateRecoveryRequestDto,
+    ): Promise<void> {
+        const user = await this.serviceUsersService.findById(userId);
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        const recovery = await this.serviceUsersService.findRecoveryById(recoveryId);
+
+        if (!recovery) {
+            throw new NotFoundException('Recovery question not found');
+        }
+
+        if (recovery.userId !== user.id) {
+            throw new ForbiddenException('This recovery question not belong to this user');
+        }
+
+        const isPasswordValid = await bcrypt.compare(updateRecoveryDto.currentPassword, user.passwordHash);
+
+        if (!isPasswordValid) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
+        const newAnswerHash = await bcrypt.hash(updateRecoveryDto.newAnswer, 10);
+
+        await this.serviceUsersService.updateRecovery(recoveryId, updateRecoveryDto.newQuestion, newAnswerHash);
+    }
+
+    async removeRecovery(
+        userId: number,
+        recoveryId: number,
+        removeRecoveryDto: RemoveRecoveryRequestDto,
+    ): Promise<void> {
+        const user = await this.serviceUsersService.findById(userId);
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        const recovery = await this.serviceUsersService.findRecoveryById(recoveryId);
+
+        if (!recovery) {
+            throw new NotFoundException('Recovery question not found');
+        }
+
+        if (recovery.userId !== user.id) {
+            throw new ForbiddenException('This recovery question not belong to this user');
+        }
+
+        const isPasswordValid = await bcrypt.compare(removeRecoveryDto.currentPassword, user.passwordHash);
+
+        if (!isPasswordValid) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
+        await this.serviceUsersService.deleteRecovery(recoveryId);
     }
 }

@@ -28,6 +28,7 @@ import { AuthService } from './auth.service';
 import { ServiceUser } from 'src/common/decorators/service-user.decorator';
 import { ServiceUserModel } from 'src/database/models/service-user.model';
 import { JwtServiceAuthGuard } from './guards/jwt-service-auth.guard';
+import { RemoveRecoveryRequestDto } from 'src/common/dto/auth/remove-recovery-request.dto';
 
 @ApiTags('Service (User Auth)')
 @Controller('auth')
@@ -130,6 +131,7 @@ export class AuthController {
     }
 
     @Post('recovery')
+    @UseGuards(JwtServiceAuthGuard)
     @ApiBearerAuth('JWT-auth-service')
     @ApiOperation({
         summary: 'Add recovery question',
@@ -148,11 +150,17 @@ export class AuthController {
         status: 401,
         description: 'Unauthorized',
     })
-    async addRecovery(@Body() addRecoveryDto: AddRecoveryRequestDto): Promise<MessageResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+    async addRecovery(
+        @ServiceUser() user: ServiceUserModel,
+        @Body() addRecoveryDto: AddRecoveryRequestDto,
+    ): Promise<MessageResponseDto> {
+        await this.authService.addRecovery(user.id, addRecoveryDto);
+
+        return { message: 'Recovery question added successfully' };
     }
 
     @Get('recovery')
+    @UseGuards(JwtServiceAuthGuard)
     @ApiBearerAuth('JWT-auth-service')
     @ApiOperation({
         summary: 'List recovery questions',
@@ -167,8 +175,8 @@ export class AuthController {
         status: 401,
         description: 'Unauthorized',
     })
-    async listRecovery(): Promise<ListRecoveryResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+    async listRecovery(@ServiceUser() user: ServiceUserModel): Promise<ListRecoveryResponseDto> {
+        return this.authService.listRecovery(user.id);
     }
 
     @Post('recovery/ask')
@@ -190,7 +198,7 @@ export class AuthController {
         description: 'User with this email not found',
     })
     async recoveryAsk(@Body() recoveryAskDto: RecoveryAskRequestDto): Promise<RecoveryAskResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        return this.authService.recoveryAsk(recoveryAskDto.email);
     }
 
     @Post('recovery/reset')
@@ -212,10 +220,13 @@ export class AuthController {
         description: 'User not found',
     })
     async recoveryReset(@Body() recoveryResetDto: RecoveryResetRequestDto): Promise<MessageResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        await this.authService.recoveryReset(recoveryResetDto);
+
+        return { message: 'Password reset successfully' };
     }
 
     @Put('recovery/:recoveryId')
+    @UseGuards(JwtServiceAuthGuard)
     @ApiBearerAuth('JWT-auth-service')
     @ApiOperation({
         summary: 'Update recovery question',
@@ -243,13 +254,17 @@ export class AuthController {
         description: 'Recovery question not found',
     })
     async updateRecovery(
+        @ServiceUser() user: ServiceUserModel,
         @Param('recoveryId', ParseIntPipe) recoveryId: number,
-        @Body() updateDto: UpdateRecoveryRequestDto,
+        @Body() updateRecoveryDto: UpdateRecoveryRequestDto,
     ): Promise<MessageResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        await this.authService.updateRecovery(user.id, recoveryId, updateRecoveryDto);
+
+        return { message: 'Recovery question updated successfully' };
     }
 
     @Delete('recovery/:recoveryId')
+    @UseGuards(JwtServiceAuthGuard)
     @ApiBearerAuth('JWT-auth-service')
     @ApiOperation({
         summary: 'Remove recovery question',
@@ -272,7 +287,13 @@ export class AuthController {
         status: 404,
         description: 'Recovery question not found',
     })
-    async removeRecovery(@Param('recoveryId', ParseIntPipe) recoveryId: number): Promise<MessageResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+    async removeRecovery(
+        @ServiceUser() user: ServiceUserModel,
+        @Param('recoveryId', ParseIntPipe) recoveryId: number,
+        @Body() removeRecoveryDto: RemoveRecoveryRequestDto,
+    ): Promise<MessageResponseDto> {
+        await this.authService.removeRecovery(user.id, recoveryId, removeRecoveryDto);
+
+        return { message: 'Recovery question removed successfully' };
     }
 }

@@ -85,6 +85,10 @@ export class ServiceUsersRepository {
         return this.recoveryModel.query().where({ userId });
     }
 
+    async findRecoveryById(id: number): Promise<ServiceUserRecoveryModel | undefined> {
+        return this.recoveryModel.query().findOne({ id });
+    }
+
     async updateRecovery(
         id: number,
         data: Partial<Pick<ServiceUserRecoveryModel, 'question' | 'answerHash'>>,
