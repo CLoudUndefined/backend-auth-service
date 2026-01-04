@@ -8,6 +8,7 @@ import { AppRolesModule } from './app-roles/app-roles.module';
 import { AppPermissionsModule } from './app-permissions/app-permissions.module';
 import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
+import { EncryptionModule } from './encryption/encryption.module';
 import * as Joi from 'joi';
 
 @Module({
@@ -21,9 +22,10 @@ import * as Joi from 'joi';
                 POSTGRES_USER: Joi.string().required(),
                 POSTGRES_PASSWORD: Joi.string().required(),
                 POSTGRES_DB: Joi.string().default('backend_auth_db'),
-                JWT_SECRET: Joi.string().required(),
+                JWT_SECRET: Joi.string().min(64).required(),
                 JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.string().required(),
                 JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.string().required(),
+                APP_ENCRYPTION_KEY: Joi.string().length(64).hex().required(),
             }),
         }),
         ServiceUsersModule,
@@ -34,6 +36,7 @@ import * as Joi from 'joi';
         AppRolesModule,
         AppPermissionsModule,
         DatabaseModule,
+        EncryptionModule,
     ],
 })
 export class AppModule {}
