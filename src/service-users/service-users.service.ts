@@ -88,7 +88,16 @@ export class ServiceUsersService {
 
     async findAllAppsByOwnerId(id: number): Promise<AppResponseDto[]> {
         const apps = await this.appsRepository.findAllByOwnerId(id);
-        return plainToInstance(AppResponseDto, apps);
+        return apps.map((app) => {
+            return {
+                id: app.id,
+                name: app.name,
+                description: app.description,
+                owner: app.owner,
+                createdAt: app.createdAt,
+                updatedAt: app.updatedAt,
+            };
+        });
     }
 
     async createRefreshToken(userId: number, tokenHash: string, expiresAt: Date): Promise<void> {
