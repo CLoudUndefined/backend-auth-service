@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { ModelClass } from 'objection';
 import { ApplicationModel } from 'src/database/models/application.model';
+import { ApplicationWithOwnerModel } from 'src/types/application.types';
 
 @Injectable()
 export class AppsRepository {
@@ -24,8 +25,10 @@ export class AppsRepository {
         return this.model.query().findById(id);
     }
 
-    async findAllByOwnerId(ownerId: number): Promise<ApplicationModel[]> {
-        return this.model.query().where({ ownerId }).withGraphFetched('owner');
+    async findAllByOwnerId(ownerId: number): Promise<ApplicationWithOwnerModel[]> {
+        const apps = await this.model.query().where({ ownerId }).withGraphFetched('owner');
+
+        return apps as ApplicationWithOwnerModel[];
     }
 
     async findAll(): Promise<ApplicationModel[]> {

@@ -18,7 +18,7 @@ export class ApplicationModel extends BaseModelWithUpdate {
 
     description?: string;
 
-    owner: ServiceUserModel;
+    owner?: ServiceUserModel;
     users?: ApplicationUserModel[];
 
     static get relationMappings() {
