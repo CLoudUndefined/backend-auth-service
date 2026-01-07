@@ -12,34 +12,46 @@ export class AppsRepository {
         name: string,
         encryptedSecret: string,
         description?: string,
-    ): Promise<ApplicationModel> {
-        return this.model.query().insert({
-            ownerId,
-            name,
-            encryptedSecret,
-            description: description,
-        });
+    ): Promise<ApplicationWithOwnerModel> {
+        const app = await this.model
+            .query()
+            .insert({
+                ownerId,
+                name,
+                encryptedSecret,
+                description: description,
+            })
+            .withGraphFetched('owner');
+
+        return app as ApplicationWithOwnerModel;
     }
 
     async findById(id: number): Promise<ApplicationModel | undefined> {
         return this.model.query().findById(id);
     }
 
+    async findWithOwnerById(id: number): Promise<ApplicationWithOwnerModel | undefined> {
+        const app = await this.model.query().findById(id).withGraphFetched('owner');
+        return app ? (app as ApplicationWithOwnerModel) : undefined;
+    }
+
     async findAllByOwnerId(ownerId: number): Promise<ApplicationWithOwnerModel[]> {
         const apps = await this.model.query().where({ ownerId }).withGraphFetched('owner');
-
         return apps as ApplicationWithOwnerModel[];
     }
 
-    async findAll(): Promise<ApplicationModel[]> {
-        return this.model.query();
+    async findAll(): Promise<ApplicationWithOwnerModel[]> {
+        const apps = await this.model.query().withGraphFetched('owner');
+        return apps as ApplicationWithOwnerModel[];
     }
 
     async update(
         id: number,
         data: Partial<Pick<ApplicationModel, 'name' | 'description'>>,
-    ): Promise<ApplicationModel | undefined> {
-        return this.model.query().patchAndFetchById(id, data);
+    ): Promise<ApplicationWithOwnerModel | undefined> {
+        const app = await this.model.query().patchAndFetchById(id, data).withGraphFetched('owner');
+
+        return app ? (app as ApplicationWithOwnerModel) : undefined;
     }
 
     async delete(id: number): Promise<number> {
