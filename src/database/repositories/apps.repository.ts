@@ -11,7 +11,7 @@ export class AppsRepository {
         ownerId: number,
         name: string,
         encryptedSecret: string,
-        description?: string,
+        description?: string | null,
     ): Promise<ApplicationWithOwnerModel> {
         const app = this.model
             .query()
