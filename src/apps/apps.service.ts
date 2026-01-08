@@ -96,7 +96,7 @@ export class AppsService {
         await this.appsRepository.delete(appId);
     }
 
-    async regenerateSecret(userId: number, isGod: boolean, appId: number): Promise<{ secret: string }> {
+    async regenerateSecret(userId: number, isGod: boolean, appId: number): Promise<void> {
         const app = await this.appsRepository.findByIdWithOwner(appId);
 
         if (!app) {
@@ -115,7 +115,5 @@ export class AppsService {
         if (!updatedApp) {
             throw new NotFoundException('Application not found');
         }
-
-        return { secret };
     }
 }

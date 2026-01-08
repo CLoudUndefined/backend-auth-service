@@ -18,7 +18,7 @@ export class ApplicationModel extends BaseModelWithUpdate {
     @Exclude()
     encryptedSecret: string;
 
-    description?: string;
+    description: string | null;
 
     owner?: ServiceUserModel;
     users?: ApplicationUserModel[];
