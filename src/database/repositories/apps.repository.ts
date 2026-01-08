@@ -7,7 +7,7 @@ import { ApplicationWithOwnerModel } from 'src/types/application.types';
 export class AppsRepository {
     constructor(@Inject(ApplicationModel) private readonly model: ModelClass<ApplicationModel>) {}
 
-    async create(
+    async createWithOwner(
         ownerId: number,
         name: string,
         encryptedSecret: string,
@@ -30,22 +30,22 @@ export class AppsRepository {
         return this.model.query().findById(id);
     }
 
-    async findWithOwnerById(id: number): Promise<ApplicationWithOwnerModel | undefined> {
+    async findByIdWithOwner(id: number): Promise<ApplicationWithOwnerModel | undefined> {
         const app = this.model.query().findById(id).withGraphFetched('owner');
         return app.castTo<ApplicationWithOwnerModel | undefined>();
     }
 
-    async findAllByOwnerId(ownerId: number): Promise<ApplicationWithOwnerModel[]> {
+    async findAllByOwnerIdWithOwner(ownerId: number): Promise<ApplicationWithOwnerModel[]> {
         const apps = this.model.query().where({ ownerId }).withGraphFetched('owner');
         return apps.castTo<ApplicationWithOwnerModel[]>();
     }
 
-    async findAll(): Promise<ApplicationWithOwnerModel[]> {
+    async findAllWithOwner(): Promise<ApplicationWithOwnerModel[]> {
         const apps = this.model.query().withGraphFetched('owner');
         return apps.castTo<ApplicationWithOwnerModel[]>();
     }
 
-    async update(
+    async updateWithOwner(
         id: number,
         data: Partial<Pick<ApplicationModel, 'name' | 'description'>>,
     ): Promise<ApplicationWithOwnerModel | undefined> {
