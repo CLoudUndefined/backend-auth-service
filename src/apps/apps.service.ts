@@ -29,8 +29,12 @@ export class AppsService {
         const secret = crypto.randomBytes(64).toString('hex');
         const encryptedSecret = this.encryptionService.encrypt(secret);
 
-        const description = createAppDto.description ?? '';
-        const app = await this.appsRepository.createWithOwner(ownerId, createAppDto.name, encryptedSecret, description);
+        const app = await this.appsRepository.createWithOwner(
+            ownerId,
+            createAppDto.name,
+            encryptedSecret,
+            createAppDto.description,
+        );
 
         return app;
     }
