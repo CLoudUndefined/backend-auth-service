@@ -19,6 +19,10 @@ export class AppsService {
         private readonly encryptionService: EncryptionService,
     ) {}
 
+    private generateEncryptedSecret(): string {
+        return this.encryptionService.encrypt(crypto.randomBytes(64).toString('hex'));
+    }
+
     async create(ownerId: number, createAppDto: CreateAppRequestDto): Promise<ApplicationWithOwnerModel> {
         const isAppExist = await this.appsRepository.exists(ownerId, createAppDto.name);
 
@@ -26,13 +30,10 @@ export class AppsService {
             throw new ConflictException('Application with this name already exists');
         }
 
-        const secret = crypto.randomBytes(64).toString('hex');
-        const encryptedSecret = this.encryptionService.encrypt(secret);
-
         const app = await this.appsRepository.createWithOwner(
             ownerId,
             createAppDto.name,
-            encryptedSecret,
+            this.generateEncryptedSecret(),
             createAppDto.description,
         );
 
@@ -63,15 +64,7 @@ export class AppsService {
         appId: number,
         updateApp: UpdateAppRequestDto,
     ): Promise<ApplicationWithOwnerModel> {
-        const app = await this.appsRepository.findByIdWithOwner(appId);
-
-        if (!app) {
-            throw new NotFoundException('Application not found');
-        }
-
-        if (!isGod && app.ownerId !== userId) {
-            throw new ForbiddenException('Can only access own application or required god-mode');
-        }
+        await this.findAppById(userId, isGod, appId);
 
         if (!updateApp.description && !updateApp.name) {
             throw new BadRequestException('At least one field (name or description) must be provided');
@@ -87,34 +80,16 @@ export class AppsService {
     }
 
     async delete(userId: number, isGod: boolean, appId: number): Promise<void> {
-        const app = await this.appsRepository.findByIdWithOwner(appId);
-
-        if (!app) {
-            throw new NotFoundException('Application not found');
-        }
-
-        if (!isGod && app.ownerId !== userId) {
-            throw new ForbiddenException('Can only access own application or required god-mode');
-        }
-
+        await this.findAppById(userId, isGod, appId);
         await this.appsRepository.delete(appId);
     }
 
     async regenerateSecret(userId: number, isGod: boolean, appId: number): Promise<void> {
-        const app = await this.appsRepository.findByIdWithOwner(appId);
+        await this.findAppById(userId, isGod, appId);
 
-        if (!app) {
-            throw new NotFoundException('Application not found');
-        }
-
-        if (!isGod && app.ownerId !== userId) {
-            throw new ForbiddenException('Can only access own application or required god-mode');
-        }
-
-        const secret = crypto.randomBytes(64).toString('hex');
-        const encryptedSecret = this.encryptionService.encrypt(secret);
-
-        const updatedApp = await this.appsRepository.updateWithOwner(appId, { encryptedSecret });
+        const updatedApp = await this.appsRepository.updateWithOwner(appId, {
+            encryptedSecret: this.generateEncryptedSecret(),
+        });
 
         if (!updatedApp) {
             throw new NotFoundException('Application not found');
