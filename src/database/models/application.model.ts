@@ -10,8 +10,10 @@ export class ApplicationModel extends BaseModelWithUpdate {
         return 'applications';
     }
 
-    ownerId: number;
     name: string;
+
+    @Exclude()
+    ownerId: number;
 
     @Exclude()
     encryptedSecret: string;
