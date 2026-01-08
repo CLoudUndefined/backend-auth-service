@@ -4,13 +4,11 @@ import { AppResponseDto } from './dto/app-response.dto';
 import { UpdateAppRequestDto } from './dto/update-app-request.dto';
 import { MessageResponseDto } from 'src/common/api/dto/message-response.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreateAppResponseDto } from './dto/create-app-response.dto';
 import { JwtServiceAuthGuard } from 'src/auth/guards/jwt-service-auth.guard';
 import { AppsService } from './apps.service';
 import { ServiceUser } from 'src/common/decorators/service-user.decorator';
 import { ServiceUserModel } from 'src/database/models/service-user.model';
 import { IsGodGuard } from 'src/auth/guards/is-god.guard';
-import { IsSelfOrGodGuard } from 'src/auth/guards/is-self-or-god.guard';
 
 @ApiTags('Service (Apps Management)')
 @ApiBearerAuth('JWT-auth-service')
@@ -40,7 +38,7 @@ export class ServiceAppsController {
     async createApp(
         @ServiceUser() user: ServiceUserModel,
         @Body() createAppDto: CreateAppRequestDto,
-    ): Promise<CreateAppResponseDto> {
+    ): Promise<AppResponseDto> {
         return this.appsService.create(user.id, createAppDto);
     }
 
