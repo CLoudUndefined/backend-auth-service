@@ -95,4 +95,27 @@ export class AppsService {
 
         await this.appsRepository.delete(appId);
     }
+
+    async regenerateSecret(userId: number, isGod: boolean, appId: number): Promise<{ secret: string }> {
+        const app = await this.appsRepository.findByIdWithOwner(appId);
+
+        if (!app) {
+            throw new NotFoundException('Application not found');
+        }
+
+        if (!isGod && app.ownerId !== userId) {
+            throw new ForbiddenException('Can only access own application or required god-mode');
+        }
+
+        const secret = crypto.randomBytes(64).toString('hex');
+        const encryptedSecret = this.encryptionService.encrypt(secret);
+
+        const updatedApp = await this.appsRepository.updateWithOwner(appId, { encryptedSecret });
+
+        if (!updatedApp) {
+            throw new NotFoundException('Application not found');
+        }
+
+        return { secret };
+    }
 }

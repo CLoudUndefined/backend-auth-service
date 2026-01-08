@@ -53,6 +53,6 @@ export class ServiceUsersService {
     }
 
     async findAllAppsByOwnerId(id: number): Promise<ApplicationWithOwnerModel[]> {
-        return this.appsRepository.findAllByOwnerId(id);
+        return this.appsRepository.findAllByOwnerIdWithOwner(id);
     }
 }

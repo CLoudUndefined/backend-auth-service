@@ -47,7 +47,7 @@ export class AppsRepository {
 
     async updateWithOwner(
         id: number,
-        data: Partial<Pick<ApplicationModel, 'name' | 'description'>>,
+        data: Partial<Pick<ApplicationModel, 'name' | 'description' | 'encryptedSecret'>>,
     ): Promise<ApplicationWithOwnerModel | undefined> {
         const app = this.model.query().patchAndFetchById(id, data).withGraphFetched('owner');
         return app.castTo<ApplicationWithOwnerModel | undefined>();

@@ -10,6 +10,7 @@ import { AppsService } from './apps.service';
 import { ServiceUser } from 'src/common/decorators/service-user.decorator';
 import { ServiceUserModel } from 'src/database/models/service-user.model';
 import { IsGodGuard } from 'src/auth/guards/is-god.guard';
+import { IsSelfOrGodGuard } from 'src/auth/guards/is-self-or-god.guard';
 
 @ApiTags('Service (Apps Management)')
 @ApiBearerAuth('JWT-auth-service')
@@ -165,7 +166,41 @@ export class ServiceAppsController {
         @Param('id', ParseIntPipe) id: number,
     ): Promise<MessageResponseDto> {
         await this.appsService.delete(user.id, user.isGod, id);
-
         return { message: 'Application deleted successfully' };
+    }
+
+    @Post(':id/regenerate')
+    @UseGuards(JwtServiceAuthGuard)
+    @ApiOperation({
+        summary: 'Regenerate application secret',
+        description: 'Generates a new JWT secret for the application. ALL existing tokens will be invalidated.',
+    })
+    @ApiParam({
+        name: 'id',
+        example: 1,
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'App secret regenerated successfully',
+        type: MessageResponseDto,
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'Unauthorized',
+    })
+    @ApiResponse({
+        status: 403,
+        description: 'Forbidden - only app owner or god',
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'App not found',
+    })
+    async regenerateSecret(
+        @ServiceUser() user: ServiceUserModel,
+        @Param('id', ParseIntPipe) id: number,
+    ): Promise<MessageResponseDto> {
+        await this.appsService.regenerateSecret(user.id, user.isGod, id);
+        return { message: 'App secret regenerated successfully' };
     }
 }
