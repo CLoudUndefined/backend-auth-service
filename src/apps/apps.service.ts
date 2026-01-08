@@ -30,17 +30,17 @@ export class AppsService {
         const encryptedSecret = this.encryptionService.encrypt(secret);
 
         const description = createAppDto.description ?? '';
-        const app = await this.appsRepository.create(ownerId, createAppDto.name, encryptedSecret, description);
+        const app = await this.appsRepository.createWithOwner(ownerId, createAppDto.name, encryptedSecret, description);
 
         return app;
     }
 
     async findAllApps(): Promise<ApplicationWithOwnerModel[]> {
-        return this.appsRepository.findAll();
+        return this.appsRepository.findAllWithOwner();
     }
 
     async findAppById(userId: number, isGod: boolean, appId: number): Promise<ApplicationWithOwnerModel> {
-        const app = await this.appsRepository.findWithOwnerById(appId);
+        const app = await this.appsRepository.findByIdWithOwner(appId);
 
         if (!app) {
             throw new NotFoundException('Application not found');
@@ -59,7 +59,7 @@ export class AppsService {
         appId: number,
         updateApp: UpdateAppRequestDto,
     ): Promise<ApplicationWithOwnerModel> {
-        const app = await this.appsRepository.findWithOwnerById(appId);
+        const app = await this.appsRepository.findByIdWithOwner(appId);
 
         if (!app) {
             throw new NotFoundException('Application not found');
@@ -73,7 +73,7 @@ export class AppsService {
             throw new BadRequestException('At least one field (name or description) must be provided');
         }
 
-        const updatedApp = await this.appsRepository.update(appId, updateApp);
+        const updatedApp = await this.appsRepository.updateWithOwner(appId, updateApp);
 
         if (!updatedApp) {
             throw new NotFoundException('Application not found');
@@ -83,7 +83,7 @@ export class AppsService {
     }
 
     async delete(userId: number, isGod: boolean, appId: number): Promise<void> {
-        const app = await this.appsRepository.findWithOwnerById(appId);
+        const app = await this.appsRepository.findByIdWithOwner(appId);
 
         if (!app) {
             throw new NotFoundException('Application not found');
