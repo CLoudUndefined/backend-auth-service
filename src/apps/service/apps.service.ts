@@ -9,6 +9,7 @@ import { AppsRepository } from 'src/database/repositories/apps.repository';
 import { EncryptionService } from 'src/encryption/encryption.service';
 import * as crypto from 'crypto';
 import { ApplicationWithOwnerModel } from 'src/types/application.types';
+import { ApplicationModel } from 'src/database/models/application.model';
 
 @Injectable()
 export class AppsService {
@@ -54,6 +55,10 @@ export class AppsService {
         }
 
         return app;
+    }
+
+    async findAppByIdUnsafe(appId: number): Promise<ApplicationModel | undefined> {
+        return this.appsRepository.findById(appId);
     }
 
     async update(
