@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { ServiceUsersRepository } from 'src/database/repositories/service-users.repository';
 import * as bcrypt from 'bcrypt';
 import type { ServiceUserModel } from 'src/database/models/service-user.model';
@@ -13,7 +13,7 @@ export class ServiceUsersService {
     ) {}
 
     async create(email: string, plainPassword: string): Promise<ServiceUserModel> {
-        const existingUser = await this.existsByEmail(email);
+        const existingUser = await this.serviceUsersRepository.existsByEmail(email);
 
         if (existingUser) {
             throw new ConflictException('User with this email already exists');
@@ -25,7 +25,7 @@ export class ServiceUsersService {
     }
 
     async update(id: number, email: string): Promise<ServiceUserModel> {
-        const existingUser = await this.findByEmail(email);
+        const existingUser = await this.serviceUsersRepository.findByEmail(email);
 
         if (existingUser && existingUser.id !== id) {
             throw new ConflictException('Email already in use');
@@ -51,19 +51,11 @@ export class ServiceUsersService {
         await this.serviceUsersRepository.delete(id);
     }
 
-    async findByEmail(email: string): Promise<ServiceUserModel | undefined> {
-        return this.serviceUsersRepository.findByEmail(email);
-    }
-
-    async findById(id: number): Promise<ServiceUserModel | undefined> {
-        return this.serviceUsersRepository.findById(id);
-    }
-
-    async findByIdOrThrow(id: number, message: string = 'User not found'): Promise<ServiceUserModel> {
-        const user = await this.findById(id);
+    async findByIdOrThrow(id: number): Promise<ServiceUserModel> {
+        const user = await this.serviceUsersRepository.findById(id);
 
         if (!user) {
-            throw new UnauthorizedException(message);
+            throw new NotFoundException('User not found');
         }
 
         return user;
@@ -85,9 +77,5 @@ export class ServiceUsersService {
                 updatedAt: app.updatedAt,
             };
         });
-    }
-
-    async existsByEmail(email: string): Promise<boolean> {
-        return this.serviceUsersRepository.existsByEmail(email);
     }
 }
