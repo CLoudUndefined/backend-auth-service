@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { ServiceUsersModule } from 'src/service-users/service-users.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
@@ -10,7 +9,6 @@ import { StringValue } from 'ms';
 
 @Module({
     imports: [
-        ServiceUsersModule,
         PassportModule.register({ defaultStrategy: 'jwt-service' }),
         JwtModule.registerAsync({
             imports: [ConfigModule],
