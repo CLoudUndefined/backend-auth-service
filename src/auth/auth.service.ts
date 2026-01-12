@@ -1,5 +1,6 @@
 import {
     BadRequestException,
+    ConflictException,
     ForbiddenException,
     Injectable,
     NotFoundException,
@@ -22,11 +23,12 @@ import { UpdateRecoveryRequestDto } from 'src/common/dto/auth/update-recovery-re
 import { RemoveRecoveryRequestDto } from 'src/common/dto/auth/remove-recovery-request.dto';
 import { ConfigService } from '@nestjs/config';
 import ms, { StringValue } from 'ms';
+import { ServiceUsersRepository } from 'src/database/repositories/service-users.repository';
 
 @Injectable()
 export class AuthService {
     constructor(
-        private readonly serviceUsersService: ServiceUsersService,
+        private readonly serviceUsersRepository: ServiceUsersRepository,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
     ) {}
@@ -40,11 +42,23 @@ export class AuthService {
     }
 
     async register(registerDto: RegisterRequestDto): Promise<ServiceUserModel> {
-        return this.serviceUsersService.create(registerDto.email, registerDto.password);
+        const existingUser = await this.serviceUsersRepository.existsByEmail(registerDto.email);
+
+        if (existingUser) {
+            throw new ConflictException('User with this email already exists');
+        }
+
+        const passwordHash = await bcrypt.hash(registerDto.password, 10);
+
+        return this.serviceUsersRepository.create(registerDto.email, passwordHash, false);
     }
 
     async login(loginDto: LoginRequestDto): Promise<LoginResponseDto> {
-        const user = await this.serviceUsersService.findByEmailOrThrow(loginDto.email, 'Invalid credentials');
+        const user = await this.serviceUsersRepository.findByEmail(loginDto.email);
+
+        if (!user) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
 
         if (user.isBanned) {
             throw new ForbiddenException('User is banned');
@@ -61,7 +75,7 @@ export class AuthService {
         const refreshToken = crypto.randomBytes(64).toString('hex');
         const refreshTokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
 
-        await this.serviceUsersService.createRefreshToken(
+        await this.serviceUsersRepository.createRefreshToken(
             user.id,
             refreshTokenHash,
             new Date(Date.now() + ms(this.configService.getOrThrow<StringValue>('JWT_REFRESH_TOKEN_EXPIRES_IN', '7d'))),
@@ -71,7 +85,11 @@ export class AuthService {
     }
 
     async changePassword(userId: number, changePasswordDto: ChangePasswordRequestDto): Promise<void> {
-        const user = await this.serviceUsersService.findByIdOrThrow(userId, 'Invalid credentials');
+        const user = await this.serviceUsersRepository.findById(userId);
+
+        if (!user) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
 
         if (changePasswordDto.newPassword === changePasswordDto.oldPassword) {
             throw new BadRequestException('New password must be different');
@@ -81,26 +99,30 @@ export class AuthService {
 
         const newPasswordHash = await bcrypt.hash(changePasswordDto.newPassword, 10);
 
-        await this.serviceUsersService.updatePassword(user.id, newPasswordHash);
+        await this.serviceUsersRepository.update(userId, { passwordHash: newPasswordHash });
 
-        await this.serviceUsersService.deleteAllRefreshTokens(userId);
+        await this.serviceUsersRepository.deleteAllUserRefreshTokens(userId);
     }
 
     async refreshToken(refreshToken: string): Promise<LoginResponseDto> {
         const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
 
-        const storedToken = await this.serviceUsersService.findRefreshTokenByHash(tokenHash);
+        const storedToken = await this.serviceUsersRepository.findRefreshTokenByHash(tokenHash);
 
         if (!storedToken) {
             throw new NotFoundException('Invalid refresh token');
         }
 
         if (new Date() > storedToken.expiresAt) {
-            await this.serviceUsersService.deleteRefreshTokenById(storedToken.id);
+            await this.serviceUsersRepository.deleteRefreshToken(storedToken.id);
             throw new UnauthorizedException('Refresh token expired');
         }
 
-        const user = await this.serviceUsersService.findByIdOrThrow(storedToken.userId, 'Invalid credentials');
+        const user = await this.serviceUsersRepository.findById(storedToken.userId);
+
+        if (!user) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
 
         if (user.isBanned) {
             throw new ForbiddenException('User is banned');
@@ -112,12 +134,12 @@ export class AuthService {
             isGod: user.isGod,
         });
 
-        await this.serviceUsersService.deleteRefreshTokenById(storedToken.id);
+        await this.serviceUsersRepository.deleteRefreshToken(storedToken.id);
 
         const newRefreshToken = crypto.randomBytes(64).toString('hex');
         const newRefreshTokenHash = crypto.createHash('sha256').update(newRefreshToken).digest('hex');
 
-        await this.serviceUsersService.createRefreshToken(
+        await this.serviceUsersRepository.createRefreshToken(
             user.id,
             newRefreshTokenHash,
             new Date(Date.now() + ms(this.configService.getOrThrow<StringValue>('JWT_REFRESH_TOKEN_EXPIRES_IN', '7d'))),
@@ -129,11 +151,11 @@ export class AuthService {
     async addRecovery(userId: number, addRecoveryDto: AddRecoveryRequestDto): Promise<void> {
         const answerHash = await bcrypt.hash(addRecoveryDto.recoveryAnswer, 10);
 
-        await this.serviceUsersService.createRecovery(userId, addRecoveryDto.recoveryQuestion, answerHash);
+        await this.serviceUsersRepository.createRecovery(userId, addRecoveryDto.recoveryQuestion, answerHash);
     }
 
     async listRecovery(userId: number): Promise<ListRecoveryResponseDto> {
-        const recoveries = await this.serviceUsersService.findRecoveriesByUserId(userId);
+        const recoveries = await this.serviceUsersRepository.findRecoveriesByUserId(userId);
 
         return {
             questions: recoveries.map((recovery) => {
@@ -143,13 +165,13 @@ export class AuthService {
     }
 
     async askRecoveryQuestions(email: string): Promise<RecoveryAskResponseDto> {
-        const user = await this.serviceUsersService.findByEmail(email);
+        const user = await this.serviceUsersRepository.findByEmail(email);
 
         if (!user) {
             return { questions: [] };
         }
 
-        const recoveries = await this.serviceUsersService.findRecoveriesByUserId(user.id);
+        const recoveries = await this.serviceUsersRepository.findRecoveriesByUserId(user.id);
 
         return {
             questions: recoveries.map((recovery) => {
@@ -159,12 +181,17 @@ export class AuthService {
     }
 
     async resetPasswordByRecovery(recoveryResetDto: RecoveryResetRequestDto): Promise<void> {
-        const user = await this.serviceUsersService.findByEmailOrThrow(recoveryResetDto.email, 'Invalid credentials');
+        const user = await this.serviceUsersRepository.findByEmail(recoveryResetDto.email);
 
-        const recovery = await this.serviceUsersService.findRecoveryByIdOrThrow(
-            recoveryResetDto.recoveryId,
-            'Invalid credentials',
-        );
+        if (!user) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
+        const recovery = await this.serviceUsersRepository.findRecoveryById(recoveryResetDto.recoveryId);
+
+        if (!recovery) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
 
         if (recovery.userId !== user.id) {
             throw new ForbiddenException('This recovery question does not belong to this user');
@@ -174,9 +201,9 @@ export class AuthService {
 
         const newPasswordHash = await bcrypt.hash(recoveryResetDto.newPassword, 10);
 
-        await this.serviceUsersService.updatePassword(user.id, newPasswordHash);
+        await this.serviceUsersRepository.update(user.id, { passwordHash: newPasswordHash });
 
-        await this.serviceUsersService.deleteAllRefreshTokens(user.id);
+        await this.serviceUsersRepository.deleteAllUserRefreshTokens(user.id);
     }
 
     async updateRecovery(
@@ -184,9 +211,17 @@ export class AuthService {
         recoveryId: number,
         updateRecoveryDto: UpdateRecoveryRequestDto,
     ): Promise<void> {
-        const user = await this.serviceUsersService.findByIdOrThrow(userId, 'Invalid credentials');
+        const user = await this.serviceUsersRepository.findById(userId);
 
-        const recovery = await this.serviceUsersService.findRecoveryByIdOrThrow(recoveryId, 'Invalid credentials');
+        if (!user) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
+        const recovery = await this.serviceUsersRepository.findRecoveryById(recoveryId);
+
+        if (!recovery) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
 
         if (recovery.userId !== user.id) {
             throw new ForbiddenException('Recovery question not found');
@@ -196,7 +231,10 @@ export class AuthService {
 
         const newAnswerHash = await bcrypt.hash(updateRecoveryDto.newAnswer, 10);
 
-        await this.serviceUsersService.updateRecovery(recoveryId, updateRecoveryDto.newQuestion, newAnswerHash);
+        await this.serviceUsersRepository.updateRecovery(recoveryId, {
+            question: updateRecoveryDto.newQuestion,
+            answerHash: newAnswerHash,
+        });
     }
 
     async removeRecovery(
@@ -204,9 +242,17 @@ export class AuthService {
         recoveryId: number,
         removeRecoveryDto: RemoveRecoveryRequestDto,
     ): Promise<void> {
-        const user = await this.serviceUsersService.findByIdOrThrow(userId, 'Invalid credentials');
+        const user = await this.serviceUsersRepository.findById(userId);
 
-        const recovery = await this.serviceUsersService.findRecoveryByIdOrThrow(recoveryId, 'Invalid credentials');
+        if (!user) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
+        const recovery = await this.serviceUsersRepository.findRecoveryById(recoveryId);
+
+        if (!recovery) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
 
         if (recovery.userId !== user.id) {
             throw new ForbiddenException('Recovery question not found');
@@ -214,6 +260,6 @@ export class AuthService {
 
         await this.verifyCredentialOrThrow(removeRecoveryDto.currentPassword, user.passwordHash);
 
-        await this.serviceUsersService.deleteRecovery(recoveryId);
+        await this.serviceUsersRepository.deleteRecovery(recoveryId);
     }
 }
