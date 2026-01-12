@@ -10,7 +10,6 @@ import { LoginRequestDto } from 'src/common/dto/auth/login-request.dto';
 import { LoginResponseDto } from 'src/common/dto/auth/login-response.dto';
 import { RegisterRequestDto } from 'src/common/dto/auth/register-request.dto';
 import { ServiceUserModel } from 'src/database/models/service-user.model';
-import { ServiceUsersService } from 'src/service-users/service-users.service';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
@@ -168,7 +167,7 @@ export class AuthService {
         const user = await this.serviceUsersRepository.findByEmail(email);
 
         if (!user) {
-            return { questions: [] };
+            throw new NotFoundException('User not found');
         }
 
         const recoveries = await this.serviceUsersRepository.findRecoveriesByUserId(user.id);
@@ -181,15 +180,12 @@ export class AuthService {
     }
 
     async resetPasswordByRecovery(recoveryResetDto: RecoveryResetRequestDto): Promise<void> {
-        const user = await this.serviceUsersRepository.findByEmail(recoveryResetDto.email);
+        const [user, recovery] = await Promise.all([
+            this.serviceUsersRepository.findByEmail(recoveryResetDto.email),
+            this.serviceUsersRepository.findRecoveryById(recoveryResetDto.recoveryId),
+        ]);
 
-        if (!user) {
-            throw new UnauthorizedException('Invalid credentials');
-        }
-
-        const recovery = await this.serviceUsersRepository.findRecoveryById(recoveryResetDto.recoveryId);
-
-        if (!recovery) {
+        if (!user || !recovery) {
             throw new UnauthorizedException('Invalid credentials');
         }
 
@@ -211,15 +207,12 @@ export class AuthService {
         recoveryId: number,
         updateRecoveryDto: UpdateRecoveryRequestDto,
     ): Promise<void> {
-        const user = await this.serviceUsersRepository.findById(userId);
+        const [user, recovery] = await Promise.all([
+            this.serviceUsersRepository.findById(userId),
+            this.serviceUsersRepository.findRecoveryById(recoveryId),
+        ]);
 
-        if (!user) {
-            throw new UnauthorizedException('Invalid credentials');
-        }
-
-        const recovery = await this.serviceUsersRepository.findRecoveryById(recoveryId);
-
-        if (!recovery) {
+        if (!user || !recovery) {
             throw new UnauthorizedException('Invalid credentials');
         }
 
@@ -242,15 +235,12 @@ export class AuthService {
         recoveryId: number,
         removeRecoveryDto: RemoveRecoveryRequestDto,
     ): Promise<void> {
-        const user = await this.serviceUsersRepository.findById(userId);
+        const [user, recovery] = await Promise.all([
+            this.serviceUsersRepository.findById(userId),
+            this.serviceUsersRepository.findRecoveryById(recoveryId),
+        ]);
 
-        if (!user) {
-            throw new UnauthorizedException('Invalid credentials');
-        }
-
-        const recovery = await this.serviceUsersRepository.findRecoveryById(recoveryId);
-
-        if (!recovery) {
+        if (!user || !recovery) {
             throw new UnauthorizedException('Invalid credentials');
         }
 
