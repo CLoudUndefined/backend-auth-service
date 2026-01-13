@@ -33,7 +33,8 @@ export class ServiceUsersController {
         description: 'Unauthorized',
     })
     async getProfile(@ServiceUser() user: ServiceUserModel): Promise<ServiceUserResponseDto> {
-        return this.serviceUsersService.findByIdOrThrow(user.id);
+        const result = await this.serviceUsersService.findByIdOrThrow(user.id);
+        return new ServiceUserResponseDto(result);
     }
 
     @Put('me')
@@ -63,7 +64,8 @@ export class ServiceUsersController {
         @ServiceUser() user: ServiceUserModel,
         @Body() updateProfileDto: UpdateServiceUserRequestDto,
     ): Promise<ServiceUserResponseDto> {
-        return this.serviceUsersService.update(user.id, updateProfileDto.email);
+        const result = await this.serviceUsersService.update(user.id, updateProfileDto.email);
+        return new ServiceUserResponseDto(result);
     }
 
     @Get()
@@ -87,7 +89,10 @@ export class ServiceUsersController {
         description: 'Forbidden - god-mode privileges required',
     })
     async findAll(): Promise<ServiceUserResponseDto[]> {
-        return this.serviceUsersService.findAll();
+        const result = await this.serviceUsersService.findAll();
+        return result.map((user) => {
+            return new ServiceUserResponseDto(user);
+        });
     }
 
     @Get(':id')
@@ -118,7 +123,8 @@ export class ServiceUsersController {
         description: 'Service user not found',
     })
     async getUser(@Param('id', ParseIntPipe) id: number): Promise<ServiceUserResponseDto> {
-        return this.serviceUsersService.findByIdOrThrow(id);
+        const result = await this.serviceUsersService.findByIdOrThrow(id);
+        return new ServiceUserResponseDto(result);
     }
 
     @Delete(':id')
@@ -187,6 +193,9 @@ export class ServiceUsersController {
         description: 'Service user not found',
     })
     async findAllAppsByOwner(@Param('id', ParseIntPipe) id: number): Promise<AppResponseDto[]> {
-        return this.serviceUsersService.findAllAppsByOwnerId(id);
+        const result = await this.serviceUsersService.findAllAppsByOwnerId(id);
+        return result.map((app) => {
+            return new AppResponseDto(app);
+        });
     }
 }

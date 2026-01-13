@@ -3,7 +3,7 @@ import { ServiceUsersRepository } from 'src/database/repositories/service-users.
 import * as bcrypt from 'bcrypt';
 import type { ServiceUserModel } from 'src/database/models/service-user.model';
 import { AppsRepository } from 'src/database/repositories/apps.repository';
-import { AppResponseDto } from 'src/apps/dto/app-response.dto';
+import { ApplicationWithOwnerModel } from 'src/types/application.types';
 
 @Injectable()
 export class ServiceUsersService {
@@ -65,17 +65,7 @@ export class ServiceUsersService {
         return this.serviceUsersRepository.findAll();
     }
 
-    async findAllAppsByOwnerId(id: number): Promise<AppResponseDto[]> {
-        const apps = await this.appsRepository.findAllByOwnerId(id);
-        return apps.map((app) => {
-            return {
-                id: app.id,
-                name: app.name,
-                description: app.description,
-                owner: app.owner,
-                createdAt: app.createdAt,
-                updatedAt: app.updatedAt,
-            };
-        });
+    async findAllAppsByOwnerId(id: number): Promise<ApplicationWithOwnerModel[]> {
+        return this.appsRepository.findAllByOwnerId(id);
     }
 }
