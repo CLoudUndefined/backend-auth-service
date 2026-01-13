@@ -1,7 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ServiceUserResponseDto } from 'src/service-users/dto/service-user-response.dto';
+import { ApplicationWithOwnerModel } from 'src/types/application.types';
 
 export class AppResponseDto {
+    constructor(data: ApplicationWithOwnerModel) {
+        this.id = data.id;
+        this.name = data.name;
+        this.description = data.description;
+        this.owner = new ServiceUserResponseDto(data.owner);
+        this.createdAt = data.createdAt;
+        this.updatedAt = data.updatedAt;
+    }
     @ApiProperty({
         example: 1,
         description: 'App ID',
