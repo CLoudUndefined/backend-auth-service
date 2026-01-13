@@ -3,7 +3,6 @@ import { ApplicationModel } from './application.model';
 import { BaseModelWithUpdate } from './base-with-update.model';
 import { ServiceUserRecoveryModel } from './service-user-recovery.model';
 import { ServiceUserRefreshTokenModel } from './service-user-refresh-token.model';
-import { Exclude } from 'class-transformer';
 
 export class ServiceUserModel extends BaseModelWithUpdate {
     static get tableName() {
@@ -11,12 +10,8 @@ export class ServiceUserModel extends BaseModelWithUpdate {
     }
 
     email: string;
-    isGod: boolean;
-
-    @Exclude()
     passwordHash: string;
-
-    @Exclude()
+    isGod: boolean;
     isBanned: boolean;
 
     apps?: ApplicationModel[];
