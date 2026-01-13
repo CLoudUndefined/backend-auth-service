@@ -1,6 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ServiceUserModel } from 'src/database/models/service-user.model';
 
 export class ServiceUserResponseDto {
+    constructor(data: ServiceUserModel) {
+        this.id = data.id;
+        this.email = data.email;
+        this.isGod = data.isGod;
+        this.createdAt = data.createdAt;
+        this.updatedAt = data.updatedAt;
+    }
+
     @ApiProperty({
         example: 1,
         description: 'Unique identifier of the service user',
