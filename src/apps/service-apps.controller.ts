@@ -39,7 +39,8 @@ export class ServiceAppsController {
         @ServiceUser() user: ServiceUserModel,
         @Body() createAppDto: CreateAppRequestDto,
     ): Promise<AppResponseDto> {
-        return this.appsService.create(user.id, createAppDto);
+        const app = await this.appsService.create(user.id, createAppDto);
+        return new AppResponseDto(app);
     }
 
     @Get()
@@ -59,7 +60,10 @@ export class ServiceAppsController {
         description: 'Unauthorized',
     })
     async findAllApps(): Promise<AppResponseDto[]> {
-        return this.appsService.findAllApps();
+        const apps = await this.appsService.findAllApps();
+        return apps.map((app) => {
+            return new AppResponseDto(app);
+        });
     }
 
     @Get(':id')
@@ -90,7 +94,8 @@ export class ServiceAppsController {
         @ServiceUser() user: ServiceUserModel,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<AppResponseDto> {
-        return this.appsService.findAppById(user.id, user.isGod, id);
+        const app = await this.appsService.findAppById(user.id, user.isGod, id);
+        return new AppResponseDto(app);
     }
 
     @Put(':id')
@@ -129,7 +134,8 @@ export class ServiceAppsController {
         @Param('id', ParseIntPipe) id: number,
         @Body() updateAppDto: UpdateAppRequestDto,
     ): Promise<AppResponseDto> {
-        return this.appsService.update(user.id, user.isGod, id, updateAppDto);
+        const app = await this.appsService.update(user.id, user.isGod, id, updateAppDto);
+        return new AppResponseDto(app);
     }
 
     @Delete(':id')

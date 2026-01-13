@@ -3,21 +3,15 @@ import { BaseModelWithUpdate } from './base-with-update.model';
 import { ServiceUserModel } from './service-user.model';
 import { ApplicationUserModel } from './application-user.model';
 import { ApplicationRoleModel } from './application-role.model';
-import { Exclude } from 'class-transformer';
 
 export class ApplicationModel extends BaseModelWithUpdate {
     static get tableName() {
         return 'applications';
     }
 
-    name: string;
-
-    @Exclude()
     ownerId: number;
-
-    @Exclude()
+    name: string;
     encryptedSecret: string;
-
     description: string | null;
 
     owner?: ServiceUserModel;
