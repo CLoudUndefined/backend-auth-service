@@ -6,20 +6,10 @@ import {
     NotFoundException,
     UnauthorizedException,
 } from '@nestjs/common';
-import { LoginRequestDto } from 'src/common/api/dto/auth/login-request.dto';
-import { LoginResponseDto } from 'src/common/api/dto/auth/login-response.dto';
-import { RegisterRequestDto } from 'src/common/api/dto/auth/register-request.dto';
 import { ServiceUserModel } from 'src/database/models/service-user.model';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
-import { ChangePasswordRequestDto } from 'src/common/api/dto/auth/change-password-request.dto';
-import { AddRecoveryRequestDto } from 'src/common/api/dto/auth/add-recovery-request.dto';
-import { ListRecoveryResponseDto } from 'src/common/api/dto/auth/list-recovery-response.dto';
-import { RecoveryAskResponseDto } from 'src/common/api/dto/auth/recovery-ask-response.dto';
-import { RecoveryResetRequestDto } from 'src/common/api/dto/auth/recovery-reset-request.dto';
-import { UpdateRecoveryRequestDto } from 'src/common/api/dto/auth/update-recovery-request.dto';
-import { RemoveRecoveryRequestDto } from 'src/common/api/dto/auth/remove-recovery-request.dto';
 import { ConfigService } from '@nestjs/config';
 import ms, { StringValue } from 'ms';
 import { ServiceUsersRepository } from 'src/database/repositories/service-users.repository';
@@ -40,20 +30,20 @@ export class AuthService {
         }
     }
 
-    async register(registerDto: RegisterRequestDto): Promise<ServiceUserModel> {
-        const existingUser = await this.serviceUsersRepository.existsByEmail(registerDto.email);
+    async register(email: string, plainPassword: string): Promise<ServiceUserModel> {
+        const existingUser = await this.serviceUsersRepository.existsByEmail(email);
 
         if (existingUser) {
             throw new ConflictException('User with this email already exists');
         }
 
-        const passwordHash = await bcrypt.hash(registerDto.password, 10);
+        const passwordHash = await bcrypt.hash(plainPassword, 10);
 
-        return this.serviceUsersRepository.create(registerDto.email, passwordHash, false);
+        return this.serviceUsersRepository.create(email, passwordHash, false);
     }
 
-    async login(loginDto: LoginRequestDto): Promise<LoginResponseDto> {
-        const user = await this.serviceUsersRepository.findByEmail(loginDto.email);
+    async login(email: string, plainPassword: string): Promise<{ accessToken: string; refreshToken: string }> {
+        const user = await this.serviceUsersRepository.findByEmail(email);
 
         if (!user) {
             throw new UnauthorizedException('Invalid credentials');
@@ -63,7 +53,7 @@ export class AuthService {
             throw new ForbiddenException('User is banned');
         }
 
-        await this.verifyCredentialOrThrow(loginDto.password, user.passwordHash);
+        await this.verifyCredentialOrThrow(plainPassword, user.passwordHash);
 
         const accessToken = this.jwtService.sign({
             sub: user.id,
@@ -83,27 +73,27 @@ export class AuthService {
         return { accessToken, refreshToken };
     }
 
-    async changePassword(userId: number, changePasswordDto: ChangePasswordRequestDto): Promise<void> {
+    async changePassword(userId: number, oldPassword: string, newPassword: string): Promise<void> {
         const user = await this.serviceUsersRepository.findById(userId);
 
         if (!user) {
             throw new UnauthorizedException('Invalid credentials');
         }
 
-        if (changePasswordDto.newPassword === changePasswordDto.oldPassword) {
+        if (oldPassword === newPassword) {
             throw new BadRequestException('New password must be different');
         }
 
-        await this.verifyCredentialOrThrow(changePasswordDto.oldPassword, user.passwordHash);
+        await this.verifyCredentialOrThrow(oldPassword, user.passwordHash);
 
-        const newPasswordHash = await bcrypt.hash(changePasswordDto.newPassword, 10);
+        const newPasswordHash = await bcrypt.hash(newPassword, 10);
 
         await this.serviceUsersRepository.update(userId, { passwordHash: newPasswordHash });
 
         await this.serviceUsersRepository.deleteAllUserRefreshTokens(userId);
     }
 
-    async refreshToken(refreshToken: string): Promise<LoginResponseDto> {
+    async refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
         const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
 
         const storedToken = await this.serviceUsersRepository.findRefreshTokenByHash(tokenHash);
@@ -147,13 +137,13 @@ export class AuthService {
         return { accessToken, refreshToken: newRefreshToken };
     }
 
-    async addRecovery(userId: number, addRecoveryDto: AddRecoveryRequestDto): Promise<void> {
-        const answerHash = await bcrypt.hash(addRecoveryDto.recoveryAnswer, 10);
+    async addRecovery(userId: number, recoveryQuestion: string, recoveryAnswer: string): Promise<void> {
+        const answerHash = await bcrypt.hash(recoveryAnswer, 10);
 
-        await this.serviceUsersRepository.createRecovery(userId, addRecoveryDto.recoveryQuestion, answerHash);
+        await this.serviceUsersRepository.createRecovery(userId, recoveryQuestion, answerHash);
     }
 
-    async listRecovery(userId: number): Promise<ListRecoveryResponseDto> {
+    async listRecovery(userId: number): Promise<{ questions: { id: number; question: string }[] }> {
         const recoveries = await this.serviceUsersRepository.findRecoveriesByUserId(userId);
 
         return {
@@ -163,7 +153,7 @@ export class AuthService {
         };
     }
 
-    async askRecoveryQuestions(email: string): Promise<RecoveryAskResponseDto> {
+    async askRecoveryQuestions(email: string): Promise<{ questions: { id: number; question: string }[] }> {
         const user = await this.serviceUsersRepository.findByEmail(email);
 
         if (!user) {
@@ -179,10 +169,15 @@ export class AuthService {
         };
     }
 
-    async resetPasswordByRecovery(recoveryResetDto: RecoveryResetRequestDto): Promise<void> {
+    async resetPasswordByRecovery(
+        recoveryId: number,
+        email: string,
+        recoveryAnswer: string,
+        newPassword: string,
+    ): Promise<void> {
         const [user, recovery] = await Promise.all([
-            this.serviceUsersRepository.findByEmail(recoveryResetDto.email),
-            this.serviceUsersRepository.findRecoveryById(recoveryResetDto.recoveryId),
+            this.serviceUsersRepository.findByEmail(email),
+            this.serviceUsersRepository.findRecoveryById(recoveryId),
         ]);
 
         if (!user || !recovery) {
@@ -193,9 +188,9 @@ export class AuthService {
             throw new ForbiddenException('This recovery question does not belong to this user');
         }
 
-        await this.verifyCredentialOrThrow(recoveryResetDto.answer, recovery.answerHash);
+        await this.verifyCredentialOrThrow(recoveryAnswer, recovery.answerHash);
 
-        const newPasswordHash = await bcrypt.hash(recoveryResetDto.newPassword, 10);
+        const newPasswordHash = await bcrypt.hash(newPassword, 10);
 
         await this.serviceUsersRepository.update(user.id, { passwordHash: newPasswordHash });
 
@@ -205,7 +200,9 @@ export class AuthService {
     async updateRecovery(
         userId: number,
         recoveryId: number,
-        updateRecoveryDto: UpdateRecoveryRequestDto,
+        currentPassword: string,
+        newRecoveryQuestion: string,
+        newRecoveryAnswer: string,
     ): Promise<void> {
         const [user, recovery] = await Promise.all([
             this.serviceUsersRepository.findById(userId),
@@ -220,21 +217,17 @@ export class AuthService {
             throw new ForbiddenException('Recovery question not found');
         }
 
-        await this.verifyCredentialOrThrow(updateRecoveryDto.currentPassword, user.passwordHash);
+        await this.verifyCredentialOrThrow(currentPassword, user.passwordHash);
 
-        const newAnswerHash = await bcrypt.hash(updateRecoveryDto.newAnswer, 10);
+        const newAnswerHash = await bcrypt.hash(newRecoveryAnswer, 10);
 
         await this.serviceUsersRepository.updateRecovery(recoveryId, {
-            question: updateRecoveryDto.newQuestion,
+            question: newRecoveryQuestion,
             answerHash: newAnswerHash,
         });
     }
 
-    async removeRecovery(
-        userId: number,
-        recoveryId: number,
-        removeRecoveryDto: RemoveRecoveryRequestDto,
-    ): Promise<void> {
+    async removeRecovery(userId: number, recoveryId: number, currentPassword: string): Promise<void> {
         const [user, recovery] = await Promise.all([
             this.serviceUsersRepository.findById(userId),
             this.serviceUsersRepository.findRecoveryById(recoveryId),
@@ -248,7 +241,7 @@ export class AuthService {
             throw new ForbiddenException('Recovery question not found');
         }
 
-        await this.verifyCredentialOrThrow(removeRecoveryDto.currentPassword, user.passwordHash);
+        await this.verifyCredentialOrThrow(currentPassword, user.passwordHash);
 
         await this.serviceUsersRepository.deleteRecovery(recoveryId);
     }
