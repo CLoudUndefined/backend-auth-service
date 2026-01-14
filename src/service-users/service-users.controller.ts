@@ -1,7 +1,7 @@
 import { Controller, Get, Put, Delete, Body, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { UpdateServiceUserRequestDto } from './dto/update-service-user-request.dto';
 import { ServiceUserResponseDto } from './dto/service-user-response.dto';
-import { MessageResponseDto } from 'src/common/dto/message-response.dto';
+import { MessageResponseDto } from 'src/common/api/dto/message-response.dto';
 import { AppResponseDto } from 'src/apps/dto/app-response.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtServiceAuthGuard } from 'src/auth/guards/jwt-service-auth.guard';

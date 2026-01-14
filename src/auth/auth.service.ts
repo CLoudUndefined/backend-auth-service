@@ -6,20 +6,20 @@ import {
     NotFoundException,
     UnauthorizedException,
 } from '@nestjs/common';
-import { LoginRequestDto } from 'src/common/dto/auth/login-request.dto';
-import { LoginResponseDto } from 'src/common/dto/auth/login-response.dto';
-import { RegisterRequestDto } from 'src/common/dto/auth/register-request.dto';
+import { LoginRequestDto } from 'src/common/api/dto/auth/login-request.dto';
+import { LoginResponseDto } from 'src/common/api/dto/auth/login-response.dto';
+import { RegisterRequestDto } from 'src/common/api/dto/auth/register-request.dto';
 import { ServiceUserModel } from 'src/database/models/service-user.model';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
-import { ChangePasswordRequestDto } from 'src/common/dto/auth/change-password-request.dto';
-import { AddRecoveryRequestDto } from 'src/common/dto/auth/add-recovery-request.dto';
-import { ListRecoveryResponseDto } from 'src/common/dto/auth/list-recovery-response.dto';
-import { RecoveryAskResponseDto } from 'src/common/dto/auth/recovery-ask-response.dto';
-import { RecoveryResetRequestDto } from 'src/common/dto/auth/recovery-reset-request.dto';
-import { UpdateRecoveryRequestDto } from 'src/common/dto/auth/update-recovery-request.dto';
-import { RemoveRecoveryRequestDto } from 'src/common/dto/auth/remove-recovery-request.dto';
+import { ChangePasswordRequestDto } from 'src/common/api/dto/auth/change-password-request.dto';
+import { AddRecoveryRequestDto } from 'src/common/api/dto/auth/add-recovery-request.dto';
+import { ListRecoveryResponseDto } from 'src/common/api/dto/auth/list-recovery-response.dto';
+import { RecoveryAskResponseDto } from 'src/common/api/dto/auth/recovery-ask-response.dto';
+import { RecoveryResetRequestDto } from 'src/common/api/dto/auth/recovery-reset-request.dto';
+import { UpdateRecoveryRequestDto } from 'src/common/api/dto/auth/update-recovery-request.dto';
+import { RemoveRecoveryRequestDto } from 'src/common/api/dto/auth/remove-recovery-request.dto';
 import { ConfigService } from '@nestjs/config';
 import ms, { StringValue } from 'ms';
 import { ServiceUsersRepository } from 'src/database/repositories/service-users.repository';

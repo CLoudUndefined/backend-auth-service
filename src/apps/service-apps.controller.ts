@@ -1,10 +1,10 @@
 import { Body, Controller, Delete, Get, NotImplementedException, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { MessageResponseDto } from 'src/common/dto/message-response.dto';
-import { AppResponseDto } from './dto/app-response.dto';
 import { CreateAppRequestDto } from './dto/create-app-request.dto';
-import { CreateAppResponseDto } from './dto/create-app-response.dto';
+import { AppResponseDto } from './dto/app-response.dto';
 import { UpdateAppRequestDto } from './dto/update-app-request.dto';
+import { MessageResponseDto } from 'src/common/api/dto/message-response.dto';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { CreateAppResponseDto } from './dto/create-app-response.dto';
 
 @ApiTags('Service (Apps Management)')
 @ApiBearerAuth('JWT-auth-service')
