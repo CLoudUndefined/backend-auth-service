@@ -14,8 +14,6 @@ async function bootstrap() {
         }),
     );
 
-    app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-
     const config = new DocumentBuilder()
         .setTitle('Backend Auth Service')
         .setVersion('0.0.1')
