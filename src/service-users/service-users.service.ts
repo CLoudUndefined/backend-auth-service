@@ -1,6 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { ServiceUsersRepository } from 'src/database/repositories/service-users.repository';
-import * as bcrypt from 'bcrypt';
 import type { ServiceUserModel } from 'src/database/models/service-user.model';
 import { AppsRepository } from 'src/database/repositories/apps.repository';
 import { ApplicationWithOwnerModel } from 'src/types/application.types';
@@ -11,18 +10,6 @@ export class ServiceUsersService {
         private readonly serviceUsersRepository: ServiceUsersRepository,
         private readonly appsRepository: AppsRepository,
     ) {}
-
-    async create(email: string, plainPassword: string): Promise<ServiceUserModel> {
-        const existingUser = await this.serviceUsersRepository.existsByEmail(email);
-
-        if (existingUser) {
-            throw new ConflictException('User with this email already exists');
-        }
-
-        const passwordHash = await bcrypt.hash(plainPassword, 10);
-
-        return this.serviceUsersRepository.create(email, passwordHash, false);
-    }
 
     async update(id: number, email: string): Promise<ServiceUserModel> {
         const existingUser = await this.serviceUsersRepository.findByEmail(email);
