@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, NotImplementedException, Param, ParseInt
 import { AppRoleResponseDto } from './dto/app-role-response.dto';
 import { CreateAppRoleRequestDto } from './dto/create-app-role-request.dto';
 import { UpdateAppRoleRequestDto } from './dto/update-app-role-request.dto';
-import { MessageResponseDto } from 'src/common/dto/message-response.dto';
+import { MessageResponseDto } from 'src/common/api/dto/message-response.dto';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('Service (App Role)')
