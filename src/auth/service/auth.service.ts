@@ -13,6 +13,8 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import ms, { StringValue } from 'ms';
 import { ServiceUsersRepository } from 'src/database/repositories/service-users.repository';
+import { AuthTokensDto } from './dto/auth-tokens.dto';
+import { RecoveryQuestionListDto } from './dto/recovery-question-list.dto';
 
 @Injectable()
 export class AuthService {
@@ -42,7 +44,7 @@ export class AuthService {
         return this.serviceUsersRepository.create(email, passwordHash, false);
     }
 
-    async login(email: string, plainPassword: string): Promise<{ accessToken: string; refreshToken: string }> {
+    async login(email: string, plainPassword: string): Promise<AuthTokensDto> {
         const user = await this.serviceUsersRepository.findByEmail(email);
 
         if (!user) {
@@ -93,7 +95,7 @@ export class AuthService {
         await this.serviceUsersRepository.deleteAllUserRefreshTokens(userId);
     }
 
-    async refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+    async refreshToken(refreshToken: string): Promise<AuthTokensDto> {
         const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
 
         const storedToken = await this.serviceUsersRepository.findRefreshTokenByHash(tokenHash);
@@ -143,7 +145,7 @@ export class AuthService {
         await this.serviceUsersRepository.createRecovery(userId, recoveryQuestion, answerHash);
     }
 
-    async listRecovery(userId: number): Promise<{ questions: { id: number; question: string }[] }> {
+    async listRecovery(userId: number): Promise<RecoveryQuestionListDto> {
         const recoveries = await this.serviceUsersRepository.findRecoveriesByUserId(userId);
 
         return {
@@ -153,7 +155,7 @@ export class AuthService {
         };
     }
 
-    async askRecoveryQuestions(email: string): Promise<{ questions: { id: number; question: string }[] }> {
+    async askRecoveryQuestions(email: string): Promise<RecoveryQuestionListDto> {
         const user = await this.serviceUsersRepository.findByEmail(email);
 
         if (!user) {
