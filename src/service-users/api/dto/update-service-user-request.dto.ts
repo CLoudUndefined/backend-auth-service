@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, MaxLength } from 'class-validator';
+import { IsDefined, IsEmail, IsNotEmpty, MaxLength } from 'class-validator';
 
 export class UpdateServiceUserRequestDto {
     @ApiProperty({
@@ -7,6 +7,7 @@ export class UpdateServiceUserRequestDto {
         description: 'Service user email address.',
         required: true,
     })
+    @IsDefined()
     @IsNotEmpty()
     @IsEmail()
     @MaxLength(255)

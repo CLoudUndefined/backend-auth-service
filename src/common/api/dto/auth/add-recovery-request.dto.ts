@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsDefined, IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export class AddRecoveryRequestDto {
     @ApiProperty({
         example: 'What is your pet name?',
         description: 'Security question for password recovery',
     })
+    @IsDefined()
     @IsNotEmpty()
     @IsString()
     @MaxLength(1024)
@@ -15,6 +16,7 @@ export class AddRecoveryRequestDto {
         example: 'Domestos',
         description: 'Answer to the security question',
     })
+    @IsDefined()
     @IsNotEmpty()
     @IsString()
     @MaxLength(1024)
