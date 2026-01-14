@@ -4,6 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { StringValue } from 'ms';
+import { AppAuthService } from './app-auth.service';
 
 @Module({
     imports: [
@@ -19,5 +20,6 @@ import { StringValue } from 'ms';
         }),
     ],
     controllers: [AppAuthController],
+    providers: [AppAuthService],
 })
 export class AppAuthModule {}
