@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, MinLength, MaxLength, IsInt, IsPositive } from 'class-validator';
+import { IsNotEmpty, IsString, MinLength, MaxLength, IsInt, IsPositive, IsDefined } from 'class-validator';
 
 export class RecoveryResetRequestDto {
     @ApiProperty({
         example: 1,
         description: 'ID of the recovery question to update',
     })
+    @IsDefined()
     @IsInt()
     @IsPositive()
     recoveryId: number;
@@ -14,6 +15,7 @@ export class RecoveryResetRequestDto {
         example: 'developer@example.com',
         description: 'Email address of the user resetting the password',
     })
+    @IsDefined()
     @IsNotEmpty()
     @IsString()
     @MaxLength(255)
@@ -23,6 +25,7 @@ export class RecoveryResetRequestDto {
         example: 'Smith',
         description: 'Answer to the security question',
     })
+    @IsDefined()
     @IsNotEmpty()
     @IsString()
     @MaxLength(1024)
@@ -33,6 +36,7 @@ export class RecoveryResetRequestDto {
         description: 'New password to be set',
         minLength: 12,
     })
+    @IsDefined()
     @IsNotEmpty()
     @IsString()
     @MinLength(12)
