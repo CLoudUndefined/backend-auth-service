@@ -13,7 +13,7 @@ export class AppsRepository {
         encryptedSecret: string,
         description?: string,
     ): Promise<ApplicationWithOwnerModel> {
-        const app = await this.model
+        const app = this.model
             .query()
             .insert({
                 ownerId,
@@ -21,9 +21,9 @@ export class AppsRepository {
                 encryptedSecret,
                 description: description,
             })
-            .withGraphFetched('owner');
-
-        return app as ApplicationWithOwnerModel;
+            .withGraphFetched('owner')
+            .castTo<ApplicationWithOwnerModel>();
+        return app;
     }
 
     async findById(id: number): Promise<ApplicationModel | undefined> {
@@ -31,27 +31,26 @@ export class AppsRepository {
     }
 
     async findWithOwnerById(id: number): Promise<ApplicationWithOwnerModel | undefined> {
-        const app = await this.model.query().findById(id).withGraphFetched('owner');
-        return app ? (app as ApplicationWithOwnerModel) : undefined;
+        const app = this.model.query().findById(id).withGraphFetched('owner');
+        return app.castTo<ApplicationWithOwnerModel | undefined>();
     }
 
     async findAllByOwnerId(ownerId: number): Promise<ApplicationWithOwnerModel[]> {
-        const apps = await this.model.query().where({ ownerId }).withGraphFetched('owner');
-        return apps as ApplicationWithOwnerModel[];
+        const apps = this.model.query().where({ ownerId }).withGraphFetched('owner');
+        return apps.castTo<ApplicationWithOwnerModel[]>();
     }
 
     async findAll(): Promise<ApplicationWithOwnerModel[]> {
-        const apps = await this.model.query().withGraphFetched('owner');
-        return apps as ApplicationWithOwnerModel[];
+        const apps = this.model.query().withGraphFetched('owner');
+        return apps.castTo<ApplicationWithOwnerModel[]>();
     }
 
     async update(
         id: number,
         data: Partial<Pick<ApplicationModel, 'name' | 'description'>>,
     ): Promise<ApplicationWithOwnerModel | undefined> {
-        const app = await this.model.query().patchAndFetchById(id, data).withGraphFetched('owner');
-
-        return app ? (app as ApplicationWithOwnerModel) : undefined;
+        const app = this.model.query().patchAndFetchById(id, data).withGraphFetched('owner');
+        return app.castTo<ApplicationWithOwnerModel | undefined>();
     }
 
     async delete(id: number): Promise<number> {
