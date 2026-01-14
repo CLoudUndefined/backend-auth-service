@@ -42,7 +42,7 @@ export class AuthController {
         description: 'Email already exists',
     })
     async register(@Body() registerDto: RegisterRequestDto): Promise<ServiceUserResponseDto> {
-        const user = await this.authService.register(registerDto);
+        const user = await this.authService.register(registerDto.email, registerDto.password);
         return new ServiceUserResponseDto(user);
     }
 
@@ -65,7 +65,7 @@ export class AuthController {
         description: 'Invalid email or password',
     })
     async login(@Body() loginDto: LoginRequestDto): Promise<LoginResponseDto> {
-        return this.authService.login(loginDto);
+        return this.authService.login(loginDto.email, loginDto.password);
     }
 
     @Post('change-password')
@@ -92,7 +92,7 @@ export class AuthController {
         @ServiceUser() user: ServiceUserModel,
         @Body() changePasswordDto: ChangePasswordRequestDto,
     ): Promise<MessageResponseDto> {
-        await this.authService.changePassword(user.id, changePasswordDto);
+        await this.authService.changePassword(user.id, changePasswordDto.oldPassword, changePasswordDto.newPassword);
 
         return { message: 'Password changed successfully' };
     }
@@ -143,7 +143,7 @@ export class AuthController {
         @ServiceUser() user: ServiceUserModel,
         @Body() addRecoveryDto: AddRecoveryRequestDto,
     ): Promise<MessageResponseDto> {
-        await this.authService.addRecovery(user.id, addRecoveryDto);
+        await this.authService.addRecovery(user.id, addRecoveryDto.recoveryQuestion, addRecoveryDto.recoveryAnswer);
 
         return { message: 'Recovery question added successfully' };
     }
@@ -205,7 +205,12 @@ export class AuthController {
         description: 'User not found',
     })
     async resetPasswordByRecovery(@Body() recoveryResetDto: RecoveryResetRequestDto): Promise<MessageResponseDto> {
-        await this.authService.resetPasswordByRecovery(recoveryResetDto);
+        await this.authService.resetPasswordByRecovery(
+            recoveryResetDto.recoveryId,
+            recoveryResetDto.email,
+            recoveryResetDto.answer,
+            recoveryResetDto.newPassword,
+        );
 
         return { message: 'Password reset successfully' };
     }
@@ -243,7 +248,13 @@ export class AuthController {
         @Param('recoveryId', ParseIntPipe) recoveryId: number,
         @Body() updateRecoveryDto: UpdateRecoveryRequestDto,
     ): Promise<MessageResponseDto> {
-        await this.authService.updateRecovery(user.id, recoveryId, updateRecoveryDto);
+        await this.authService.updateRecovery(
+            user.id,
+            recoveryId,
+            updateRecoveryDto.currentPassword,
+            updateRecoveryDto.newQuestion,
+            updateRecoveryDto.newAnswer,
+        );
 
         return { message: 'Recovery question updated successfully' };
     }
@@ -277,7 +288,7 @@ export class AuthController {
         @Param('recoveryId', ParseIntPipe) recoveryId: number,
         @Body() removeRecoveryDto: RemoveRecoveryRequestDto,
     ): Promise<MessageResponseDto> {
-        await this.authService.removeRecovery(user.id, recoveryId, removeRecoveryDto);
+        await this.authService.removeRecovery(user.id, recoveryId, removeRecoveryDto.currentPassword);
 
         return { message: 'Recovery question removed successfully' };
     }
