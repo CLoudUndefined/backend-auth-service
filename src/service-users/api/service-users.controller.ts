@@ -5,7 +5,7 @@ import { MessageResponseDto } from 'src/common/api/dto/message-response.dto';
 import { AppResponseDto } from 'src/apps/dto/app-response.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtServiceAuthGuard } from 'src/auth/guards/jwt-service-auth.guard';
-import { ServiceUsersService } from './service-users.service';
+import { ServiceUsersService } from '../service/service-users.service';
 import { ServiceUser } from 'src/common/decorators/service-user.decorator';
 import { ServiceUserModel } from 'src/database/models/service-user.model';
 import { IsGodGuard } from 'src/auth/guards/is-god.guard';
