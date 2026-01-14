@@ -1,21 +1,21 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
-import { ServiceUserResponseDto } from 'src/service-users/dto/service-user-response.dto';
-import { RegisterRequestDto } from '../common/api/dto/auth/register-request.dto';
-import { LoginRequestDto } from '../common/api/dto/auth/login-request.dto';
-import { ChangePasswordRequestDto } from '../common/api/dto/auth/change-password-request.dto';
-import { RecoveryAskRequestDto } from '../common/api/dto/auth/recovery-ask-request.dto';
-import { RecoveryResetRequestDto } from '../common/api/dto/auth/recovery-reset-request.dto';
-import { LoginResponseDto } from '../common/api/dto/auth/login-response.dto';
-import { MessageResponseDto } from '../common/api/dto/message-response.dto';
+import { ServiceUserResponseDto } from 'src/service-users/api/dto/service-user-response.dto';
+import { RegisterRequestDto } from 'src/common/api/dto/auth/register-request.dto';
+import { LoginRequestDto } from 'src/common/api/dto/auth/login-request.dto';
+import { ChangePasswordRequestDto } from 'src/common/api/dto/auth/change-password-request.dto';
+import { RecoveryAskRequestDto } from 'src/common/api/dto/auth/recovery-ask-request.dto';
+import { RecoveryResetRequestDto } from 'src/common/api/dto/auth/recovery-reset-request.dto';
+import { LoginResponseDto } from 'src/common/api/dto/auth/login-response.dto';
+import { MessageResponseDto } from 'src/common/api/dto/message-response.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AddRecoveryRequestDto } from 'src/common/api/dto/auth/add-recovery-request.dto';
 import { UpdateRecoveryRequestDto } from 'src/common/api/dto/auth/update-recovery-request.dto';
 import { ListRecoveryResponseDto } from 'src/common/api/dto/auth/list-recovery-response.dto';
 import { RefreshTokenRequestDto } from 'src/common/api/dto/auth/refresh-token-request.dto';
-import { AuthService } from './auth.service';
+import { AuthService } from '../service/auth.service';
 import { ServiceUser } from 'src/common/decorators/service-user.decorator';
 import { ServiceUserModel } from 'src/database/models/service-user.model';
-import { JwtServiceAuthGuard } from './guards/jwt-service-auth.guard';
+import { JwtServiceAuthGuard } from '../guards/jwt-service-auth.guard';
 import { RemoveRecoveryRequestDto } from 'src/common/api/dto/auth/remove-recovery-request.dto';
 
 @ApiTags('Service (User Auth)')
