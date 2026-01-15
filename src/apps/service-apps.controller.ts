@@ -39,7 +39,7 @@ export class ServiceAppsController {
         @ServiceUser() user: ServiceUserModel,
         @Body() createAppDto: CreateAppRequestDto,
     ): Promise<AppResponseDto> {
-        const app = await this.appsService.create(user.id, createAppDto);
+        const app = await this.appsService.create(user.id, createAppDto.name, createAppDto.description);
         return new AppResponseDto(app);
     }
 
@@ -134,7 +134,7 @@ export class ServiceAppsController {
         @Param('id', ParseIntPipe) id: number,
         @Body() updateAppDto: UpdateAppRequestDto,
     ): Promise<AppResponseDto> {
-        const app = await this.appsService.update(user.id, user.isGod, id, updateAppDto);
+        const app = await this.appsService.update(user.id, user.isGod, id, updateAppDto.name, updateAppDto.description);
         return new AppResponseDto(app);
     }
 
