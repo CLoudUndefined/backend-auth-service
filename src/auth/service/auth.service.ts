@@ -13,8 +13,8 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import ms, { StringValue } from 'ms';
 import { ServiceUsersRepository } from 'src/database/repositories/service-users.repository';
-import { AuthTokensDto } from './dto/auth-tokens.dto';
-import { RecoveryQuestionListDto } from './dto/recovery-question-list.dto';
+import { AuthTokensDto } from '../../common/service/dto/auth/auth-tokens.dto';
+import { RecoveryQuestionListDto } from '../../common/service/dto/auth/recovery-question-list.dto';
 
 @Injectable()
 export class AuthService {
