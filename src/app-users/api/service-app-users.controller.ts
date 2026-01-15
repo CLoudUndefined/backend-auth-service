@@ -14,13 +14,13 @@ import { AppUserResponseDto } from './dto/app-user-response.dto';
 import { MessageResponseDto } from 'src/common/api/dto/message-response.dto';
 import { UpdateAppUserRequestDto } from './dto/update-app-user-request.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AppRoleResponseDto } from 'src/app-roles/dto/app-role-response.dto';
+import { AppRoleResponseDto } from 'src/app-roles/api/dto/app-role-response.dto';
 import { GetAppUsersQueryDto } from './dto/get-app-users-query.dto';
 
-@ApiTags('App (Users)')
-@ApiBearerAuth('JWT-auth-app')
-@Controller('apps/:appId/users')
-export class AppUsersController {
+@ApiTags('Service (App Users)')
+@ApiBearerAuth('JWT-auth-service')
+@Controller('service/apps/:appId/users')
+export class ServiceAppUsersController {
     @Get()
     @ApiOperation({
         summary: 'List users of an application',
@@ -46,7 +46,7 @@ export class AppUsersController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only view user with special permission',
+        description: 'Forbidden - can only view own apps or requires god-mode',
     })
     @ApiResponse({
         status: 404,
@@ -87,7 +87,7 @@ export class AppUsersController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only view user with special permission',
+        description: 'Forbidden - can only view own apps or requires god-mode',
     })
     @ApiResponse({
         status: 404,
@@ -128,7 +128,7 @@ export class AppUsersController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only manage user with special permission',
+        description: 'Forbidden - can only view own apps or requires god-mode',
     })
     @ApiResponse({
         status: 404,
@@ -170,7 +170,7 @@ export class AppUsersController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only manage user with special permission',
+        description: 'Forbidden - can only view own apps or requires god-mode',
     })
     @ApiResponse({
         status: 404,
@@ -208,7 +208,7 @@ export class AppUsersController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only view user with special permission',
+        description: 'Forbidden - can only view own apps or requires god-mode',
     })
     @ApiResponse({
         status: 404,
@@ -236,8 +236,7 @@ export class AppUsersController {
     })
     @ApiParam({
         name: 'roleId',
-        description: 'Role ID to assign',
-        example: 2,
+        example: 3,
     })
     @ApiResponse({
         status: 201,
@@ -254,7 +253,7 @@ export class AppUsersController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only manage user with special permission',
+        description: 'Forbidden - can only manage own apps or requires god-mode',
     })
     @ApiResponse({
         status: 404,
@@ -300,7 +299,7 @@ export class AppUsersController {
     })
     @ApiResponse({
         status: 403,
-        description: 'Forbidden - can only manage user with special permission',
+        description: 'Forbidden - can only manage own apps or requires god-mode',
     })
     @ApiResponse({
         status: 404,
