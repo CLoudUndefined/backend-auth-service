@@ -1,7 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PermissionResponseDto } from 'src/app-permissions/api/dto/permission-response.dto';
+import { ApplicationRoleWithPermissionsModel } from 'src/types/application-role.types';
 
 export class AppRoleResponseDto {
+    constructor(data: ApplicationRoleWithPermissionsModel) {
+        this.id = data.id;
+        this.name = data.name;
+        this.description = data.description;
+        this.permissions = data.permissions.map((permission) => {
+            return new PermissionResponseDto(permission);
+        });
+        this.createdAt = data.createdAt;
+        this.updatedAt = data.updatedAt;
+    }
     @ApiProperty({
         example: 1,
         description: 'Role ID',
