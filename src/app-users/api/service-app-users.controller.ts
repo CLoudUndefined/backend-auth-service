@@ -14,7 +14,7 @@ import { AppUserResponseDto } from './dto/app-user-response.dto';
 import { MessageResponseDto } from 'src/common/api/dto/message-response.dto';
 import { UpdateAppUserRequestDto } from './dto/update-app-user-request.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AppRoleResponseDto } from 'src/app-roles/dto/app-role-response.dto';
+import { AppRoleResponseDto } from 'src/app-roles/api/dto/app-role-response.dto';
 import { GetAppUsersQueryDto } from './dto/get-app-users-query.dto';
 
 @ApiTags('Service (App Users)')

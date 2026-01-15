@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AppAuthController } from './app-auth.controller';
+import { AppAuthController } from './api/app-auth.controller';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { StringValue } from 'ms';
-import { AppAuthService } from './app-auth.service';
+import { AppAuthService } from './service/app-auth.service';
 
 @Module({
     imports: [

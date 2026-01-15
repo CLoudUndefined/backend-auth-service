@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, NotImplementedException, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AppUserResponseDto } from 'src/app-users/dto/app-user-response.dto';
+import { AppUserResponseDto } from 'src/app-users/api/dto/app-user-response.dto';
 import { ChangePasswordRequestDto } from 'src/common/api/dto/auth/change-password-request.dto';
 import { LoginResponseDto } from 'src/common/api/dto/auth/login-response.dto';
 import { LoginRequestDto } from 'src/common/api/dto/auth/login-request.dto';
