@@ -13,10 +13,13 @@ import { MessageResponseDto } from 'src/common/api/dto/message-response.dto';
 import { AddRecoveryRequestDto } from 'src/common/api/dto/auth/add-recovery-request.dto';
 import { ListRecoveryResponseDto } from 'src/common/api/dto/auth/list-recovery-response.dto';
 import { RefreshTokenRequestDto } from 'src/common/api/dto/auth/refresh-token-request.dto';
+import { AppAuthService } from '../service/app-auth.service';
 
 @ApiTags('App (User Auth)')
 @Controller('apps/:appId/auth')
 export class AppAuthController {
+    constructor(private readonly appAuthService: AppAuthService) {}
+
     @Post('register')
     @ApiOperation({
         summary: 'Register new user in app',
@@ -47,7 +50,15 @@ export class AppAuthController {
         @Param('appId', ParseIntPipe) appId: number,
         @Body() registerDto: RegisterRequestDto,
     ): Promise<AppUserResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        const user = await this.appAuthService.register(
+            appId,
+            registerDto.email,
+            registerDto.password,
+            registerDto.recoveryAnswer,
+            registerDto.recoveryQuestion,
+        );
+
+        return new AppUserResponseDto(user);
     }
 
     @Post('login')

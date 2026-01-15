@@ -14,7 +14,7 @@ export class AppUsersRepository {
     ) {}
 
     async create(appId: number, email: string, passwordHash: string): Promise<ApplicationUserModel> {
-        return this.userModel.query().insert({
+        return this.userModel.query().insertAndFetch({
             appId,
             email,
             passwordHash,
