@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { AppsController } from './apps.controller';
-import { ServiceAppsController } from './service-apps.controller';
-import { AppsService } from './apps.service';
+import { AppsController } from './api/apps.controller';
+import { ServiceAppsController } from './api/service-apps.controller';
+import { AppsService } from './service/apps.service';
 import { EncryptionModule } from 'src/encryption/encryption.module';
 
 @Module({
