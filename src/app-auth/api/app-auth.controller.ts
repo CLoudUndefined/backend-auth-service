@@ -91,7 +91,7 @@ export class AppAuthController {
         @Param('appId', ParseIntPipe) appId: number,
         @Body() loginDto: LoginRequestDto,
     ): Promise<LoginResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        return this.appAuthService.login(appId, loginDto.email, loginDto.password);
     }
 
     @Post('change-password')
