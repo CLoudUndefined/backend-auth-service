@@ -41,7 +41,14 @@ export class AppAuthService {
         recoveryQuestion?: string,
         recoveryAnswer?: string,
     ): Promise<ApplicationUserModel> {
-        const existingUser = await this.appUsersRepository.exists(appId, email);
+        const [app, existingUser] = await Promise.all([
+            this.appsRepository.findById(appId),
+            this.appUsersRepository.exists(appId, email),
+        ]);
+
+        if (!app) {
+            throw new NotFoundException('Application not found');
+        }
 
         if (existingUser) {
             throw new ConflictException('User with this email alreadt exists');
