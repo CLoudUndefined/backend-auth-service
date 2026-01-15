@@ -42,7 +42,12 @@ export class AuthController {
         description: 'Email already exists',
     })
     async register(@Body() registerDto: RegisterRequestDto): Promise<ServiceUserResponseDto> {
-        const user = await this.authService.register(registerDto.email, registerDto.password);
+        const user = await this.authService.register(
+            registerDto.email,
+            registerDto.password,
+            registerDto.recoveryQuestion,
+            registerDto.recoveryAnswer,
+        );
         return new ServiceUserResponseDto(user);
     }
 

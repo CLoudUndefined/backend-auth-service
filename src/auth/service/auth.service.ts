@@ -32,7 +32,12 @@ export class AuthService {
         }
     }
 
-    async register(email: string, plainPassword: string): Promise<ServiceUserModel> {
+    async register(
+        email: string,
+        plainPassword: string,
+        recoveryQuestion?: string,
+        recoveryAnswer?: string,
+    ): Promise<ServiceUserModel> {
         const existingUser = await this.serviceUsersRepository.existsByEmail(email);
 
         if (existingUser) {
@@ -41,7 +46,14 @@ export class AuthService {
 
         const passwordHash = await bcrypt.hash(plainPassword, 10);
 
-        return this.serviceUsersRepository.create(email, passwordHash, false);
+        const user = await this.serviceUsersRepository.create(email, passwordHash, false);
+
+        if (recoveryQuestion && recoveryAnswer) {
+            const answerHash = await bcrypt.hash(recoveryAnswer, 10);
+            await this.serviceUsersRepository.createRecovery(user.id, recoveryQuestion, answerHash);
+        }
+
+        return user;
     }
 
     async login(email: string, plainPassword: string): Promise<AuthTokensDto> {
