@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsDefined, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class CreateAppRequestDto {
     @ApiProperty({
         example: 'My Cat Chat App',
         description: 'Name of the application. Must be unique per user.',
     })
+    @IsDefined()
     @IsNotEmpty()
     @IsString()
     @MaxLength(255)
