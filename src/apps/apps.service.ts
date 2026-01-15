@@ -6,11 +6,9 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 import { AppsRepository } from 'src/database/repositories/apps.repository';
-import { CreateAppRequestDto } from './dto/create-app-request.dto';
 import { EncryptionService } from 'src/encryption/encryption.service';
 import * as crypto from 'crypto';
 import { ApplicationWithOwnerModel } from 'src/types/application.types';
-import { UpdateAppRequestDto } from './dto/update-app-request.dto';
 
 @Injectable()
 export class AppsService {
@@ -23,8 +21,8 @@ export class AppsService {
         return this.encryptionService.encrypt(crypto.randomBytes(64).toString('hex'));
     }
 
-    async create(ownerId: number, createAppDto: CreateAppRequestDto): Promise<ApplicationWithOwnerModel> {
-        const isAppExist = await this.appsRepository.exists(ownerId, createAppDto.name);
+    async create(ownerId: number, name: string, description?: string): Promise<ApplicationWithOwnerModel> {
+        const isAppExist = await this.appsRepository.exists(ownerId, name);
 
         if (isAppExist) {
             throw new ConflictException('Application with this name already exists');
@@ -32,9 +30,9 @@ export class AppsService {
 
         const app = await this.appsRepository.createWithOwner(
             ownerId,
-            createAppDto.name,
+            name,
             this.generateEncryptedSecret(),
-            createAppDto.description,
+            description,
         );
 
         return app;
@@ -62,15 +60,16 @@ export class AppsService {
         userId: number,
         isGod: boolean,
         appId: number,
-        updateApp: UpdateAppRequestDto,
+        name?: string,
+        description?: string,
     ): Promise<ApplicationWithOwnerModel> {
         await this.findAppById(userId, isGod, appId);
 
-        if (!updateApp.description && !updateApp.name) {
+        if (!description && !name) {
             throw new BadRequestException('At least one field (name or description) must be provided');
         }
 
-        const updatedApp = await this.appsRepository.updateWithOwner(appId, updateApp);
+        const updatedApp = await this.appsRepository.updateWithOwner(appId, { name, description });
 
         if (!updatedApp) {
             throw new NotFoundException('Application not found');
