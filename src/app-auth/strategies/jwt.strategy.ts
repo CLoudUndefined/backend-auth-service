@@ -1,13 +1,12 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtSecretRequestType, JwtService } from '@nestjs/jwt';
-import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy, VerifiedCallback } from 'passport-jwt';
+import { ExtractJwt, Strategy } from 'passport-jwt';
 import { EncryptionService } from 'src/encryption/encryption.service';
 import { AuthenticatedAppUser } from '../interfaces/authenticated-app-user.interface';
 import { AppsRepository } from 'src/database/repositories/apps.repository';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
 import { AppUsersRepository } from 'src/database/repositories/app-users.repository';
-import { ValidationError } from 'objection';
+import { PassportStrategy } from '@nestjs/passport';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-app') {
@@ -26,7 +25,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-app') {
                 done: (err: Error | null, secretOrKey?: string | Buffer) => void,
             ): Promise<void> => {
                 try {
-                    const decoded = this.jwtService.decode(rawJwtToken) as AuthenticatedAppUser;
+                    const decoded = this.jwtService.decode(rawJwtToken) as JwtPayload;
 
                     const app = await this.appsRepository.findById(decoded.appId);
                     if (!app) {
