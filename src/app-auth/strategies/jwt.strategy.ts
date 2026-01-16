@@ -25,7 +25,11 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-app') {
                 done: (err: Error | null, secretOrKey?: string | Buffer) => void,
             ): Promise<void> => {
                 try {
-                    const decoded = this.jwtService.decode(rawJwtToken) as JwtPayload;
+                    const decoded: JwtPayload = this.jwtService.decode(rawJwtToken);
+
+                    if (!decoded || !decoded.appId) {
+                        throw new UnauthorizedException('Invalid token');
+                    }
 
                     const app = await this.appsRepository.findById(decoded.appId);
                     if (!app) {
@@ -41,7 +45,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-app') {
     }
 
     async validate(payload: JwtPayload): Promise<AuthenticatedAppUser> {
-        const user = await this.appUsersRepository.findById(payload.sub);
+        const user = await this.appUsersRepository.findByIdInApp(payload.appId, payload.sub);
 
         if (!user) {
             throw new UnauthorizedException('User not found');
