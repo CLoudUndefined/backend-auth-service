@@ -5,6 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { StringValue } from 'ms';
 import { AppAuthService } from './service/app-auth.service';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
     imports: [
@@ -20,6 +21,6 @@ import { AppAuthService } from './service/app-auth.service';
         }),
     ],
     controllers: [AppAuthController],
-    providers: [AppAuthService],
+    providers: [AppAuthService, JwtStrategy],
 })
 export class AppAuthModule {}
