@@ -88,6 +88,10 @@ export class AppAuthController {
         description: 'Invalid credentials',
     })
     @ApiResponse({
+        status: 403,
+        description: 'User is banned',
+    })
+    @ApiResponse({
         status: 404,
         description: 'App not found',
     })
@@ -111,7 +115,7 @@ export class AppAuthController {
     })
     @ApiResponse({
         status: 200,
-        description: 'Password changed',
+        description: 'Password changed successfully',
         type: MessageResponseDto,
     })
     @ApiResponse({
@@ -164,6 +168,10 @@ export class AppAuthController {
         description: 'Invalid or expired Refresh Token',
     })
     @ApiResponse({
+        status: 403,
+        description: 'User is banned',
+    })
+    @ApiResponse({
         status: 404,
         description: 'App not found',
     })
@@ -183,7 +191,7 @@ export class AppAuthController {
     })
     @ApiResponse({
         status: 201,
-        description: 'Recovery question added',
+        description: 'Recovery question added successfully',
         type: MessageResponseDto,
     })
     @ApiResponse({
@@ -196,7 +204,7 @@ export class AppAuthController {
     })
     @ApiResponse({
         status: 404,
-        description: 'App not found',
+        description: 'App or user not found',
     })
     async addRecovery(
         @AppUser() user: ApplicationUserModel,
@@ -231,7 +239,7 @@ export class AppAuthController {
     })
     @ApiResponse({
         status: 404,
-        description: 'App not found',
+        description: 'App or user not found',
     })
     async listRecovery(
         @AppUser() user: ApplicationUserModel,
@@ -285,11 +293,19 @@ export class AppAuthController {
     })
     @ApiResponse({
         status: 400,
-        description: 'Wrong answer or invalid data',
+        description: 'Validation failed',
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'Invalid credentials',
+    })
+    @ApiResponse({
+        status: 403,
+        description: 'Recovery question does not belong to this user',
     })
     @ApiResponse({
         status: 404,
-        description: 'App not found',
+        description: 'App or user not found',
     })
     async resetPasswordByRecovery(
         @Param('appId', ParseIntPipe) appId: number,
@@ -322,7 +338,7 @@ export class AppAuthController {
     })
     @ApiResponse({
         status: 200,
-        description: 'Recovery question updated',
+        description: 'Recovery question updated successfully',
         type: MessageResponseDto,
     })
     @ApiResponse({
@@ -334,8 +350,12 @@ export class AppAuthController {
         description: 'Unauthorized',
     })
     @ApiResponse({
+        status: 403,
+        description: 'Recovery question does not belong to this user',
+    })
+    @ApiResponse({
         status: 404,
-        description: 'App or recovery question not found',
+        description: 'App, user or recovery question not found',
     })
     async updateRecovery(
         @AppUser() user: ApplicationUserModel,
@@ -371,7 +391,7 @@ export class AppAuthController {
     })
     @ApiResponse({
         status: 200,
-        description: 'Recovery question removed',
+        description: 'Recovery question removed successfully',
         type: MessageResponseDto,
     })
     @ApiResponse({
@@ -383,8 +403,12 @@ export class AppAuthController {
         description: 'Unauthorized',
     })
     @ApiResponse({
+        status: 403,
+        description: 'Recovery question does not belong to this user',
+    })
+    @ApiResponse({
         status: 404,
-        description: 'App or recovery question not found',
+        description: 'App, user or recovery question not found',
     })
     async removeRecovery(
         @AppUser() user: ApplicationUserModel,
