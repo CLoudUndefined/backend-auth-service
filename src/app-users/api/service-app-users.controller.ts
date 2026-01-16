@@ -9,6 +9,7 @@ import {
     Post,
     Put,
     Query,
+    UseGuards,
 } from '@nestjs/common';
 import { AppUserResponseDto } from './dto/app-user-response.dto';
 import { MessageResponseDto } from 'src/common/api/dto/message-response.dto';
@@ -16,12 +17,21 @@ import { UpdateAppUserRequestDto } from './dto/update-app-user-request.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AppRoleResponseDto } from 'src/app-roles/api/dto/app-role-response.dto';
 import { GetAppUsersQueryDto } from './dto/get-app-users-query.dto';
+import { JwtServiceAuthGuard } from 'src/auth/guards/jwt-service-auth.guard';
+import { AppUsersService } from '../service/app-users.service';
+import { AppUserWithRolesResponseDto } from './dto/app-user-with-roles-response.dto';
+import { ServiceUser } from 'src/common/decorators/service-user.decorator';
+import { ServiceUserModel } from 'src/database/models/service-user.model';
+import { AppUserWithRolesAndPermissionsResponseDto } from './dto/app-user-with-roles-and-permissions.dto';
 
 @ApiTags('Service (App Users)')
 @ApiBearerAuth('JWT-auth-service')
 @Controller('service/apps/:appId/users')
 export class ServiceAppUsersController {
+    constructor(private readonly appUsersService: AppUsersService) {}
+
     @Get()
+    @UseGuards(JwtServiceAuthGuard)
     @ApiOperation({
         summary: 'List users of an application',
         description: 'Retrieves all registered users for the specific application. Optionally filter by role.',
@@ -52,14 +62,19 @@ export class ServiceAppUsersController {
         status: 404,
         description: 'App not found',
     })
-    async findAll(
+    async listUsers(
+        @ServiceUser() user: ServiceUserModel,
         @Param('appId', ParseIntPipe) appId: number,
         @Query() query: GetAppUsersQueryDto,
-    ): Promise<AppUserResponseDto[]> {
-        throw new NotImplementedException('Logic not implemented yet');
+    ): Promise<AppUserWithRolesResponseDto[]> {
+        const appUsers = await this.appUsersService.listUsers(appId, user.id, user.isGod, query.roleId);
+        return appUsers.map((appUser) => {
+            return new AppUserWithRolesResponseDto(appUser);
+        });
     }
 
     @Get(':userId')
+    @UseGuards(JwtServiceAuthGuard)
     @ApiOperation({
         summary: 'Get specific app user',
         description: 'Returns details of a registered user in the app.',
@@ -93,14 +108,17 @@ export class ServiceAppUsersController {
         status: 404,
         description: 'App or User not found',
     })
-    async findOne(
+    async getProfile(
+        @ServiceUser() user: ServiceUserModel,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
     ): Promise<AppUserResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        const appUser = await this.appUsersService.getUser(appId, user.id, user.isGod, userId);
+        return new AppUserWithRolesAndPermissionsResponseDto(appUser);
     }
 
     @Put(':userId')
+    @UseGuards(JwtServiceAuthGuard)
     @ApiOperation({
         summary: 'Update app user',
         description: 'Updates user email.',
@@ -136,17 +154,26 @@ export class ServiceAppUsersController {
     })
     @ApiResponse({
         status: 409,
-        description: 'Conflict - Email already exists',
+        description: 'Conflict',
     })
-    async update(
+    async updateUser(
+        @ServiceUser() user: ServiceUserModel,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
-        @Body() updateDto: UpdateAppUserRequestDto,
+        @Body() updateAppUserDto: UpdateAppUserRequestDto,
     ): Promise<AppUserResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        const appUser = await this.appUsersService.updateUser(
+            appId,
+            user.id,
+            user.isGod,
+            userId,
+            updateAppUserDto.email,
+        );
+        return new AppUserResponseDto(appUser);
     }
 
     @Delete(':userId')
+    @UseGuards(JwtServiceAuthGuard)
     @ApiOperation({
         summary: 'Delete app user',
         description: 'Removes a user from the application.',
@@ -161,7 +188,7 @@ export class ServiceAppUsersController {
     })
     @ApiResponse({
         status: 200,
-        description: 'User deleted',
+        description: 'User deleted successfully',
         type: MessageResponseDto,
     })
     @ApiResponse({
@@ -176,11 +203,14 @@ export class ServiceAppUsersController {
         status: 404,
         description: 'App or User not found',
     })
-    async remove(
+    async deleteUser(
+        @ServiceUser() user: ServiceUserModel,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
     ): Promise<MessageResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        await this.appUsersService.deleteUser(appId, user.id, user.isGod, userId);
+
+        return { message: 'user deleted successfully' };
     }
 
     @Get(':userId/roles')
