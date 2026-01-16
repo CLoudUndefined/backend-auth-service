@@ -30,6 +30,10 @@ export class AppUsersRepository {
         return this.userModel.query().findOne({ appId, email });
     }
 
+    async findByIdInApp(appId: number, id: number): Promise<ApplicationUserModel | undefined> {
+        return this.userModel.query().findOne({ appId, id });
+    }
+
     async findAllByApp(appId: number): Promise<ApplicationUserModel[]> {
         return this.userModel.query().where({ appId });
     }
