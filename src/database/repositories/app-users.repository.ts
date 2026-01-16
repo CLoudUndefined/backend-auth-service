@@ -3,6 +3,10 @@ import type { ModelClass } from 'objection';
 import { ApplicationUserRecoveryModel } from 'src/database/models/application-user-recovery.model';
 import { ApplicationUserRefreshTokenModel } from 'src/database/models/application-user-refresh-tokens.model';
 import { ApplicationUserModel } from 'src/database/models/application-user.model';
+import {
+    ApplicationUserWithRolesAndPermissionsModel,
+    ApplicationUserWithRolesModel,
+} from 'src/types/application-user.types';
 
 @Injectable()
 export class AppUsersRepository {
@@ -34,16 +38,37 @@ export class AppUsersRepository {
         return this.userModel.query().findOne({ appId, id });
     }
 
+    async findByIdInAppWithRolesAndPermissions(
+        appId: number,
+        id: number,
+    ): Promise<ApplicationUserWithRolesAndPermissionsModel | undefined> {
+        return await this.userModel
+            .query()
+            .findOne({ appId, id })
+            .withGraphFetched('roles.permissions')
+            .castTo<ApplicationUserWithRolesAndPermissionsModel>();
+    }
+
     async findAllByApp(appId: number): Promise<ApplicationUserModel[]> {
         return this.userModel.query().where({ appId });
     }
 
-    async findUsersByRole(appId: number, roleId: number): Promise<ApplicationUserModel[]> {
-        return this.userModel
+    async findAllByAppWithRoles(appId: number): Promise<ApplicationUserWithRolesModel[]> {
+        return await this.userModel
+            .query()
+            .where({ appId })
+            .withGraphFetched('roles')
+            .castTo<ApplicationUserWithRolesModel[]>();
+    }
+
+    async findUsersByRoleWithRoles(appId: number, roleId: number): Promise<ApplicationUserWithRolesModel[]> {
+        const users = await this.userModel
             .query()
             .where({ appId })
             .whereExists(this.userModel.relatedQuery('roles').where('applicationRoles.id', roleId))
-            .withGraphFetched('roles.permissions');
+            .withGraphFetched('roles')
+            .castTo<ApplicationUserWithRolesModel[]>();
+        return users;
     }
 
     async update(
