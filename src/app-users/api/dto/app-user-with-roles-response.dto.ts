@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { AppRoleResponseDto } from 'src/app-roles/api/dto/app-role-response.dto';
-import { ApplicationUserWithRolesAndPermissionsModel } from 'src/types/application-user.types';
+import { ApplicationUserWithRolesModel } from 'src/types/application-user.types';
 
 export class AppUserWithRolesResponseDto {
-    constructor(data: ApplicationUserWithRolesAndPermissionsModel) {
+    constructor(data: ApplicationUserWithRolesModel) {
         this.id = data.id;
         this.email = data.email;
         this.roles = data.roles.map((role) => {

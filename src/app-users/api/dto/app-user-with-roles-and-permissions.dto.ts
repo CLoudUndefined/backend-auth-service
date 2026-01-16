@@ -1,10 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ApplicationUserModel } from 'src/database/models/application-user.model';
+import { AppRoleResponseDto } from 'src/app-roles/api/dto/app-role-response.dto';
+import { AppRoleWithPermissionsResponseDto } from 'src/app-roles/api/dto/app-role-with-permissions-response.dto';
+import { ApplicationUserWithRolesAndPermissionsModel } from 'src/types/application-user.types';
 
-export class AppUserResponseDto {
-    constructor(data: ApplicationUserModel) {
+export class AppUserWithRolesAndPermissionsResponseDto {
+    constructor(data: ApplicationUserWithRolesAndPermissionsModel) {
         this.id = data.id;
         this.email = data.email;
+        this.roles = data.roles.map((role) => {
+            return new AppRoleWithPermissionsResponseDto(role);
+        });
         this.createdAt = data.createdAt;
         this.updatedAt = data.updatedAt;
     }
@@ -20,6 +25,13 @@ export class AppUserResponseDto {
         description: 'User email',
     })
     email: string;
+
+    @ApiProperty({
+        type: AppRoleResponseDto,
+        description: 'Assigned roles',
+        isArray: true,
+    })
+    roles: AppRoleResponseDto[];
 
     @ApiProperty({
         example: '2025-11-23T12:34:56.000Z',
