@@ -121,6 +121,10 @@ export class AppUsersRepository {
         });
     }
 
+    async findRecoveryById(recoveryId: number): Promise<ApplicationUserRecoveryModel | undefined> {
+        return this.recoveryModel.query().findById(recoveryId);
+    }
+
     async findRecoveriesByUserId(userId: number): Promise<ApplicationUserRecoveryModel[]> {
         return this.recoveryModel.query().where({ userId });
     }

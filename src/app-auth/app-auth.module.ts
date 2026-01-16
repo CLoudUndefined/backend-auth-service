@@ -5,6 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { StringValue } from 'ms';
 import { AppAuthService } from './service/app-auth.service';
+import { EncryptionModule } from 'src/encryption/encryption.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
@@ -19,6 +20,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
                 },
             }),
         }),
+        EncryptionModule,
     ],
     controllers: [AppAuthController],
     providers: [AppAuthService, JwtStrategy],

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, NotImplementedException, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AppUserResponseDto } from 'src/app-users/api/dto/app-user-response.dto';
 import { ChangePasswordRequestDto } from 'src/common/api/dto/auth/change-password-request.dto';
@@ -14,6 +14,10 @@ import { AddRecoveryRequestDto } from 'src/common/api/dto/auth/add-recovery-requ
 import { ListRecoveryResponseDto } from 'src/common/api/dto/auth/list-recovery-response.dto';
 import { RefreshTokenRequestDto } from 'src/common/api/dto/auth/refresh-token-request.dto';
 import { AppAuthService } from '../service/app-auth.service';
+import { JwtAppAuthGuard } from '../guards/jwt-app-auth.guard';
+import { AppUser } from 'src/common/decorators/app-user.decorator';
+import { ApplicationUserModel } from 'src/database/models/application-user.model';
+import { RemoveRecoveryRequestDto } from 'src/common/api/dto/auth/remove-recovery-request.dto';
 
 @ApiTags('App (User Auth)')
 @Controller('apps/:appId/auth')
@@ -54,8 +58,8 @@ export class AppAuthController {
             appId,
             registerDto.email,
             registerDto.password,
-            registerDto.recoveryAnswer,
             registerDto.recoveryQuestion,
+            registerDto.recoveryAnswer,
         );
 
         return new AppUserResponseDto(user);
@@ -95,6 +99,7 @@ export class AppAuthController {
     }
 
     @Post('change-password')
+    @UseGuards(JwtAppAuthGuard)
     @ApiBearerAuth('JWT-auth-app')
     @ApiOperation({
         summary: 'Change password',
@@ -119,13 +124,21 @@ export class AppAuthController {
     })
     @ApiResponse({
         status: 404,
-        description: 'App not found',
+        description: 'App or user not found',
     })
     async changePassword(
+        @AppUser() user: ApplicationUserModel,
         @Param('appId', ParseIntPipe) appId: number,
         @Body() changePasswordDto: ChangePasswordRequestDto,
     ): Promise<MessageResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        await this.appAuthService.changePassword(
+            appId,
+            user.id,
+            changePasswordDto.oldPassword,
+            changePasswordDto.newPassword,
+        );
+
+        return { message: 'Password changed successfully' };
     }
 
     @Post('refresh')
@@ -154,14 +167,15 @@ export class AppAuthController {
         status: 404,
         description: 'App not found',
     })
-    async refresh(
+    async refreshToken(
         @Param('appId', ParseIntPipe) appId: number,
-        @Body() refreshDto: RefreshTokenRequestDto,
+        @Body() refreshTokenDto: RefreshTokenRequestDto,
     ): Promise<LoginResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        return this.appAuthService.refreshToken(appId, refreshTokenDto.refreshToken);
     }
 
     @Post('recovery')
+    @UseGuards(JwtAppAuthGuard)
     @ApiBearerAuth('JWT-auth-app')
     @ApiOperation({
         summary: 'Add recovery question',
@@ -185,13 +199,22 @@ export class AppAuthController {
         description: 'App not found',
     })
     async addRecovery(
+        @AppUser() user: ApplicationUserModel,
         @Param('appId', ParseIntPipe) appId: number,
-        @Body() addDto: AddRecoveryRequestDto,
+        @Body() addRecoveryDto: AddRecoveryRequestDto,
     ): Promise<MessageResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        await this.appAuthService.addRecovery(
+            appId,
+            user.id,
+            addRecoveryDto.recoveryQuestion,
+            addRecoveryDto.recoveryAnswer,
+        );
+
+        return { message: 'Recovery question added successfully' };
     }
 
     @Get('recovery')
+    @UseGuards(JwtAppAuthGuard)
     @ApiBearerAuth('JWT-auth-app')
     @ApiOperation({
         summary: 'List recovery questions',
@@ -210,8 +233,11 @@ export class AppAuthController {
         status: 404,
         description: 'App not found',
     })
-    async listRecovery(@Param('appId', ParseIntPipe) appId: number): Promise<ListRecoveryResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+    async listRecovery(
+        @AppUser() user: ApplicationUserModel,
+        @Param('appId', ParseIntPipe) appId: number,
+    ): Promise<ListRecoveryResponseDto> {
+        return this.appAuthService.listRecovery(appId, user.id);
     }
 
     @Post('recovery/ask')
@@ -234,13 +260,13 @@ export class AppAuthController {
     })
     @ApiResponse({
         status: 404,
-        description: 'App not found',
+        description: 'App or user not found',
     })
-    async recoveryAsk(
+    async askRecoveryQuestions(
         @Param('appId', ParseIntPipe) appId: number,
         @Body() recoveryAskDto: RecoveryAskRequestDto,
     ): Promise<RecoveryAskResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        return this.appAuthService.askRecoveryQuestions(appId, recoveryAskDto.email);
     }
 
     @Post('recovery/reset')
@@ -265,14 +291,23 @@ export class AppAuthController {
         status: 404,
         description: 'App not found',
     })
-    async recoveryReset(
+    async resetPasswordByRecovery(
         @Param('appId', ParseIntPipe) appId: number,
         @Body() recoveryResetDto: RecoveryResetRequestDto,
     ): Promise<MessageResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        await this.appAuthService.resetPasswordByRecovery(
+            appId,
+            recoveryResetDto.recoveryId,
+            recoveryResetDto.email,
+            recoveryResetDto.answer,
+            recoveryResetDto.newPassword,
+        );
+
+        return { message: 'Password reset successfully' };
     }
 
     @Put('recovery/:recoveryId')
+    @UseGuards(JwtAppAuthGuard)
     @ApiBearerAuth('JWT-auth-app')
     @ApiOperation({
         summary: 'Update recovery question',
@@ -303,14 +338,25 @@ export class AppAuthController {
         description: 'App or recovery question not found',
     })
     async updateRecovery(
+        @AppUser() user: ApplicationUserModel,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('recoveryId', ParseIntPipe) recoveryId: number,
-        @Body() updateDto: UpdateRecoveryRequestDto,
+        @Body() updateRecoveryDto: UpdateRecoveryRequestDto,
     ): Promise<MessageResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        await this.appAuthService.updateRecovery(
+            appId,
+            user.id,
+            recoveryId,
+            updateRecoveryDto.currentPassword,
+            updateRecoveryDto.newQuestion,
+            updateRecoveryDto.newAnswer,
+        );
+
+        return { message: 'Recovery question updated successfully' };
     }
 
     @Delete('recovery/:recoveryId')
+    @UseGuards(JwtAppAuthGuard)
     @ApiBearerAuth('JWT-auth-app')
     @ApiOperation({
         summary: 'Remove recovery question',
@@ -341,9 +387,13 @@ export class AppAuthController {
         description: 'App or recovery question not found',
     })
     async removeRecovery(
+        @AppUser() user: ApplicationUserModel,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('recoveryId', ParseIntPipe) recoveryId: number,
+        @Body() removeRecoveryDto: RemoveRecoveryRequestDto,
     ): Promise<MessageResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        await this.appAuthService.removeRecovery(appId, user.id, recoveryId, removeRecoveryDto.currentPassword);
+
+        return { message: 'Recovery question removed successfully' };
     }
 }
