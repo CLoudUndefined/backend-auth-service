@@ -22,6 +22,10 @@ export class AppRolesRepository {
         return this.model.query().where({ appId });
     }
 
+    async findByIdInApp(appId: number, roleId: number): Promise<ApplicationRoleModel | undefined> {
+        return this.model.query().findOne({ appId, id: roleId });
+    }
+
     async update(
         id: number,
         data: Partial<Pick<ApplicationRoleModel, 'name' | 'description'>>,

@@ -6,6 +6,7 @@ import {
     ApplicationUserWithRolesModel,
 } from 'src/types/application-user.types';
 import { AppsRepository } from 'src/database/repositories/apps.repository';
+import { ApplicationRoleWithPermissionsModel } from 'src/types/application-role.types';
 
 @Injectable()
 export class AppUsersService {
@@ -124,5 +125,84 @@ export class AppUsersService {
         }
 
         await this.appUsersRepository.delete(appUserId);
+    }
+
+    async getUserRoles(
+        appId: number,
+        serviceUserId: number,
+        isGod: boolean,
+        appUserId: number,
+    ): Promise<ApplicationRoleWithPermissionsModel[]> {
+        const app = await this.appsRepository.findById(appId);
+
+        if (!app) {
+            throw new NotFoundException('Application not found');
+        }
+
+        if (!isGod && app.ownerId !== serviceUserId) {
+            throw new ForbiddenException('You can only manage users in your own applications');
+        }
+
+        const user = await this.appUsersRepository.findByIdInAppWithRolesAndPermissions(appId, appUserId);
+
+        if (!user) {
+            throw new NotFoundException('User not found in this application');
+        }
+
+        return user.roles;
+    }
+
+    async addRoleToUser(
+        appId: number,
+        serviceUserId: number,
+        isGod: boolean,
+        appUserId: number,
+        roleId: number,
+    ): Promise<void> {
+        const [app, hasRole] = await Promise.all([
+            this.appsRepository.findById(appId),
+            this.appUsersRepository.hasRole(appUserId, roleId),
+        ]);
+
+        if (!app) {
+            throw new NotFoundException('Application not found');
+        }
+
+        if (!isGod && app.ownerId !== serviceUserId) {
+            throw new ForbiddenException('You can only manage users in your own applications');
+        }
+
+        if (hasRole) {
+            throw new ConflictException('User already has this role');
+        }
+
+        await this.appUsersRepository.addRole(appUserId, roleId);
+    }
+
+    async removeRoleFromUser(
+        appId: number,
+        serviceUserId: number,
+        isGod: boolean,
+        appUserId: number,
+        roleId: number,
+    ): Promise<void> {
+        const [app, hasRole] = await Promise.all([
+            this.appsRepository.findById(appId),
+            this.appUsersRepository.hasRole(appUserId, roleId),
+        ]);
+
+        if (!app) {
+            throw new NotFoundException('Application not found');
+        }
+
+        if (!isGod && app.ownerId !== serviceUserId) {
+            throw new ForbiddenException('You can only manage users in your own applications');
+        }
+
+        if (!hasRole) {
+            throw new ConflictException('User does not have this role');
+        }
+
+        await this.appUsersRepository.removeRole(appUserId, roleId);
     }
 }

@@ -7,6 +7,7 @@ import {
     ApplicationUserWithRolesAndPermissionsModel,
     ApplicationUserWithRolesModel,
 } from 'src/types/application-user.types';
+import { ApplicationUserRoleModel } from '../models/application-user-role.model';
 
 @Injectable()
 export class AppUsersRepository {
@@ -15,6 +16,7 @@ export class AppUsersRepository {
         @Inject(ApplicationUserRecoveryModel) private readonly recoveryModel: ModelClass<ApplicationUserRecoveryModel>,
         @Inject(ApplicationUserRefreshTokenModel)
         private readonly refreshTokenModel: ModelClass<ApplicationUserRefreshTokenModel>,
+        @Inject(ApplicationUserRoleModel) private readonly userRoleModel: ModelClass<ApplicationUserRoleModel>,
     ) {}
 
     async create(appId: number, email: string, passwordHash: string): Promise<ApplicationUserModel> {
@@ -167,6 +169,12 @@ export class AppUsersRepository {
 
     async exists(appId: number, email: string): Promise<boolean> {
         const result = await this.userModel.query().where({ appId, email }).select(1).first();
+        return !!result;
+    }
+
+    async hasRole(userId: number, roleId: number): Promise<boolean> {
+        const result = await this.userRoleModel.query().findOne({ userId, roleId });
+
         return !!result;
     }
 }

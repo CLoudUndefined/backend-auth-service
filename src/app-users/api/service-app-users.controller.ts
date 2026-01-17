@@ -1,21 +1,8 @@
-import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    NotImplementedException,
-    Param,
-    ParseIntPipe,
-    Post,
-    Put,
-    Query,
-    UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { AppUserResponseDto } from './dto/app-user-response.dto';
 import { MessageResponseDto } from 'src/common/api/dto/message-response.dto';
 import { UpdateAppUserRequestDto } from './dto/update-app-user-request.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AppRoleResponseDto } from 'src/app-roles/api/dto/app-role-response.dto';
 import { GetAppUsersQueryDto } from './dto/get-app-users-query.dto';
 import { JwtServiceAuthGuard } from 'src/auth/guards/jwt-service-auth.guard';
 import { AppUsersService } from '../service/app-users.service';
@@ -23,6 +10,7 @@ import { AppUserWithRolesResponseDto } from './dto/app-user-with-roles-response.
 import { ServiceUser } from 'src/common/decorators/service-user.decorator';
 import { ServiceUserModel } from 'src/database/models/service-user.model';
 import { AppUserWithRolesAndPermissionsResponseDto } from './dto/app-user-with-roles-and-permissions.dto';
+import { AppRoleWithPermissionsResponseDto } from 'src/app-roles/api/dto/app-role-with-permissions-response.dto';
 
 @ApiTags('Service (App Users)')
 @ApiBearerAuth('JWT-auth-service')
@@ -209,11 +197,11 @@ export class ServiceAppUsersController {
         @Param('userId', ParseIntPipe) userId: number,
     ): Promise<MessageResponseDto> {
         await this.appUsersService.deleteUser(appId, user.id, user.isGod, userId);
-
-        return { message: 'user deleted successfully' };
+        return { message: 'User deleted successfully' };
     }
 
     @Get(':userId/roles')
+    @UseGuards(JwtServiceAuthGuard)
     @ApiOperation({
         summary: 'Get user roles',
         description: 'Retrieves all roles assigned to the user.',
@@ -229,7 +217,7 @@ export class ServiceAppUsersController {
     @ApiResponse({
         status: 200,
         description: 'List of assigned roles',
-        type: AppRoleResponseDto,
+        type: AppRoleWithPermissionsResponseDto,
         isArray: true,
     })
     @ApiResponse({
@@ -245,13 +233,18 @@ export class ServiceAppUsersController {
         description: 'App or User not found',
     })
     async getUserRoles(
+        @ServiceUser() user: ServiceUserModel,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
-    ): Promise<AppRoleResponseDto[]> {
-        throw new NotImplementedException('Logic not implemented yet');
+    ): Promise<AppRoleWithPermissionsResponseDto[]> {
+        const roles = await this.appUsersService.getUserRoles(appId, user.id, user.isGod, userId);
+        return roles.map((role) => {
+            return new AppRoleWithPermissionsResponseDto(role);
+        });
     }
 
     @Post(':userId/roles/:roleId')
+    @UseGuards(JwtServiceAuthGuard)
     @ApiOperation({
         summary: 'Add role to user',
         description: 'Assigns a specific role to the user.',
@@ -294,14 +287,17 @@ export class ServiceAppUsersController {
         description: 'Conflict - User already has this role',
     })
     async addRoleToUser(
+        @ServiceUser() user: ServiceUserModel,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<MessageResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        await this.appUsersService.addRoleToUser(appId, user.id, user.isGod, userId, roleId);
+        return { message: 'Role added successfully' };
     }
 
     @Delete(':userId/roles/:roleId')
+    @UseGuards(JwtServiceAuthGuard)
     @ApiOperation({
         summary: 'Remove role from user',
         description: 'Removes a specific role from the user.',
@@ -336,10 +332,12 @@ export class ServiceAppUsersController {
         description: 'App, User, Role not found, or User does not have this role',
     })
     async removeRoleFromUser(
+        @ServiceUser() user: ServiceUserModel,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<MessageResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        await this.appUsersService.removeRoleFromUser(appId, user.id, user.isGod, userId, roleId);
+        return { message: 'Role removed successfully' };
     }
 }
