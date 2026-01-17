@@ -8,11 +8,13 @@ import {
 import { AppsRepository } from 'src/database/repositories/apps.repository';
 import { ApplicationRoleWithPermissionsModel } from 'src/types/application-role.types';
 import { ApplicationModel } from 'src/database/models/application.model';
+import { AppRolesRepository } from 'src/database/repositories/app-roles.repository';
 
 @Injectable()
 export class AppUsersService {
     constructor(
         private readonly appUsersRepository: AppUsersRepository,
+        private readonly appRolesRepository: AppRolesRepository,
         private readonly appsRepository: AppsRepository,
     ) {}
 
@@ -133,6 +135,11 @@ export class AppUsersService {
         const user = await this.appUsersRepository.findByIdInApp(appId, appUserId);
         if (!user) {
             throw new NotFoundException('User not found in this application');
+        }
+
+        const role = await this.appRolesRepository.findByIdInApp(appId, roleId);
+        if (!role) {
+            throw new NotFoundException('Role not found in this application');
         }
 
         const hasRole = await this.appUsersRepository.hasRole(appUserId, roleId);
