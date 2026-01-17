@@ -7,6 +7,7 @@ import {
 } from 'src/types/application-user.types';
 import { AppsRepository } from 'src/database/repositories/apps.repository';
 import { ApplicationRoleWithPermissionsModel } from 'src/types/application-role.types';
+import { ApplicationModel } from 'src/database/models/application.model';
 
 @Injectable()
 export class AppUsersService {
@@ -14,16 +15,8 @@ export class AppUsersService {
         private readonly appUsersRepository: AppUsersRepository,
         private readonly appsRepository: AppsRepository,
     ) {}
-    async findById(userId: number): Promise<ApplicationUserModel | undefined> {
-        return this.appUsersRepository.findById(userId);
-    }
 
-    async listUsers(
-        appId: number,
-        serviceUserId: number,
-        isGod: boolean,
-        roleId?: number,
-    ): Promise<ApplicationUserWithRolesModel[]> {
+    private async validateAppAccess(appId: number, serviceUserId: number, isGod: boolean): Promise<ApplicationModel> {
         const app = await this.appsRepository.findById(appId);
 
         if (!app) {
@@ -33,6 +26,17 @@ export class AppUsersService {
         if (!isGod && app.ownerId !== serviceUserId) {
             throw new ForbiddenException('You can only manage users in your own applications');
         }
+
+        return app;
+    }
+
+    async listUsers(
+        appId: number,
+        serviceUserId: number,
+        isGod: boolean,
+        roleId?: number,
+    ): Promise<ApplicationUserWithRolesModel[]> {
+        await this.validateAppAccess(appId, serviceUserId, isGod);
 
         if (roleId) {
             return this.appUsersRepository.findUsersByRoleWithRoles(appId, roleId);
@@ -47,15 +51,7 @@ export class AppUsersService {
         isGod: boolean,
         appUserId: number,
     ): Promise<ApplicationUserWithRolesAndPermissionsModel> {
-        const app = await this.appsRepository.findById(appId);
-
-        if (!app) {
-            throw new NotFoundException('Application not found');
-        }
-
-        if (!isGod && app.ownerId !== serviceUserId) {
-            throw new ForbiddenException('You can only manage users in your own applications');
-        }
+        await this.validateAppAccess(appId, serviceUserId, isGod);
 
         const user = await this.appUsersRepository.findByIdInAppWithRolesAndPermissions(appId, appUserId);
 
@@ -73,24 +69,15 @@ export class AppUsersService {
         appUserId: number,
         email: string,
     ): Promise<ApplicationUserModel> {
-        const app = await this.appsRepository.findById(appId);
+        await this.validateAppAccess(appId, serviceUserId, isGod);
 
-        if (!app) {
-            throw new NotFoundException('Application not found');
-        }
-
-        if (!isGod && app.ownerId !== serviceUserId) {
-            throw new ForbiddenException('You can only manage users in your own applications');
-        }
-
-        const user = await this.appUsersRepository.findByIdInAppWithRolesAndPermissions(appId, appUserId);
-
+        const user = await this.appUsersRepository.findByIdInApp(appId, appUserId);
         if (!user) {
             throw new NotFoundException('User not found in this application');
         }
 
         if (email === user.email) {
-            throw new ConflictException('Email already in use');
+            return user;
         }
 
         const existingUser = await this.appUsersRepository.findByEmailInApp(appId, email);
@@ -108,18 +95,9 @@ export class AppUsersService {
     }
 
     async deleteUser(appId: number, serviceUserId: number, isGod: boolean, appUserId: number): Promise<void> {
-        const app = await this.appsRepository.findById(appId);
+        await this.validateAppAccess(appId, serviceUserId, isGod);
 
-        if (!app) {
-            throw new NotFoundException('Application not found');
-        }
-
-        if (!isGod && app.ownerId !== serviceUserId) {
-            throw new ForbiddenException('You can only manage users in your own applications');
-        }
-
-        const user = await this.appUsersRepository.findByIdInAppWithRolesAndPermissions(appId, appUserId);
-
+        const user = await this.appUsersRepository.findByIdInApp(appId, appUserId);
         if (!user) {
             throw new NotFoundException('User not found in this application');
         }
@@ -133,18 +111,9 @@ export class AppUsersService {
         isGod: boolean,
         appUserId: number,
     ): Promise<ApplicationRoleWithPermissionsModel[]> {
-        const app = await this.appsRepository.findById(appId);
-
-        if (!app) {
-            throw new NotFoundException('Application not found');
-        }
-
-        if (!isGod && app.ownerId !== serviceUserId) {
-            throw new ForbiddenException('You can only manage users in your own applications');
-        }
+        await this.validateAppAccess(appId, serviceUserId, isGod);
 
         const user = await this.appUsersRepository.findByIdInAppWithRolesAndPermissions(appId, appUserId);
-
         if (!user) {
             throw new NotFoundException('User not found in this application');
         }
@@ -159,19 +128,14 @@ export class AppUsersService {
         appUserId: number,
         roleId: number,
     ): Promise<void> {
-        const [app, hasRole] = await Promise.all([
-            this.appsRepository.findById(appId),
-            this.appUsersRepository.hasRole(appUserId, roleId),
-        ]);
+        await this.validateAppAccess(appId, serviceUserId, isGod);
 
-        if (!app) {
-            throw new NotFoundException('Application not found');
+        const user = await this.appUsersRepository.findByIdInApp(appId, appUserId);
+        if (!user) {
+            throw new NotFoundException('User not found in this application');
         }
 
-        if (!isGod && app.ownerId !== serviceUserId) {
-            throw new ForbiddenException('You can only manage users in your own applications');
-        }
-
+        const hasRole = await this.appUsersRepository.hasRole(appUserId, roleId);
         if (hasRole) {
             throw new ConflictException('User already has this role');
         }
@@ -186,21 +150,16 @@ export class AppUsersService {
         appUserId: number,
         roleId: number,
     ): Promise<void> {
-        const [app, hasRole] = await Promise.all([
-            this.appsRepository.findById(appId),
-            this.appUsersRepository.hasRole(appUserId, roleId),
-        ]);
+        await this.validateAppAccess(appId, serviceUserId, isGod);
 
-        if (!app) {
-            throw new NotFoundException('Application not found');
+        const user = await this.appUsersRepository.findByIdInApp(appId, appUserId);
+        if (!user) {
+            throw new NotFoundException('User not found in this application');
         }
 
-        if (!isGod && app.ownerId !== serviceUserId) {
-            throw new ForbiddenException('You can only manage users in your own applications');
-        }
-
+        const hasRole = await this.appUsersRepository.hasRole(appUserId, roleId);
         if (!hasRole) {
-            throw new ConflictException('User does not have this role');
+            throw new NotFoundException('User does not have this role');
         }
 
         await this.appUsersRepository.removeRole(appUserId, roleId);

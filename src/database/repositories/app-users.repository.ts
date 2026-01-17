@@ -77,13 +77,7 @@ export class AppUsersRepository {
         id: number,
         data: Partial<Pick<ApplicationUserModel, 'email' | 'passwordHash' | 'isBanned'>>,
     ): Promise<ApplicationUserModel | undefined> {
-        const user = await this.userModel.query().patchAndFetchById(id, data);
-
-        if (!user) {
-            return undefined;
-        }
-
-        return this.userModel.query().findById(user.id);
+        return this.userModel.query().patchAndFetchById(id, data);
     }
 
     async delete(id: number): Promise<number> {
