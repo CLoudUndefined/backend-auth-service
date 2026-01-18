@@ -4,7 +4,7 @@ import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@ne
 
 @ApiTags('App (Role Permission)')
 @ApiBearerAuth('JWT-auth-app')
-@Controller('apps/permissions')
+@Controller('app/permissions')
 export class AppPermissionsController {
     @Get()
     @ApiOperation({

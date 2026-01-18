@@ -6,7 +6,7 @@ import { AppPermissionsService } from '../service/app-permissions.service';
 
 @ApiTags('Service (App Role Permission)')
 @ApiBearerAuth('JWT-auth-service')
-@Controller('service/apps/permissions')
+@Controller('service/permissions')
 export class ServiceAppPermissionsController {
     constructor(private readonly appPermissionsService: AppPermissionsService) {}
 
