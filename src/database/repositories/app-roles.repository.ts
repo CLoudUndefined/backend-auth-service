@@ -1,17 +1,34 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { ModelClass } from 'objection';
 import { ApplicationRoleModel } from 'src/database/models/application-role.model';
+import { ApplicationRoleWithPermissionsModel } from 'src/types/application-role.types';
+import { ApplicationUserRoleModel } from '../models/application-user-role.model';
 
 @Injectable()
 export class AppRolesRepository {
-    constructor(@Inject(ApplicationRoleModel) private readonly model: ModelClass<ApplicationRoleModel>) {}
+    constructor(
+        @Inject(ApplicationRoleModel) private readonly model: ModelClass<ApplicationRoleModel>,
+        @Inject(ApplicationUserRoleModel) private readonly userRoleModel: ModelClass<ApplicationUserRoleModel>,
+    ) {}
 
-    async create(appId: number, name: string, description?: string): Promise<ApplicationRoleModel> {
-        return this.model.query().insert({
-            appId,
-            name,
-            description,
-        });
+    async createWithPermissions(
+        appId: number,
+        name: string,
+        description?: string,
+        permissionIds: number[] = [],
+    ): Promise<ApplicationRoleWithPermissionsModel> {
+        return this.model
+            .query()
+            .insertGraphAndFetch(
+                {
+                    appId,
+                    name,
+                    description,
+                    permissions: permissionIds.map((id) => ({ id })),
+                },
+                { relate: true },
+            )
+            .castTo<ApplicationRoleWithPermissionsModel>();
     }
 
     async findById(id: number): Promise<ApplicationRoleModel | undefined> {
@@ -26,6 +43,17 @@ export class AppRolesRepository {
         return this.model.query().findOne({ appId, id: roleId });
     }
 
+    async findByIdWithPermissionsInApp(
+        appId: number,
+        roleId: number,
+    ): Promise<ApplicationRoleWithPermissionsModel | undefined> {
+        return this.model
+            .query()
+            .findOne({ appId, id: roleId })
+            .withGraphFetched('permissions')
+            .castTo<ApplicationRoleWithPermissionsModel>();
+    }
+
     async update(
         id: number,
         data: Partial<Pick<ApplicationRoleModel, 'name' | 'description'>>,
@@ -37,12 +65,12 @@ export class AppRolesRepository {
         return this.model.query().deleteById(id);
     }
 
-    async setPermissions(roleId: number, permissionIds: number[]): Promise<ApplicationRoleModel | undefined> {
+    async setPermissions(roleId: number, permissionIds: number[]): Promise<void> {
         return ApplicationRoleModel.transaction(async (trx) => {
             const role = await this.model.query(trx).findById(roleId);
 
             if (!role) {
-                return undefined;
+                return;
             }
 
             await role.$relatedQuery('permissions', trx).unrelate();
@@ -50,8 +78,21 @@ export class AppRolesRepository {
             if (permissionIds.length > 0) {
                 await role.$relatedQuery('permissions', trx).relate(permissionIds);
             }
-
-            return this.model.query(trx).findById(roleId).withGraphFetched('permissions');
         });
+    }
+
+    async existsByNameInApp(appId: number, name: string): Promise<boolean> {
+        const result = await this.model.query().where({ appId, name }).select(1).first();
+        return !!result;
+    }
+
+    async existsByIdInApp(appId: number, roleId: number): Promise<boolean> {
+        const result = await this.model.query().where({ appId, id: roleId }).select(1).first();
+        return !!result;
+    }
+
+    async hasUsers(roleId: number): Promise<boolean> {
+        const result = await this.userRoleModel.query().where('roleId', roleId).select(1).first();
+        return !!result;
     }
 }
