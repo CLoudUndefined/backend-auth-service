@@ -233,7 +233,7 @@ export class AppAuthService {
         }
 
         if (!user) {
-            throw new NotFoundException('User not found');
+            throw new NotFoundException('User not found in this application');
         }
 
         const recoveries = await this.appUsersRepository.findRecoveriesByUserId(user.id);
