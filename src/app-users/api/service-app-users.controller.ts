@@ -9,7 +9,7 @@ import { AppUsersService } from '../service/app-users.service';
 import { AppUserWithRolesResponseDto } from './dto/app-user-with-roles-response.dto';
 import { ServiceUser } from 'src/common/decorators/service-user.decorator';
 import { ServiceUserModel } from 'src/database/models/service-user.model';
-import { AppUserWithRolesAndPermissionsResponseDto } from './dto/app-user-with-roles-and-permissions.dto';
+import { AppUserWithRolesAndPermissionsResponseDto } from './dto/app-user-with-roles-and-permissions-response.dto';
 import { AppRoleWithPermissionsResponseDto } from 'src/app-roles/api/dto/app-role-with-permissions-response.dto';
 
 @ApiTags('Service (App Users)')
