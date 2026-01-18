@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, U
 import { AppUserResponseDto } from './dto/app-user-response.dto';
 import { MessageResponseDto } from 'src/common/api/dto/message-response.dto';
 import { UpdateAppUserRequestDto } from './dto/update-app-user-request.dto';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetAppUsersQueryDto } from './dto/get-app-users-query.dto';
 import { JwtServiceAuthGuard } from 'src/auth/guards/jwt-service-auth.guard';
 import { AppUsersService } from '../service/app-users.service';
@@ -28,10 +28,15 @@ export class ServiceAppUsersController {
         name: 'appId',
         example: 1,
     })
+    @ApiQuery({
+        name: 'roleId',
+        required: false,
+        type: Number,
+    })
     @ApiResponse({
         status: 200,
         description: 'List of users',
-        type: AppUserResponseDto,
+        type: AppUserWithRolesResponseDto,
         isArray: true,
     })
     @ApiResponse({
@@ -78,7 +83,7 @@ export class ServiceAppUsersController {
     @ApiResponse({
         status: 200,
         description: 'User details',
-        type: AppUserResponseDto,
+        type: AppUserWithRolesAndPermissionsResponseDto,
     })
     @ApiResponse({
         status: 400,
@@ -96,11 +101,11 @@ export class ServiceAppUsersController {
         status: 404,
         description: 'App or User not found',
     })
-    async getProfile(
+    async getUser(
         @ServiceUser() user: ServiceUserModel,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
-    ): Promise<AppUserResponseDto> {
+    ): Promise<AppUserWithRolesAndPermissionsResponseDto> {
         const appUser = await this.appUsersService.getUser(appId, user.id, user.isGod, userId);
         return new AppUserWithRolesAndPermissionsResponseDto(appUser);
     }

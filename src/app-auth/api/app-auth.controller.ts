@@ -168,7 +168,7 @@ export class AppAuthController {
     })
     @ApiResponse({
         status: 401,
-        description: 'Invalid or expired Refresh Token',
+        description: 'Invalid or expired refresh token',
     })
     @ApiResponse({
         status: 403,
@@ -255,7 +255,7 @@ export class AppAuthController {
     @HttpCode(200)
     @ApiOperation({
         summary: 'Get recovery questions',
-        description: 'Retrieves the security questions for a user within this app.',
+        description: 'Returns recovery questions by email.',
     })
     @ApiParam({
         name: 'appId',
@@ -310,7 +310,7 @@ export class AppAuthController {
     })
     @ApiResponse({
         status: 404,
-        description: 'App or user not found',
+        description: 'App not found',
     })
     async resetPasswordByRecovery(
         @Param('appId', ParseIntPipe) appId: number,
