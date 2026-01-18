@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
 import { ServiceUserResponseDto } from 'src/service-users/api/dto/service-user-response.dto';
 import { RegisterRequestDto } from 'src/common/api/dto/auth/register-request.dto';
 import { LoginRequestDto } from 'src/common/api/dto/auth/login-request.dto';
@@ -52,6 +52,7 @@ export class AuthController {
     }
 
     @Post('login')
+    @HttpCode(200)
     @ApiOperation({
         summary: 'Login to platform',
         description: 'Authenticates a service user and returns a JWT token.',
@@ -74,6 +75,7 @@ export class AuthController {
     }
 
     @Post('change-password')
+    @HttpCode(200)
     @UseGuards(JwtServiceAuthGuard)
     @ApiBearerAuth('JWT-auth-service')
     @ApiOperation({
@@ -103,6 +105,7 @@ export class AuthController {
     }
 
     @Post('refresh')
+    @HttpCode(200)
     @ApiOperation({
         summary: 'Refresh access token',
         description: 'Exchanges a valid Refresh Token for a new Access Token and Refresh Token pair.',
@@ -174,6 +177,7 @@ export class AuthController {
     }
 
     @Post('recovery/ask')
+    @HttpCode(200)
     @ApiOperation({
         summary: 'Get recovery questions',
         description: 'Retrieves the security questions for the provided email.',
@@ -192,6 +196,7 @@ export class AuthController {
     }
 
     @Post('recovery/reset')
+    @HttpCode(200)
     @ApiOperation({
         summary: 'Reset password',
         description: 'Resets the password using the answer to the security question.',
