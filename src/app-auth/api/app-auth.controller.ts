@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AppUserResponseDto } from 'src/app-users/api/dto/app-user-response.dto';
 import { ChangePasswordRequestDto } from 'src/common/api/dto/auth/change-password-request.dto';
@@ -66,6 +66,7 @@ export class AppAuthController {
     }
 
     @Post('login')
+    @HttpCode(200)
     @ApiOperation({
         summary: 'Login user into app',
         description: 'Authenticates an app-user against the specific app context.',
@@ -103,6 +104,7 @@ export class AppAuthController {
     }
 
     @Post('change-password')
+    @HttpCode(200)
     @UseGuards(JwtAppAuthGuard)
     @ApiBearerAuth('JWT-auth-app')
     @ApiOperation({
@@ -146,6 +148,7 @@ export class AppAuthController {
     }
 
     @Post('refresh')
+    @HttpCode(200)
     @ApiOperation({
         summary: 'Refresh specific app user token',
         description: 'Exchanges a valid Refresh Token for a new Access Token pair within the application context.',
@@ -249,6 +252,7 @@ export class AppAuthController {
     }
 
     @Post('recovery/ask')
+    @HttpCode(200)
     @ApiOperation({
         summary: 'Get recovery questions',
         description: 'Retrieves the security questions for a user within this app.',
@@ -278,6 +282,7 @@ export class AppAuthController {
     }
 
     @Post('recovery/reset')
+    @HttpCode(200)
     @ApiOperation({
         summary: 'Reset password',
         description: 'Resets the password using the answer to the security question.',
