@@ -1,4 +1,4 @@
-export interface AuthenticatedUser {
+export interface AuthenticatedServiceUser {
     id: number;
     email: string;
     isGod: boolean;
