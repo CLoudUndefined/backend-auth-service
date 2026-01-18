@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
 import { CreateAppRequestDto } from './dto/create-app-request.dto';
 import { AppResponseDto } from './dto/app-response.dto';
 import { UpdateAppRequestDto } from './dto/update-app-request.dto';
@@ -174,6 +174,7 @@ export class ServiceAppsController {
     }
 
     @Post(':id/regenerate')
+    @HttpCode(200)
     @UseGuards(JwtServiceAuthGuard)
     @ApiOperation({
         summary: 'Regenerate application secret',
