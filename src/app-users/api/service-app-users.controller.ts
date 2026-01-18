@@ -8,9 +8,9 @@ import { JwtServiceAuthGuard } from 'src/auth/guards/jwt-service-auth.guard';
 import { AppUsersService } from '../service/app-users.service';
 import { AppUserWithRolesResponseDto } from './dto/app-user-with-roles-response.dto';
 import { ServiceUser } from 'src/common/decorators/service-user.decorator';
-import { ServiceUserModel } from 'src/database/models/service-user.model';
 import { AppUserWithRolesAndPermissionsResponseDto } from './dto/app-user-with-roles-and-permissions-response.dto';
 import { AppRoleWithPermissionsResponseDto } from 'src/app-roles/api/dto/app-role-with-permissions-response.dto';
+import { type AuthenticatedServiceUser } from 'src/auth/interfaces/authenticated-service-user.interface';
 
 @ApiTags('Service (App Users)')
 @ApiBearerAuth('JWT-auth-service')
@@ -56,7 +56,7 @@ export class ServiceAppUsersController {
         description: 'App not found',
     })
     async listUsers(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Query() query: GetAppUsersQueryDto,
     ): Promise<AppUserWithRolesResponseDto[]> {
@@ -102,7 +102,7 @@ export class ServiceAppUsersController {
         description: 'App or User not found',
     })
     async getUser(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
     ): Promise<AppUserWithRolesAndPermissionsResponseDto> {
@@ -150,7 +150,7 @@ export class ServiceAppUsersController {
         description: 'Conflict',
     })
     async updateUser(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
         @Body() updateAppUserDto: UpdateAppUserRequestDto,
@@ -197,7 +197,7 @@ export class ServiceAppUsersController {
         description: 'App or User not found',
     })
     async deleteUser(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
     ): Promise<MessageResponseDto> {
@@ -238,7 +238,7 @@ export class ServiceAppUsersController {
         description: 'App or User not found',
     })
     async getUserRoles(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
     ): Promise<AppRoleWithPermissionsResponseDto[]> {
@@ -292,7 +292,7 @@ export class ServiceAppUsersController {
         description: 'Conflict - User already has this role',
     })
     async addRoleToUser(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
@@ -337,7 +337,7 @@ export class ServiceAppUsersController {
         description: 'App, User, Role not found, or User does not have this role',
     })
     async removeRoleFromUser(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
         @Param('roleId', ParseIntPipe) roleId: number,

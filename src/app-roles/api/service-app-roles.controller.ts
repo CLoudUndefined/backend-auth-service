@@ -18,8 +18,8 @@ import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam, ApiResponse } from '@ne
 import { AppRolesService } from '../service/app-roles.service';
 import { JwtServiceAuthGuard } from 'src/auth/guards/jwt-service-auth.guard';
 import { ServiceUser } from 'src/common/decorators/service-user.decorator';
-import { ServiceUserModel } from 'src/database/models/service-user.model';
 import { AppRoleWithPermissionsResponseDto } from './dto/app-role-with-permissions-response.dto';
+import type { AuthenticatedServiceUser } from 'src/auth/interfaces/authenticated-service-user.interface';
 
 @ApiTags('Service (App Role)')
 @ApiBearerAuth('JWT-auth-service')
@@ -63,7 +63,7 @@ export class ServiceAppRolesController {
         description: 'Conflict',
     })
     async createRole(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Body() createAppRoleDto: CreateAppRoleRequestDto,
     ): Promise<AppRoleWithPermissionsResponseDto> {
@@ -107,7 +107,7 @@ export class ServiceAppRolesController {
         description: 'App not found',
     })
     async getAllRoles(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
     ): Promise<AppRoleResponseDto[]> {
         const roles = await this.appRolesService.getAllRoles(appId, user.id, user.isGod);
@@ -148,7 +148,7 @@ export class ServiceAppRolesController {
         description: 'App or role not found',
     })
     async getRole(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<AppRoleWithPermissionsResponseDto> {
@@ -192,7 +192,7 @@ export class ServiceAppRolesController {
         description: 'App or role not found',
     })
     async updateRole(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
         @Body() updateAppRoleDto: UpdateAppRoleRequestDto,
@@ -245,7 +245,7 @@ export class ServiceAppRolesController {
         description: 'Conflict',
     })
     async deleteRole(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<MessageResponseDto> {

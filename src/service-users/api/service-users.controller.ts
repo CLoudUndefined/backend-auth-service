@@ -7,9 +7,9 @@ import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@ne
 import { JwtServiceAuthGuard } from 'src/auth/guards/jwt-service-auth.guard';
 import { ServiceUsersService } from '../service/service-users.service';
 import { ServiceUser } from 'src/common/decorators/service-user.decorator';
-import { ServiceUserModel } from 'src/database/models/service-user.model';
 import { IsGodGuard } from 'src/auth/guards/is-god.guard';
 import { IsSelfOrGodGuard } from 'src/auth/guards/is-self-or-god.guard';
+import { type AuthenticatedServiceUser } from 'src/auth/interfaces/authenticated-service-user.interface';
 
 @ApiTags('Service (Users)')
 @ApiBearerAuth('JWT-auth-service')
@@ -32,7 +32,7 @@ export class ServiceUsersController {
         status: 401,
         description: 'Unauthorized',
     })
-    async getProfile(@ServiceUser() user: ServiceUserModel): Promise<ServiceUserResponseDto> {
+    async getProfile(@ServiceUser() user: AuthenticatedServiceUser): Promise<ServiceUserResponseDto> {
         const result = await this.serviceUsersService.findByIdOrThrow(user.id);
         return new ServiceUserResponseDto(result);
     }
@@ -61,7 +61,7 @@ export class ServiceUsersController {
         description: 'Email already exists',
     })
     async updateProfile(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Body() updateProfileDto: UpdateServiceUserRequestDto,
     ): Promise<ServiceUserResponseDto> {
         const result = await this.serviceUsersService.update(user.id, updateProfileDto.email);

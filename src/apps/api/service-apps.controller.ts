@@ -7,8 +7,8 @@ import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@ne
 import { JwtServiceAuthGuard } from 'src/auth/guards/jwt-service-auth.guard';
 import { AppsService } from '../service/apps.service';
 import { ServiceUser } from 'src/common/decorators/service-user.decorator';
-import { ServiceUserModel } from 'src/database/models/service-user.model';
 import { IsGodGuard } from 'src/auth/guards/is-god.guard';
+import { type AuthenticatedServiceUser } from 'src/auth/interfaces/authenticated-service-user.interface';
 
 @ApiTags('Service (Apps Management)')
 @ApiBearerAuth('JWT-auth-service')
@@ -36,7 +36,7 @@ export class ServiceAppsController {
         description: 'Unauthorized',
     })
     async createApp(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Body() createAppDto: CreateAppRequestDto,
     ): Promise<AppResponseDto> {
         const app = await this.appsService.create(user.id, createAppDto.name, createAppDto.description);
@@ -91,7 +91,7 @@ export class ServiceAppsController {
     })
     @ApiResponse({ status: 404, description: 'App not found' })
     async findAppById(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<AppResponseDto> {
         const app = await this.appsService.findAppById(user.id, user.isGod, id);
@@ -130,7 +130,7 @@ export class ServiceAppsController {
         description: 'App not found',
     })
     async updateApp(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('id', ParseIntPipe) id: number,
         @Body() updateAppDto: UpdateAppRequestDto,
     ): Promise<AppResponseDto> {
@@ -166,7 +166,7 @@ export class ServiceAppsController {
         description: 'App not found',
     })
     async deleteApp(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<MessageResponseDto> {
         await this.appsService.delete(user.id, user.isGod, id);
@@ -202,7 +202,7 @@ export class ServiceAppsController {
         description: 'App not found',
     })
     async regenerateSecret(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('id', ParseIntPipe) id: number,
     ): Promise<MessageResponseDto> {
         await this.appsService.regenerateSecret(user.id, user.isGod, id);
