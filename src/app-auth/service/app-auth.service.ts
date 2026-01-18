@@ -145,7 +145,7 @@ export class AppAuthService {
         }
 
         if (!storedToken) {
-            throw new NotFoundException('Invalid refresh token');
+            throw new UnauthorizedException('Invalid refresh token');
         }
 
         if (new Date() > storedToken.expiresAt) {
@@ -167,6 +167,8 @@ export class AppAuthService {
             { appId, sub: user.id, email: user.email },
             { secret: this.encryptionService.decrypt(app.encryptedSecret) },
         );
+
+        await this.appUsersRepository.deleteRefreshToken(storedToken.id);
 
         const newRefreshToken = crypto.randomBytes(64).toString('hex');
         const refreshTokenHash = crypto.createHash('sha256').update(newRefreshToken).digest('hex');
