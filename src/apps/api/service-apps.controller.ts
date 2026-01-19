@@ -39,7 +39,7 @@ export class ServiceAppsController {
         @ServiceUser() user: AuthenticatedServiceUser,
         @Body() createAppDto: CreateAppRequestDto,
     ): Promise<AppResponseDto> {
-        const app = await this.appsService.create(user.id, createAppDto.name, createAppDto.description);
+        const app = await this.appsService.createByServiceUser(user.id, createAppDto.name, createAppDto.description);
         return new AppResponseDto(app);
     }
 
@@ -60,13 +60,13 @@ export class ServiceAppsController {
         description: 'Unauthorized',
     })
     async findAllApps(): Promise<AppResponseDto[]> {
-        const apps = await this.appsService.findAllApps();
+        const apps = await this.appsService.findAllAppsByServiceUser();
         return apps.map((app) => {
             return new AppResponseDto(app);
         });
     }
 
-    @Get(':id')
+    @Get(':appId')
     @UseGuards(JwtServiceAuthGuard)
     @ApiOperation({
         summary: 'Get app by ID',
@@ -92,13 +92,13 @@ export class ServiceAppsController {
     @ApiResponse({ status: 404, description: 'App not found' })
     async findAppById(
         @ServiceUser() user: AuthenticatedServiceUser,
-        @Param('id', ParseIntPipe) id: number,
+        @Param('appId', ParseIntPipe) appId: number,
     ): Promise<AppResponseDto> {
-        const app = await this.appsService.findAppById(user.id, user.isGod, id);
+        const app = await this.appsService.findAppByIdByServiceUser(appId, user.id, user.isGod);
         return new AppResponseDto(app);
     }
 
-    @Put(':id')
+    @Put(':appid')
     @UseGuards(JwtServiceAuthGuard)
     @ApiOperation({
         summary: 'Update application',
@@ -131,14 +131,20 @@ export class ServiceAppsController {
     })
     async updateApp(
         @ServiceUser() user: AuthenticatedServiceUser,
-        @Param('id', ParseIntPipe) id: number,
+        @Param('appId', ParseIntPipe) appId: number,
         @Body() updateAppDto: UpdateAppRequestDto,
     ): Promise<AppResponseDto> {
-        const app = await this.appsService.update(user.id, user.isGod, id, updateAppDto.name, updateAppDto.description);
+        const app = await this.appsService.updateByServiceUser(
+            appId,
+            user.id,
+            user.isGod,
+            updateAppDto.name,
+            updateAppDto.description,
+        );
         return new AppResponseDto(app);
     }
 
-    @Delete(':id')
+    @Delete(':appid')
     @UseGuards(JwtServiceAuthGuard)
     @ApiOperation({
         summary: 'Delete application',
@@ -167,13 +173,13 @@ export class ServiceAppsController {
     })
     async deleteApp(
         @ServiceUser() user: AuthenticatedServiceUser,
-        @Param('id', ParseIntPipe) id: number,
+        @Param('appId', ParseIntPipe) appId: number,
     ): Promise<MessageResponseDto> {
-        await this.appsService.delete(user.id, user.isGod, id);
+        await this.appsService.deleteByServiceUser(appId, user.id, user.isGod);
         return { message: 'Application deleted successfully' };
     }
 
-    @Post(':id/regenerate')
+    @Post(':appId/regenerate')
     @HttpCode(200)
     @UseGuards(JwtServiceAuthGuard)
     @ApiOperation({
@@ -203,9 +209,9 @@ export class ServiceAppsController {
     })
     async regenerateSecret(
         @ServiceUser() user: AuthenticatedServiceUser,
-        @Param('id', ParseIntPipe) id: number,
+        @Param('appId', ParseIntPipe) appId: number,
     ): Promise<MessageResponseDto> {
-        await this.appsService.regenerateSecret(user.id, user.isGod, id);
+        await this.appsService.regenerateSecretByServiceUser(appId, user.id, user.isGod);
         return { message: 'App secret regenerated successfully' };
     }
 }
