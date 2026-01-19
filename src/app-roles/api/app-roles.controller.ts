@@ -11,6 +11,7 @@ import { AppUser } from 'src/common/decorators/app-user.decorator';
 import { type AuthenticatedAppUser } from 'src/app-auth/interfaces/authenticated-app-user.interface';
 import { AppRoleWithPermissionsResponseDto } from './dto/app-role-with-permissions-response.dto';
 import { Permissions } from 'src/app-auth/decorators/permissions.reflector';
+import { AppPermission } from 'src/app-auth/enums/app-permissions.enum';
 
 @ApiTags('App (Role)')
 @ApiBearerAuth('JWT-auth-app')
@@ -20,7 +21,7 @@ export class AppRolesController {
 
     @Post()
     @UseGuards(JwtAppAuthGuard, AppPermissionGuard)
-    @Permissions('roles.read', 'roles.manage')
+    @Permissions(AppPermission.ROLES_READ, AppPermission.ROLES_MANAGE)
     @ApiOperation({
         summary: 'Create a new role in the app',
         description: 'Creates a role definition that can be assigned to app users.',
@@ -67,7 +68,7 @@ export class AppRolesController {
 
     @Get()
     @UseGuards(JwtAppAuthGuard, AppPermissionGuard)
-    @Permissions('roles.read')
+    @Permissions(AppPermission.ROLES_READ)
     @ApiOperation({
         summary: 'List all roles in the app',
         description: 'Returns all roles defined within the application.',
@@ -104,7 +105,7 @@ export class AppRolesController {
 
     @Get(':roleId')
     @UseGuards(JwtAppAuthGuard, AppPermissionGuard)
-    @Permissions('roles.read')
+    @Permissions(AppPermission.ROLES_READ)
     @ApiOperation({
         summary: 'Get role details',
         description: 'Returns specific role information.',
@@ -145,7 +146,7 @@ export class AppRolesController {
 
     @Put(':roleId')
     @UseGuards(JwtAppAuthGuard, AppPermissionGuard)
-    @Permissions('roles.read', 'roles.manage')
+    @Permissions(AppPermission.ROLES_READ, AppPermission.ROLES_MANAGE)
     @ApiOperation({
         summary: 'Update role',
         description: 'Updates role name or description.',
@@ -198,7 +199,7 @@ export class AppRolesController {
 
     @Delete(':roleId')
     @UseGuards(JwtAppAuthGuard, AppPermissionGuard)
-    @Permissions('roles.read', 'roles.manage')
+    @Permissions(AppPermission.ROLES_READ, AppPermission.ROLES_MANAGE)
     @ApiOperation({
         summary: 'Delete role',
         description: 'Deletes a role. May fail if role is assigned to users.',

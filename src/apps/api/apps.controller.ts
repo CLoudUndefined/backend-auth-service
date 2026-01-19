@@ -8,6 +8,7 @@ import { AppUser } from 'src/common/decorators/app-user.decorator';
 import { type AuthenticatedAppUser } from 'src/app-auth/interfaces/authenticated-app-user.interface';
 import { AppPermissionGuard } from 'src/app-auth/guards/app-permissions.guard';
 import { Permissions } from 'src/app-auth/decorators/permissions.reflector';
+import { AppPermission } from 'src/app-auth/enums/app-permissions.enum';
 
 @ApiTags('Apps (Management)')
 @ApiBearerAuth('JWT-auth-app')
@@ -17,7 +18,7 @@ export class AppsController {
 
     @Get()
     @UseGuards(JwtAppAuthGuard, AppPermissionGuard)
-    @Permissions('app.manage')
+    @Permissions(AppPermission.APP_MANAGE)
     @ApiOperation({
         summary: 'Get current app info',
         description: 'Returns public details about the application context.',
@@ -45,7 +46,7 @@ export class AppsController {
 
     @Put()
     @UseGuards(JwtAppAuthGuard, AppPermissionGuard)
-    @Permissions('app.manage')
+    @Permissions(AppPermission.APP_MANAGE)
     @ApiOperation({
         summary: 'Update application',
         description: 'Updates name or description of the application.',
