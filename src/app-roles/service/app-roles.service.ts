@@ -38,6 +38,20 @@ export class AppRolesService {
         return app;
     }
 
+    private async validateAppAccessByAppUser(appId: number, appIdFromToken: number): Promise<ApplicationModel> {
+        const app = await this.appsRepository.findById(appId);
+
+        if (!app) {
+            throw new NotFoundException('Application not found');
+        }
+
+        if (appId !== appIdFromToken) {
+            throw new ForbiddenException('Can only access users of application');
+        }
+
+        return app;
+    }
+
     async createRoleByServiceUser(
         appId: number,
         serviceUserId: number,
@@ -47,7 +61,26 @@ export class AppRolesService {
         permissionIds?: number[],
     ): Promise<ApplicationRoleWithPermissionsModel> {
         await this.validateAppAccessByServiceUser(appId, serviceUserId, serviceIsGod);
+        return this.createRole(appId, name, description, permissionIds);
+    }
 
+    async createRoleByAppUser(
+        appId: number,
+        appIdFromToken: number,
+        name: string,
+        description?: string,
+        permissionIds?: number[],
+    ): Promise<ApplicationRoleWithPermissionsModel> {
+        await this.validateAppAccessByAppUser(appId, appIdFromToken);
+        return this.createRole(appId, name, description, permissionIds);
+    }
+
+    private async createRole(
+        appId: number,
+        name: string,
+        description?: string,
+        permissionIds?: number[],
+    ): Promise<ApplicationRoleWithPermissionsModel> {
         const existingRole = await this.appRolesRepository.existsByNameInApp(appId, name);
 
         if (existingRole) {
@@ -71,7 +104,11 @@ export class AppRolesService {
         serviceIsGod: boolean,
     ): Promise<ApplicationRoleModel[]> {
         await this.validateAppAccessByServiceUser(appId, serviceUserId, serviceIsGod);
+        return this.appRolesRepository.findAllByApp(appId);
+    }
 
+    async getAllRolesByAppUser(appId: number, appIdFromToken: number): Promise<ApplicationRoleModel[]> {
+        await this.validateAppAccessByAppUser(appId, appIdFromToken);
         return this.appRolesRepository.findAllByApp(appId);
     }
 
@@ -82,7 +119,19 @@ export class AppRolesService {
         roleId: number,
     ): Promise<ApplicationRoleWithPermissionsModel> {
         await this.validateAppAccessByServiceUser(appId, serviceUserId, serviceIsGod);
+        return this.getRole(appId, roleId);
+    }
 
+    async getRoleByAppUser(
+        appId: number,
+        appIdFromToken: number,
+        roleId: number,
+    ): Promise<ApplicationRoleWithPermissionsModel> {
+        await this.validateAppAccessByAppUser(appId, appIdFromToken);
+        return this.getRole(appId, roleId);
+    }
+
+    private async getRole(appId: number, roleId: number): Promise<ApplicationRoleWithPermissionsModel> {
         const role = await this.appRolesRepository.findByIdWithPermissionsInApp(appId, roleId);
 
         if (!role) {
@@ -102,7 +151,28 @@ export class AppRolesService {
         permissionIds?: number[],
     ): Promise<ApplicationRoleWithPermissionsModel> {
         await this.validateAppAccessByServiceUser(appId, serviceUserId, serviceIsGod);
+        return this.updateRole(appId, roleId, name, description, permissionIds);
+    }
 
+    async updateRoleByAppUser(
+        appId: number,
+        appIdFromToken: number,
+        roleId: number,
+        name?: string,
+        description?: string,
+        permissionIds?: number[],
+    ): Promise<ApplicationRoleWithPermissionsModel> {
+        await this.validateAppAccessByAppUser(appId, appIdFromToken);
+        return this.updateRole(appId, roleId, name, description, permissionIds);
+    }
+
+    private async updateRole(
+        appId: number,
+        roleId: number,
+        name?: string,
+        description?: string,
+        permissionIds?: number[],
+    ): Promise<ApplicationRoleWithPermissionsModel> {
         const role = await this.appRolesRepository.findByIdInApp(appId, roleId);
         if (!role) {
             throw new NotFoundException('Role not found');
@@ -154,7 +224,15 @@ export class AppRolesService {
         roleId: number,
     ): Promise<void> {
         await this.validateAppAccessByServiceUser(appId, serviceUserId, serviceIsGod);
+        await this.deleteRole(appId, roleId);
+    }
 
+    async deleteRoleByAppUser(appId: number, appIdFromToken: number, roleId: number): Promise<void> {
+        await this.validateAppAccessByAppUser(appId, appIdFromToken);
+        await this.deleteRole(appId, roleId);
+    }
+
+    private async deleteRole(appId: number, roleId: number): Promise<void> {
         const [existingRole, hasUsers] = await Promise.all([
             this.appRolesRepository.existsByIdInApp(appId, roleId),
             this.appRolesRepository.hasUsers(roleId),
