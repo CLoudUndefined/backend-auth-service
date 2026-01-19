@@ -67,7 +67,7 @@ export class ServiceAppRolesController {
         @Param('appId', ParseIntPipe) appId: number,
         @Body() createAppRoleDto: CreateAppRoleRequestDto,
     ): Promise<AppRoleWithPermissionsResponseDto> {
-        const role = await this.appRolesService.createRole(
+        const role = await this.appRolesService.createRoleByServiceUser(
             appId,
             user.id,
             user.isGod,
@@ -110,7 +110,7 @@ export class ServiceAppRolesController {
         @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
     ): Promise<AppRoleResponseDto[]> {
-        const roles = await this.appRolesService.getAllRoles(appId, user.id, user.isGod);
+        const roles = await this.appRolesService.getAllRolesByServiceUser(appId, user.id, user.isGod);
         return roles.map((role) => {
             return new AppRoleResponseDto(role);
         });
@@ -152,7 +152,7 @@ export class ServiceAppRolesController {
         @Param('appId', ParseIntPipe) appId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<AppRoleWithPermissionsResponseDto> {
-        const role = await this.appRolesService.getRole(appId, user.id, user.isGod, roleId);
+        const role = await this.appRolesService.getRoleByServiceUser(appId, user.id, user.isGod, roleId);
         return new AppRoleWithPermissionsResponseDto(role);
     }
 
@@ -197,7 +197,7 @@ export class ServiceAppRolesController {
         @Param('roleId', ParseIntPipe) roleId: number,
         @Body() updateAppRoleDto: UpdateAppRoleRequestDto,
     ): Promise<AppRoleResponseDto> {
-        const role = await this.appRolesService.updateRole(
+        const role = await this.appRolesService.updateRoleByServiceUser(
             appId,
             user.id,
             user.isGod,
@@ -249,7 +249,7 @@ export class ServiceAppRolesController {
         @Param('appId', ParseIntPipe) appId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<MessageResponseDto> {
-        await this.appRolesService.deleteRole(appId, user.id, user.isGod, roleId);
+        await this.appRolesService.deleteRoleByServiceUser(appId, user.id, user.isGod, roleId);
         return { message: 'Role deleted successfully' };
     }
 }
