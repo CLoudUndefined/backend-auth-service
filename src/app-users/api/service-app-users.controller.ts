@@ -66,7 +66,7 @@ export class ServiceAppUsersController {
         });
     }
 
-    @Get(':userId')
+    @Get(':appUserId')
     @UseGuards(JwtServiceAuthGuard)
     @ApiOperation({
         summary: 'Get specific app user',
@@ -77,7 +77,7 @@ export class ServiceAppUsersController {
         example: 1,
     })
     @ApiParam({
-        name: 'userId',
+        name: 'appUserId',
         example: 2,
     })
     @ApiResponse({
@@ -104,13 +104,13 @@ export class ServiceAppUsersController {
     async getAppUser(
         @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
-        @Param('userId', ParseIntPipe) userId: number,
+        @Param('appUserId', ParseIntPipe) appUserId: number,
     ): Promise<AppUserWithRolesAndPermissionsResponseDto> {
-        const appUser = await this.appUsersService.getAppUserByServiceUser(appId, user.id, user.isGod, userId);
+        const appUser = await this.appUsersService.getAppUserByServiceUser(appId, user.id, user.isGod, appUserId);
         return new AppUserWithRolesAndPermissionsResponseDto(appUser);
     }
 
-    @Put(':userId')
+    @Put(':appUserId')
     @UseGuards(JwtServiceAuthGuard)
     @ApiOperation({
         summary: 'Update app user',
@@ -121,7 +121,7 @@ export class ServiceAppUsersController {
         example: 1,
     })
     @ApiParam({
-        name: 'userId',
+        name: 'appUserId',
         example: 2,
     })
     @ApiResponse({
@@ -152,20 +152,20 @@ export class ServiceAppUsersController {
     async updateAppUser(
         @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
-        @Param('userId', ParseIntPipe) userId: number,
+        @Param('appUserId', ParseIntPipe) appUserId: number,
         @Body() updateAppUserDto: UpdateAppUserRequestDto,
     ): Promise<AppUserResponseDto> {
         const appUser = await this.appUsersService.updateAppUserByServiceUser(
             appId,
             user.id,
             user.isGod,
-            userId,
+            appUserId,
             updateAppUserDto.email,
         );
         return new AppUserResponseDto(appUser);
     }
 
-    @Delete(':userId')
+    @Delete(':appUserId')
     @UseGuards(JwtServiceAuthGuard)
     @ApiOperation({
         summary: 'Delete app user',
@@ -176,7 +176,7 @@ export class ServiceAppUsersController {
         example: 1,
     })
     @ApiParam({
-        name: 'userId',
+        name: 'appUserId',
         example: 2,
     })
     @ApiResponse({
@@ -199,13 +199,13 @@ export class ServiceAppUsersController {
     async deleteAppUser(
         @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
-        @Param('userId', ParseIntPipe) userId: number,
+        @Param('appUserId', ParseIntPipe) appUserId: number,
     ): Promise<MessageResponseDto> {
-        await this.appUsersService.deleteAppUserByServiceUser(appId, user.id, user.isGod, userId);
+        await this.appUsersService.deleteAppUserByServiceUser(appId, user.id, user.isGod, appUserId);
         return { message: 'User deleted successfully' };
     }
 
-    @Get(':userId/roles')
+    @Get(':appUserId/roles')
     @UseGuards(JwtServiceAuthGuard)
     @ApiOperation({
         summary: 'Get user roles',
@@ -216,7 +216,7 @@ export class ServiceAppUsersController {
         example: 1,
     })
     @ApiParam({
-        name: 'userId',
+        name: 'appUserId',
         example: 2,
     })
     @ApiResponse({
@@ -240,15 +240,15 @@ export class ServiceAppUsersController {
     async getAppUserRoles(
         @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
-        @Param('userId', ParseIntPipe) userId: number,
+        @Param('appUserId', ParseIntPipe) appUserId: number,
     ): Promise<AppRoleWithPermissionsResponseDto[]> {
-        const roles = await this.appUsersService.getAppUserRolesByServiceUser(appId, user.id, user.isGod, userId);
+        const roles = await this.appUsersService.getAppUserRolesByServiceUser(appId, user.id, user.isGod, appUserId);
         return roles.map((role) => {
             return new AppRoleWithPermissionsResponseDto(role);
         });
     }
 
-    @Post(':userId/roles/:roleId')
+    @Post(':appUserId/roles/:roleId')
     @UseGuards(JwtServiceAuthGuard)
     @ApiOperation({
         summary: 'Add role to user',
@@ -259,7 +259,7 @@ export class ServiceAppUsersController {
         example: 1,
     })
     @ApiParam({
-        name: 'userId',
+        name: 'appUserId',
         example: 2,
     })
     @ApiParam({
@@ -294,14 +294,14 @@ export class ServiceAppUsersController {
     async addRoleToAppUser(
         @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
-        @Param('userId', ParseIntPipe) userId: number,
+        @Param('appUserId', ParseIntPipe) appUserId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<MessageResponseDto> {
-        await this.appUsersService.addRoleToAppUserByServiceUser(appId, user.id, user.isGod, userId, roleId);
+        await this.appUsersService.addRoleToAppUserByServiceUser(appId, user.id, user.isGod, appUserId, roleId);
         return { message: 'Role added successfully' };
     }
 
-    @Delete(':userId/roles/:roleId')
+    @Delete(':appUserId/roles/:roleId')
     @UseGuards(JwtServiceAuthGuard)
     @ApiOperation({
         summary: 'Remove role from user',
@@ -312,7 +312,7 @@ export class ServiceAppUsersController {
         example: 1,
     })
     @ApiParam({
-        name: 'userId',
+        name: 'appUserId',
         example: 2,
     })
     @ApiParam({
@@ -339,10 +339,10 @@ export class ServiceAppUsersController {
     async removeRoleFromAppUser(
         @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
-        @Param('userId', ParseIntPipe) userId: number,
+        @Param('appUserId', ParseIntPipe) appUserId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<MessageResponseDto> {
-        await this.appUsersService.removeRoleFromAppUserByServiceUser(appId, user.id, user.isGod, userId, roleId);
+        await this.appUsersService.removeRoleFromAppUserByServiceUser(appId, user.id, user.isGod, appUserId, roleId);
         return { message: 'Role removed successfully' };
     }
 }
