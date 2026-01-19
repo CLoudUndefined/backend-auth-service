@@ -1,15 +1,4 @@
-import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    NotImplementedException,
-    Param,
-    ParseIntPipe,
-    Post,
-    Put,
-    UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
 import { AppRoleResponseDto } from './dto/app-role-response.dto';
 import { CreateAppRoleRequestDto } from './dto/create-app-role-request.dto';
 import { UpdateAppRoleRequestDto } from './dto/update-app-role-request.dto';
@@ -196,7 +185,7 @@ export class ServiceAppRolesController {
         @Param('appId', ParseIntPipe) appId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
         @Body() updateAppRoleDto: UpdateAppRoleRequestDto,
-    ): Promise<AppRoleResponseDto> {
+    ): Promise<AppRoleWithPermissionsResponseDto> {
         const role = await this.appRolesService.updateRoleByServiceUser(
             appId,
             user.id,
