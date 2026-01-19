@@ -1,15 +1,37 @@
-import { Body, Controller, Delete, Get, NotImplementedException, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    NotImplementedException,
+    Param,
+    ParseIntPipe,
+    Post,
+    Put,
+    UseGuards,
+} from '@nestjs/common';
 import { AppRoleResponseDto } from './dto/app-role-response.dto';
 import { CreateAppRoleRequestDto } from './dto/create-app-role-request.dto';
 import { UpdateAppRoleRequestDto } from './dto/update-app-role-request.dto';
 import { MessageResponseDto } from 'src/common/api/dto/message-response.dto';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { AppRolesService } from '../service/app-roles.service';
+import { JwtAppAuthGuard } from 'src/app-auth/guards/jwt-app-auth.guard';
+import { AppPermissionGuard } from 'src/app-auth/guards/app-permissions.guard';
+import { AppUser } from 'src/common/decorators/app-user.decorator';
+import { type AuthenticatedAppUser } from 'src/app-auth/interfaces/authenticated-app-user.interface';
+import { AppRoleWithPermissionsResponseDto } from './dto/app-role-with-permissions-response.dto';
+import { Permissions } from 'src/app-auth/decorators/permissions.reflector';
 
 @ApiTags('App (Role)')
 @ApiBearerAuth('JWT-auth-app')
 @Controller('apps/:appId/roles')
 export class AppRolesController {
+    constructor(private readonly appRolesService: AppRolesService) {}
+
     @Post()
+    @UseGuards(JwtAppAuthGuard, AppPermissionGuard)
+    @Permissions('roles.read', 'roles.manage')
     @ApiOperation({
         summary: 'Create a new role in the app',
         description: 'Creates a role definition that can be assigned to app users.',
@@ -21,7 +43,7 @@ export class AppRolesController {
     @ApiResponse({
         status: 201,
         description: 'Role created',
-        type: AppRoleResponseDto,
+        type: AppRoleWithPermissionsResponseDto,
     })
     @ApiResponse({
         status: 400,
@@ -39,14 +61,24 @@ export class AppRolesController {
         status: 404,
         description: 'App not found',
     })
-    async create(
+    async createRole(
+        @AppUser() user: AuthenticatedAppUser,
         @Param('appId', ParseIntPipe) appId: number,
-        @Body() createDto: CreateAppRoleRequestDto,
-    ): Promise<AppRoleResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        @Body() createRoleDto: CreateAppRoleRequestDto,
+    ): Promise<AppRoleWithPermissionsResponseDto> {
+        const role = await this.appRolesService.createRoleByAppUser(
+            appId,
+            user.appId,
+            createRoleDto.name,
+            createRoleDto.description,
+            createRoleDto.permissionIds,
+        );
+        return new AppRoleWithPermissionsResponseDto(role);
     }
 
     @Get()
+    @UseGuards(JwtAppAuthGuard, AppPermissionGuard)
+    @Permissions('roles.read')
     @ApiOperation({
         summary: 'List all roles in the app',
         description: 'Returns all roles defined within the application.',
@@ -73,11 +105,17 @@ export class AppRolesController {
         status: 404,
         description: 'App not found',
     })
-    async findAll(@Param('appId', ParseIntPipe) appId: number): Promise<AppRoleResponseDto[]> {
-        throw new NotImplementedException('Logic not implemented yet');
+    async getAllRoles(
+        @AppUser() user: AuthenticatedAppUser,
+        @Param('appId', ParseIntPipe) appId: number,
+    ): Promise<AppRoleResponseDto[]> {
+        const roles = await this.appRolesService.getAllRolesByAppUser(appId, user.appId);
+        return roles.map((role) => new AppRoleResponseDto(role));
     }
 
     @Get(':roleId')
+    @UseGuards(JwtAppAuthGuard, AppPermissionGuard)
+    @Permissions('roles.read')
     @ApiOperation({
         summary: 'Get role details',
         description: 'Returns specific role information.',
@@ -93,7 +131,7 @@ export class AppRolesController {
     @ApiResponse({
         status: 200,
         description: 'Role details',
-        type: AppRoleResponseDto,
+        type: AppRoleWithPermissionsResponseDto,
     })
     @ApiResponse({
         status: 401,
@@ -107,14 +145,18 @@ export class AppRolesController {
         status: 404,
         description: 'App or Role not found',
     })
-    async findOne(
+    async getRole(
+        @AppUser() user: AuthenticatedAppUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
-    ): Promise<AppRoleResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+    ): Promise<AppRoleWithPermissionsResponseDto> {
+        const role = await this.appRolesService.getRoleByAppUser(appId, user.appId, roleId);
+        return new AppRoleWithPermissionsResponseDto(role);
     }
 
     @Put(':roleId')
+    @UseGuards(JwtAppAuthGuard, AppPermissionGuard)
+    @Permissions('roles.read', 'roles.manage')
     @ApiOperation({
         summary: 'Update role',
         description: 'Updates role name or description.',
@@ -129,8 +171,8 @@ export class AppRolesController {
     })
     @ApiResponse({
         status: 200,
-        description: 'Role updated',
-        type: AppRoleResponseDto,
+        description: 'Role updated successfully',
+        type: AppRoleWithPermissionsResponseDto,
     })
     @ApiResponse({
         status: 400,
@@ -148,15 +190,26 @@ export class AppRolesController {
         status: 404,
         description: 'App or Role not found',
     })
-    async update(
+    async updateRole(
+        @AppUser() user: AuthenticatedAppUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
-        @Body() updateDto: UpdateAppRoleRequestDto,
-    ): Promise<AppRoleResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        @Body() updateAppRoleDto: UpdateAppRoleRequestDto,
+    ): Promise<AppRoleWithPermissionsResponseDto> {
+        const role = await this.appRolesService.updateRoleByAppUser(
+            appId,
+            user.appId,
+            roleId,
+            updateAppRoleDto.name,
+            updateAppRoleDto.description,
+            updateAppRoleDto.permissionIds,
+        );
+        return new AppRoleWithPermissionsResponseDto(role);
     }
 
     @Delete(':roleId')
+    @UseGuards(JwtAppAuthGuard, AppPermissionGuard)
+    @Permissions('roles.read', 'roles.manage')
     @ApiOperation({
         summary: 'Delete role',
         description: 'Deletes a role. May fail if role is assigned to users.',
@@ -171,7 +224,7 @@ export class AppRolesController {
     })
     @ApiResponse({
         status: 200,
-        description: 'Role deleted',
+        description: 'Role deleted successfully',
         type: MessageResponseDto,
     })
     @ApiResponse({
@@ -190,10 +243,12 @@ export class AppRolesController {
         status: 409,
         description: 'Conflict - Cannot delete role currently assigned to users',
     })
-    async remove(
+    async deleteRole(
+        @AppUser() user: AuthenticatedAppUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<MessageResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+        await this.appRolesService.deleteRoleByAppUser(appId, user.appId, roleId);
+        return { message: 'Role deleted successfully' };
     }
 }
