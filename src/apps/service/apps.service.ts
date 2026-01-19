@@ -21,7 +21,42 @@ export class AppsService {
         return this.encryptionService.encrypt(crypto.randomBytes(64).toString('hex'));
     }
 
-    async create(ownerId: number, name: string, description?: string): Promise<ApplicationWithOwnerModel> {
+    private async validateAppAccessByServiceUser(
+        appId: number,
+        userId: number,
+        isGod: boolean,
+    ): Promise<ApplicationWithOwnerModel> {
+        const app = await this.appsRepository.findByIdWithOwner(appId);
+
+        if (!app) {
+            throw new NotFoundException('Application not found');
+        }
+
+        if (!isGod && app.ownerId !== userId) {
+            throw new ForbiddenException('Can only access own applications or required god-mode');
+        }
+
+        return app;
+    }
+
+    private async validateAppAccessByAppUser(
+        appId: number,
+        appIdFromToken: number,
+    ): Promise<ApplicationWithOwnerModel> {
+        const app = await this.appsRepository.findByIdWithOwner(appId);
+
+        if (!app) {
+            throw new NotFoundException('Application not found');
+        }
+
+        if (appId !== appIdFromToken) {
+            throw new ForbiddenException('Can only access users of application');
+        }
+
+        return app;
+    }
+
+    async createByServiceUser(ownerId: number, name: string, description?: string): Promise<ApplicationWithOwnerModel> {
         const isAppExist = await this.appsRepository.exists(ownerId, name);
 
         if (isAppExist) {
@@ -38,33 +73,40 @@ export class AppsService {
         return app;
     }
 
-    async findAllApps(): Promise<ApplicationWithOwnerModel[]> {
+    async findAllAppsByServiceUser(): Promise<ApplicationWithOwnerModel[]> {
         return this.appsRepository.findAllWithOwner();
     }
 
-    async findAppById(userId: number, isGod: boolean, appId: number): Promise<ApplicationWithOwnerModel> {
-        const app = await this.appsRepository.findByIdWithOwner(appId);
-
-        if (!app) {
-            throw new NotFoundException('Application not found');
-        }
-
-        if (!isGod && app.ownerId !== userId) {
-            throw new ForbiddenException('Can only access own applications or required god-mode');
-        }
-
-        return app;
+    async findAppByIdByAppUser(appId: number, appIdFromToken: number): Promise<ApplicationWithOwnerModel> {
+        return this.validateAppAccessByAppUser(appId, appIdFromToken);
     }
 
-    async update(
-        userId: number,
-        isGod: boolean,
+    async findAppByIdByServiceUser(appId: number, userId: number, isGod: boolean): Promise<ApplicationWithOwnerModel> {
+        return this.validateAppAccessByServiceUser(appId, userId, isGod);
+    }
+
+    async updateByAppUser(
         appId: number,
+        appIdFromToken: number,
         name?: string,
         description?: string,
     ): Promise<ApplicationWithOwnerModel> {
-        await this.findAppById(userId, isGod, appId);
+        await this.validateAppAccessByAppUser(appId, appIdFromToken);
+        return this.update(appId, name, description);
+    }
 
+    async updateByServiceUser(
+        appId: number,
+        userId: number,
+        isGod: boolean,
+        name?: string,
+        description?: string,
+    ): Promise<ApplicationWithOwnerModel> {
+        await this.validateAppAccessByServiceUser(appId, userId, isGod);
+        return this.update(appId, name, description);
+    }
+
+    private async update(appId: number, name?: string, description?: string): Promise<ApplicationWithOwnerModel> {
         if (!description && !name) {
             throw new BadRequestException('At least one field (name or description) must be provided');
         }
@@ -78,13 +120,13 @@ export class AppsService {
         return updatedApp;
     }
 
-    async delete(userId: number, isGod: boolean, appId: number): Promise<void> {
-        await this.findAppById(userId, isGod, appId);
+    async deleteByServiceUser(appId: number, userId: number, isGod: boolean): Promise<void> {
+        await this.validateAppAccessByServiceUser(appId, userId, isGod);
         await this.appsRepository.delete(appId);
     }
 
-    async regenerateSecret(userId: number, isGod: boolean, appId: number): Promise<void> {
-        await this.findAppById(userId, isGod, appId);
+    async regenerateSecretByServiceUser(appId: number, userId: number, isGod: boolean): Promise<void> {
+        await this.validateAppAccessByServiceUser(appId, userId, isGod);
 
         const updatedApp = await this.appsRepository.updateWithOwner(appId, {
             encryptedSecret: this.generateEncryptedSecret(),
