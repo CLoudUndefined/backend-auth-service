@@ -13,6 +13,7 @@ import { AppUserWithRolesResponseDto } from './dto/app-user-with-roles-response.
 import { AppUsersService } from '../service/app-users.service';
 import { AppUserWithRolesAndPermissionsResponseDto } from './dto/app-user-with-roles-and-permissions-response.dto';
 import { AppRoleWithPermissionsResponseDto } from 'src/app-roles/api/dto/app-role-with-permissions-response.dto';
+import { AppPermission } from 'src/app-auth/enums/app-permissions.enum';
 
 @ApiTags('App (Users)')
 @ApiBearerAuth('JWT-auth-app')
@@ -22,7 +23,7 @@ export class AppUsersController {
 
     @Get()
     @UseGuards(JwtAppAuthGuard, AppPermissionGuard)
-    @Permissions('users.read')
+    @Permissions(AppPermission.USERS_READ)
     @ApiOperation({
         summary: 'List users of an application',
         description: 'Retrieves all registered users for the specific application. Optionally filter by role.',
@@ -64,7 +65,7 @@ export class AppUsersController {
 
     @Get(':appUserId')
     @UseGuards(JwtAppAuthGuard, AppPermissionGuard)
-    @Permissions('users.read')
+    @Permissions(AppPermission.USERS_READ)
     @ApiOperation({
         summary: 'Get specific app user',
         description: 'Returns details of a registered user in the app.',
@@ -109,7 +110,7 @@ export class AppUsersController {
 
     @Put(':appUserId')
     @UseGuards(JwtAppAuthGuard, AppPermissionGuard)
-    @Permissions('users.read', 'users.manage')
+    @Permissions(AppPermission.USERS_READ, AppPermission.USERS_MANAGE)
     @ApiOperation({
         summary: 'Update app user',
         description: 'Updates user email.',
@@ -164,7 +165,7 @@ export class AppUsersController {
 
     @Delete(':appUserId')
     @UseGuards(JwtAppAuthGuard, AppPermissionGuard)
-    @Permissions('users.read', 'users.manage')
+    @Permissions(AppPermission.USERS_READ, AppPermission.USERS_MANAGE)
     @ApiOperation({
         summary: 'Delete app user',
         description: 'Removes a user from the application.',
@@ -205,7 +206,7 @@ export class AppUsersController {
 
     @Get(':appUserId/roles')
     @UseGuards(JwtAppAuthGuard, AppPermissionGuard)
-    @Permissions('users.read', 'users.manage', 'roles.read')
+    @Permissions(AppPermission.USERS_READ, AppPermission.USERS_MANAGE, AppPermission.ROLES_READ)
     @ApiOperation({
         summary: 'Get user roles',
         description: 'Retrieves all roles assigned to the user.',
@@ -247,7 +248,12 @@ export class AppUsersController {
 
     @Post(':appUserId/roles/:roleId')
     @UseGuards(JwtAppAuthGuard, AppPermissionGuard)
-    @Permissions('users.read', 'users.manage', 'roles.read', 'roles.manage')
+    @Permissions(
+        AppPermission.USERS_READ,
+        AppPermission.USERS_MANAGE,
+        AppPermission.ROLES_READ,
+        AppPermission.ROLES_MANAGE,
+    )
     @ApiOperation({
         summary: 'Add role to user',
         description: 'Assigns a specific role to the user.',
@@ -302,7 +308,12 @@ export class AppUsersController {
 
     @Delete(':appUserId/roles/:roleId')
     @UseGuards(JwtAppAuthGuard, AppPermissionGuard)
-    @Permissions('users.read', 'users.manage', 'roles.read', 'roles.manage')
+    @Permissions(
+        AppPermission.USERS_READ,
+        AppPermission.USERS_MANAGE,
+        AppPermission.ROLES_READ,
+        AppPermission.ROLES_MANAGE,
+    )
     @ApiOperation({
         summary: 'Remove role from user',
         description: 'Removes a specific role from the user.',
