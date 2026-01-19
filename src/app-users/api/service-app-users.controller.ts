@@ -55,12 +55,12 @@ export class ServiceAppUsersController {
         status: 404,
         description: 'App not found',
     })
-    async listUsers(
+    async listAppUsers(
         @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Query() query: GetAppUsersQueryDto,
     ): Promise<AppUserWithRolesResponseDto[]> {
-        const appUsers = await this.appUsersService.listUsers(appId, user.id, user.isGod, query.roleId);
+        const appUsers = await this.appUsersService.listAppUsersByServiceUser(appId, user.id, user.isGod, query.roleId);
         return appUsers.map((appUser) => {
             return new AppUserWithRolesResponseDto(appUser);
         });
@@ -101,12 +101,12 @@ export class ServiceAppUsersController {
         status: 404,
         description: 'App or User not found',
     })
-    async getUser(
+    async getAppUser(
         @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
     ): Promise<AppUserWithRolesAndPermissionsResponseDto> {
-        const appUser = await this.appUsersService.getUser(appId, user.id, user.isGod, userId);
+        const appUser = await this.appUsersService.getAppUserByServiceUser(appId, user.id, user.isGod, userId);
         return new AppUserWithRolesAndPermissionsResponseDto(appUser);
     }
 
@@ -149,13 +149,13 @@ export class ServiceAppUsersController {
         status: 409,
         description: 'Conflict',
     })
-    async updateUser(
+    async updateAppUser(
         @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
         @Body() updateAppUserDto: UpdateAppUserRequestDto,
     ): Promise<AppUserResponseDto> {
-        const appUser = await this.appUsersService.updateUser(
+        const appUser = await this.appUsersService.updateAppUserByServiceUser(
             appId,
             user.id,
             user.isGod,
@@ -196,12 +196,12 @@ export class ServiceAppUsersController {
         status: 404,
         description: 'App or User not found',
     })
-    async deleteUser(
+    async deleteAppUser(
         @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
     ): Promise<MessageResponseDto> {
-        await this.appUsersService.deleteUser(appId, user.id, user.isGod, userId);
+        await this.appUsersService.deleteAppUserByServiceUser(appId, user.id, user.isGod, userId);
         return { message: 'User deleted successfully' };
     }
 
@@ -237,12 +237,12 @@ export class ServiceAppUsersController {
         status: 404,
         description: 'App or User not found',
     })
-    async getUserRoles(
+    async getAppUserRoles(
         @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
     ): Promise<AppRoleWithPermissionsResponseDto[]> {
-        const roles = await this.appUsersService.getUserRoles(appId, user.id, user.isGod, userId);
+        const roles = await this.appUsersService.getAppUserRolesByServiceUser(appId, user.id, user.isGod, userId);
         return roles.map((role) => {
             return new AppRoleWithPermissionsResponseDto(role);
         });
@@ -291,13 +291,13 @@ export class ServiceAppUsersController {
         status: 409,
         description: 'Conflict - User already has this role',
     })
-    async addRoleToUser(
+    async addRoleToAppUser(
         @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<MessageResponseDto> {
-        await this.appUsersService.addRoleToUser(appId, user.id, user.isGod, userId, roleId);
+        await this.appUsersService.addRoleToAppUserByServiceUser(appId, user.id, user.isGod, userId, roleId);
         return { message: 'Role added successfully' };
     }
 
@@ -336,13 +336,13 @@ export class ServiceAppUsersController {
         status: 404,
         description: 'App, User, Role not found, or User does not have this role',
     })
-    async removeRoleFromUser(
+    async removeRoleFromAppUser(
         @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('userId', ParseIntPipe) userId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<MessageResponseDto> {
-        await this.appUsersService.removeRoleFromUser(appId, user.id, user.isGod, userId, roleId);
+        await this.appUsersService.removeRoleFromAppUserByServiceUser(appId, user.id, user.isGod, userId, roleId);
         return { message: 'Role removed successfully' };
     }
 }
