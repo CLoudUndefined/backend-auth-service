@@ -1,12 +1,17 @@
-import { Controller, Get, NotImplementedException, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { PermissionResponseDto } from './dto/permission-response.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AppPermissionsService } from '../service/app-permissions.service';
+import { JwtAppAuthGuard } from 'src/app-auth/guards/jwt-app-auth.guard';
 
 @ApiTags('App (Role Permission)')
 @ApiBearerAuth('JWT-auth-app')
 @Controller('app/permissions')
 export class AppPermissionsController {
+    constructor(private readonly appPermissionsService: AppPermissionsService) {}
+
     @Get()
+    @UseGuards(JwtAppAuthGuard)
     @ApiOperation({
         summary: 'List all available system permissions',
         description: 'Returns a dictionary of all permissions that can be assigned to roles.',
@@ -21,11 +26,13 @@ export class AppPermissionsController {
         status: 401,
         description: 'Unauthorized',
     })
-    async findAll(): Promise<PermissionResponseDto[]> {
-        throw new NotImplementedException('Logic not implemented yet');
+    async getAllPermissions(): Promise<PermissionResponseDto[]> {
+        const permissions = await this.appPermissionsService.getAllPermissions();
+        return permissions.map((permission) => new PermissionResponseDto(permission));
     }
 
     @Get(':permissionId')
+    @UseGuards(JwtAppAuthGuard)
     @ApiOperation({
         summary: 'Get permission details',
         description: 'Returns details of a specific system permission.',
@@ -47,7 +54,8 @@ export class AppPermissionsController {
         status: 404,
         description: 'Permission not found',
     })
-    async findOne(@Param('permissionId', ParseIntPipe) permissionId: number): Promise<PermissionResponseDto> {
-        throw new NotImplementedException('Logic not implemented yet');
+    async getPermission(@Param('permissionId', ParseIntPipe) permissionId: number): Promise<PermissionResponseDto> {
+        const permission = await this.appPermissionsService.getPermission(permissionId);
+        return new PermissionResponseDto(permission);
     }
 }
