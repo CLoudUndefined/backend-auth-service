@@ -186,7 +186,7 @@ export class AppAuthService {
             new Date(Date.now() + ms(this.configService.getOrThrow<StringValue>('JWT_REFRESH_TOKEN_EXPIRES_IN', '7d'))),
         );
 
-        return { accessToken, refreshToken };
+        return { accessToken, refreshToken: newRefreshToken };
     }
 
     async addRecovery(appId: number, userId: number, recoveryQuestion: string, recoveryAnswer: string): Promise<void> {
