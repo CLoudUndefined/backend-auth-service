@@ -93,7 +93,13 @@ export class AppAuthService {
             { secret: this.encryptionService.decrypt(app.encryptedSecret) },
         );
 
-        const refreshToken = crypto.randomBytes(64).toString('hex');
+        const refreshToken = this.jwtService.sign(
+            { appId, sub: user.id },
+            {
+                secret: this.encryptionService.decrypt(app.encryptedSecret),
+                expiresIn: this.configService.getOrThrow<StringValue>('JWT_REFRESH_TOKEN_EXPIRES_IN', '7d'),
+            },
+        );
         const refreshTokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
 
         await this.appUsersRepository.createRefreshToken(
@@ -148,11 +154,6 @@ export class AppAuthService {
             throw new UnauthorizedException('Invalid refresh token');
         }
 
-        if (new Date() > storedToken.expiresAt) {
-            await this.appUsersRepository.deleteRefreshToken(storedToken.id);
-            throw new UnauthorizedException('Refresh token expired');
-        }
-
         const user = await this.appUsersRepository.findByIdInApp(appId, storedToken.userId);
 
         if (!user) {
@@ -170,7 +171,13 @@ export class AppAuthService {
 
         await this.appUsersRepository.deleteRefreshToken(storedToken.id);
 
-        const newRefreshToken = crypto.randomBytes(64).toString('hex');
+        const newRefreshToken = this.jwtService.sign(
+            { appId, sub: user.id },
+            {
+                secret: this.encryptionService.decrypt(app.encryptedSecret),
+                expiresIn: this.configService.getOrThrow<StringValue>('JWT_REFRESH_TOKEN_EXPIRES_IN', '7d'),
+            },
+        );
         const refreshTokenHash = crypto.createHash('sha256').update(newRefreshToken).digest('hex');
 
         await this.appUsersRepository.createRefreshToken(

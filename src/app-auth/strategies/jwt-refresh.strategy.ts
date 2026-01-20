@@ -1,21 +1,21 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtSecretRequestType, JwtService } from '@nestjs/jwt';
+import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { JwtPayload } from '../interfaces/jwt-payload.interface';
+import { AppsRepository } from 'src/database/repositories/apps.repository';
 import { EncryptionService } from 'src/common/encryption/encryption.service';
 import { AuthenticatedAppUser } from '../interfaces/authenticated-app-user.interface';
-import { AppsRepository } from 'src/database/repositories/apps.repository';
-import { JwtPayload } from '../interfaces/jwt-payload.interface';
-import { PassportStrategy } from '@nestjs/passport';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-app') {
+export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh-app') {
     constructor(
-        private readonly jwtService: JwtService,
-        private readonly encryptionService: EncryptionService,
+        private readonly JwtService: JwtService,
         private readonly appsRepository: AppsRepository,
+        private readonly encryptionService: EncryptionService,
     ) {
         super({
-            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
             ignoreExpiration: false,
             secretOrKeyProvider: async (
                 request: JwtSecretRequestType,
@@ -23,7 +23,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-app') {
                 done: (err: Error | null, secretOrKey?: string | Buffer) => void,
             ): Promise<void> => {
                 try {
-                    const decoded: JwtPayload = this.jwtService.decode(rawJwtToken);
+                    const decoded: JwtPayload = this.JwtService.decode(rawJwtToken);
 
                     if (!decoded || !decoded.appId) {
                         throw new UnauthorizedException('Invalid token');
