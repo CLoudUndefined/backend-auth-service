@@ -43,6 +43,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-app') {
     }
 
     async validate(payload: JwtPayload): Promise<AuthenticatedAppUser> {
-        return { appId: payload.appId, id: payload.sub, roles: [] };
+        return { appId: payload.appId, id: payload.sub };
     }
 }
