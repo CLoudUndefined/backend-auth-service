@@ -10,6 +10,7 @@ import { ApplicationRoleModel } from 'src/database/models/application-role.model
 import { ApplicationModel } from 'src/database/models/application.model';
 import { AppPermissionsRepository } from 'src/database/repositories/app-permissions.repository';
 import { AppRolesRepository } from 'src/database/repositories/app-roles.repository';
+import { AppUsersRepository } from 'src/database/repositories/app-users.repository';
 import { AppsRepository } from 'src/database/repositories/apps.repository';
 import { ServiceUsersRepository } from 'src/database/repositories/service-users.repository';
 import { ApplicationRoleWithPermissionsModel } from 'src/types/application-role.types';
@@ -20,6 +21,7 @@ export class AppRolesService {
         private readonly appsRepository: AppsRepository,
         private readonly appRolesRepository: AppRolesRepository,
         private readonly appPermissionsRepository: AppPermissionsRepository,
+        private readonly appUsersRepository: AppUsersRepository,
         private readonly serviceUsersRepository: ServiceUsersRepository,
     ) {}
 
@@ -49,6 +51,18 @@ export class AppRolesService {
         return app;
     }
 
+    private async validateAppAccessByAppUser(appId: number, appUserId: number): Promise<ApplicationModel> {
+        const user = await this.appUsersRepository.findByIdInApp(appId, appUserId);
+
+        if (!user) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
+        const app = await this.validateAppExists(appId);
+
+        return app;
+    }
+
     async createRoleByServiceUser(
         appId: number,
         serviceUserId: number,
@@ -62,11 +76,12 @@ export class AppRolesService {
 
     async createRoleByAppUser(
         appId: number,
+        appUserId: number,
         name: string,
         description?: string,
         permissionIds?: number[],
     ): Promise<ApplicationRoleWithPermissionsModel> {
-        await this.validateAppExists(appId);
+        await this.validateAppAccessByAppUser(appId, appUserId);
         return this.createRole(appId, name, description, permissionIds);
     }
 
@@ -98,8 +113,8 @@ export class AppRolesService {
         return this.appRolesRepository.findAllByApp(appId);
     }
 
-    async getAllRolesByAppUser(appId: number): Promise<ApplicationRoleModel[]> {
-        await this.validateAppExists(appId);
+    async getAllRolesByAppUser(appId: number, appUserId: number): Promise<ApplicationRoleModel[]> {
+        await this.validateAppAccessByAppUser(appId, appUserId);
         return this.appRolesRepository.findAllByApp(appId);
     }
 
@@ -112,8 +127,12 @@ export class AppRolesService {
         return this.getRole(appId, roleId);
     }
 
-    async getRoleByAppUser(appId: number, roleId: number): Promise<ApplicationRoleWithPermissionsModel> {
-        await this.validateAppExists(appId);
+    async getRoleByAppUser(
+        appId: number,
+        appUserId: number,
+        roleId: number,
+    ): Promise<ApplicationRoleWithPermissionsModel> {
+        await this.validateAppAccessByAppUser(appId, appUserId);
         return this.getRole(appId, roleId);
     }
 
@@ -141,12 +160,13 @@ export class AppRolesService {
 
     async updateRoleByAppUser(
         appId: number,
+        appUserId: number,
         roleId: number,
         name?: string,
         description?: string,
         permissionIds?: number[],
     ): Promise<ApplicationRoleWithPermissionsModel> {
-        await this.validateAppExists(appId);
+        await this.validateAppAccessByAppUser(appId, appUserId);
         return this.updateRole(appId, roleId, name, description, permissionIds);
     }
 
@@ -206,8 +226,8 @@ export class AppRolesService {
         await this.deleteRole(appId, roleId);
     }
 
-    async deleteRoleByAppUser(appId: number, roleId: number): Promise<void> {
-        await this.validateAppExists(appId);
+    async deleteRoleByAppUser(appId: number, appUserId: number, roleId: number): Promise<void> {
+        await this.validateAppAccessByAppUser(appId, appUserId);
         await this.deleteRole(appId, roleId);
     }
 

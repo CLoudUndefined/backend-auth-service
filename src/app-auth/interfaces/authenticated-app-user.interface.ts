@@ -3,6 +3,5 @@ import { ApplicationRoleWithPermissionsModel } from 'src/types/application-role.
 export interface AuthenticatedAppUser {
     appId: number;
     id: number;
-    email: string;
     roles: ApplicationRoleWithPermissionsModel[];
 }

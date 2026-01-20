@@ -52,6 +52,18 @@ export class AppUsersService {
         return app;
     }
 
+    private async validateAppAccessByAppUser(appId: number, appUserId: number): Promise<ApplicationModel> {
+        const user = await this.appUsersRepository.findByIdInApp(appId, appUserId);
+
+        if (!user) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
+        const app = await this.validateAppExists(appId);
+
+        return app;
+    }
+
     async listAppUsersByServiceUser(
         appId: number,
         serviceUserId: number,
@@ -61,8 +73,12 @@ export class AppUsersService {
         return this.listAppUsers(appId, roleId);
     }
 
-    async listAppUsersByAppUser(appId: number, roleId?: number): Promise<ApplicationUserWithRolesModel[]> {
-        await this.validateAppExists(appId);
+    async listAppUsersByAppUser(
+        appId: number,
+        authenticatedAppUserId: number,
+        roleId?: number,
+    ): Promise<ApplicationUserWithRolesModel[]> {
+        await this.validateAppAccessByAppUser(appId, authenticatedAppUserId);
         return this.listAppUsers(appId, roleId);
     }
 
@@ -83,8 +99,12 @@ export class AppUsersService {
         return this.getAppUser(appId, appUserId);
     }
 
-    async getAppUserByAppUser(appId: number, appUserId: number): Promise<ApplicationUserWithRolesAndPermissionsModel> {
-        await this.validateAppExists(appId);
+    async getAppUserByAppUser(
+        appId: number,
+        authenticatedAppUserId: number,
+        appUserId: number,
+    ): Promise<ApplicationUserWithRolesAndPermissionsModel> {
+        await this.validateAppAccessByAppUser(appId, authenticatedAppUserId);
         return this.getAppUser(appId, appUserId);
     }
 
@@ -108,8 +128,13 @@ export class AppUsersService {
         return this.updateAppUser(appId, appUserId, email);
     }
 
-    async updateAppUserByAppUser(appId: number, appUserId: number, email: string): Promise<ApplicationUserModel> {
-        await this.validateAppExists(appId);
+    async updateAppUserByAppUser(
+        appId: number,
+        authenticatedAppUserId: number,
+        appUserId: number,
+        email: string,
+    ): Promise<ApplicationUserModel> {
+        await this.validateAppAccessByAppUser(appId, authenticatedAppUserId);
         return this.updateAppUser(appId, appUserId, email);
     }
 
@@ -142,8 +167,8 @@ export class AppUsersService {
         await this.deleteAppUser(appId, appUserId);
     }
 
-    async deleteAppUserByAppUser(appId: number, appUserId: number): Promise<void> {
-        await this.validateAppExists(appId);
+    async deleteAppUserByAppUser(appId: number, authenticatedAppUserId: number, appUserId: number): Promise<void> {
+        await this.validateAppAccessByAppUser(appId, authenticatedAppUserId);
         await this.deleteAppUser(appId, appUserId);
     }
 
@@ -165,8 +190,12 @@ export class AppUsersService {
         return this.getAppUserRoles(appId, appUserId);
     }
 
-    async getAppUserRolesByAppUser(appId: number, appUserId: number): Promise<ApplicationRoleWithPermissionsModel[]> {
-        await this.validateAppExists(appId);
+    async getAppUserRolesByAppUser(
+        appId: number,
+        authenticatedAppUserId: number,
+        appUserId: number,
+    ): Promise<ApplicationRoleWithPermissionsModel[]> {
+        await this.validateAppAccessByAppUser(appId, authenticatedAppUserId);
         return this.getAppUserRoles(appId, appUserId);
     }
 
@@ -189,8 +218,13 @@ export class AppUsersService {
         return this.addRoleToAppUser(appId, appUserId, roleId);
     }
 
-    async addRoleToAppUserByAppUser(appId: number, appUserId: number, roleId: number): Promise<void> {
-        await this.validateAppExists(appId);
+    async addRoleToAppUserByAppUser(
+        appId: number,
+        authenticatedAppUserId: number,
+        appUserId: number,
+        roleId: number,
+    ): Promise<void> {
+        await this.validateAppAccessByAppUser(appId, authenticatedAppUserId);
         return this.addRoleToAppUser(appId, appUserId, roleId);
     }
 
@@ -223,8 +257,13 @@ export class AppUsersService {
         await this.removeRoleFromAppUser(appId, appUserId, roleId);
     }
 
-    async removeRoleFromAppUserByAppUser(appId: number, appUserId: number, roleId: number): Promise<void> {
-        await this.validateAppExists(appId);
+    async removeRoleFromAppUserByAppUser(
+        appId: number,
+        authenticatedAppUserId: number,
+        appUserId: number,
+        roleId: number,
+    ): Promise<void> {
+        await this.validateAppAccessByAppUser(appId, authenticatedAppUserId);
         await this.removeRoleFromAppUser(appId, appUserId, roleId);
     }
 
