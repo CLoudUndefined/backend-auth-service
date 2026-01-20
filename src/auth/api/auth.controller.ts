@@ -17,6 +17,7 @@ import { ServiceUser } from 'src/common/decorators/service-user.decorator';
 import { ServiceUserModel } from 'src/database/models/service-user.model';
 import { JwtServiceAuthGuard } from '../guards/jwt-service-auth.guard';
 import { RemoveRecoveryRequestDto } from 'src/common/api/dto/auth/remove-recovery-request.dto';
+import { JwtServiceRefreshGuard } from '../guards/jwt-service-refresh.guard';
 
 @ApiTags('Service (User Auth)')
 @Controller('auth')
@@ -105,6 +106,7 @@ export class AuthController {
     }
 
     @Post('refresh')
+    @UseGuards(JwtServiceRefreshGuard)
     @HttpCode(200)
     @ApiOperation({
         summary: 'Refresh access token',
