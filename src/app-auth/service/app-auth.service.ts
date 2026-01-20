@@ -13,7 +13,7 @@ import { ApplicationUserModel } from 'src/database/models/application-user.model
 import { AuthTokensDto } from 'src/common/service/dto/auth/auth-tokens.dto';
 import { JwtService } from '@nestjs/jwt';
 import { AppsRepository } from 'src/database/repositories/apps.repository';
-import { EncryptionService } from 'src/encryption/encryption.service';
+import { EncryptionService } from 'src/common/encryption/encryption.service';
 import { ConfigService } from '@nestjs/config';
 import ms, { StringValue } from 'ms';
 import { RecoveryQuestionListDto } from 'src/common/service/dto/auth/recovery-question-list.dto';

@@ -8,7 +8,7 @@ import { AppRolesModule } from './app-roles/app-roles.module';
 import { AppPermissionsModule } from './app-permissions/app-permissions.module';
 import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
-import { EncryptionModule } from './encryption/encryption.module';
+import { EncryptionModule } from './common/encryption/encryption.module';
 import * as Joi from 'joi';
 
 @Module({

@@ -7,7 +7,7 @@ import {
     UnauthorizedException,
 } from '@nestjs/common';
 import { AppsRepository } from 'src/database/repositories/apps.repository';
-import { EncryptionService } from 'src/encryption/encryption.service';
+import { EncryptionService } from 'src/common/encryption/encryption.service';
 import * as crypto from 'crypto';
 import { ApplicationWithOwnerModel } from 'src/types/application.types';
 import { ServiceUsersRepository } from 'src/database/repositories/service-users.repository';
