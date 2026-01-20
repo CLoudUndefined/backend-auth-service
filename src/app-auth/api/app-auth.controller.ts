@@ -18,6 +18,7 @@ import { JwtAppAuthGuard } from '../guards/jwt-app-auth.guard';
 import { AppUser } from 'src/common/decorators/app-user.decorator';
 import { ApplicationUserModel } from 'src/database/models/application-user.model';
 import { RemoveRecoveryRequestDto } from 'src/common/api/dto/auth/remove-recovery-request.dto';
+import { JwtAppRefreshGuard } from '../guards/jwt-refresh.guard';
 
 @ApiTags('App (User Auth)')
 @Controller('apps/:appId/auth')
@@ -148,6 +149,7 @@ export class AppAuthController {
     }
 
     @Post('refresh')
+    @UseGuards(JwtAppRefreshGuard)
     @HttpCode(200)
     @ApiOperation({
         summary: 'Refresh specific app user token',

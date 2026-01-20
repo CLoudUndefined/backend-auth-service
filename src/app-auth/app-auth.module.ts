@@ -7,6 +7,7 @@ import { StringValue } from 'ms';
 import { AppAuthService } from './service/app-auth.service';
 import { EncryptionModule } from 'src/common/encryption/encryption.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 
 @Module({
     imports: [
@@ -23,6 +24,6 @@ import { JwtStrategy } from './strategies/jwt.strategy';
         EncryptionModule,
     ],
     controllers: [AppAuthController],
-    providers: [AppAuthService, JwtStrategy],
+    providers: [AppAuthService, JwtStrategy, JwtRefreshStrategy],
 })
 export class AppAuthModule {}
