@@ -3,7 +3,7 @@ import { IsDefined, IsNotEmpty, IsString } from 'class-validator';
 
 export class RefreshTokenRequestDto {
     @ApiProperty({
-        example: 'dcc43482efa34...',
+        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
         description: 'Valid Refresh Token issued during login',
     })
     @IsDefined()
