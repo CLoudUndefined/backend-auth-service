@@ -18,33 +18,25 @@ export class AppUsersService {
         private readonly appsRepository: AppsRepository,
     ) {}
 
-    private async validateAppAccessByServiceUser(
-        appId: number,
-        serviceUserId: number,
-        serviceUserIsGod: boolean,
-    ): Promise<ApplicationModel> {
+    private async validateAppExists(appId: number): Promise<ApplicationModel> {
         const app = await this.appsRepository.findById(appId);
 
         if (!app) {
             throw new NotFoundException('Application not found');
-        }
-
-        if (!serviceUserIsGod && app.ownerId !== serviceUserId) {
-            throw new ForbiddenException('Can only access own applications or required god-mode');
         }
 
         return app;
     }
 
-    private async validateAppAccessByAppUser(appId: number, appIdFromToken: number): Promise<ApplicationModel> {
-        const app = await this.appsRepository.findById(appId);
+    private async validateAppAccessByServiceUser(
+        appId: number,
+        serviceUserId: number,
+        serviceUserIsGod: boolean,
+    ): Promise<ApplicationModel> {
+        const app = await this.validateAppExists(appId);
 
-        if (!app) {
-            throw new NotFoundException('Application not found');
-        }
-
-        if (appId !== appIdFromToken) {
-            throw new ForbiddenException('Can only access users of application');
+        if (!serviceUserIsGod && app.ownerId !== serviceUserId) {
+            throw new ForbiddenException('Can only access own applications or required god-mode');
         }
 
         return app;
@@ -60,12 +52,8 @@ export class AppUsersService {
         return this.listAppUsers(appId, roleId);
     }
 
-    async listAppUsersByAppUser(
-        appId: number,
-        appIdFromToken: number,
-        roleId?: number,
-    ): Promise<ApplicationUserWithRolesModel[]> {
-        await this.validateAppAccessByAppUser(appId, appIdFromToken);
+    async listAppUsersByAppUser(appId: number, roleId?: number): Promise<ApplicationUserWithRolesModel[]> {
+        await this.validateAppExists(appId);
         return this.listAppUsers(appId, roleId);
     }
 
@@ -87,12 +75,8 @@ export class AppUsersService {
         return this.getAppUser(appId, appUserId);
     }
 
-    async getAppUserByAppUser(
-        appId: number,
-        appIdFromToken: number,
-        appUserId: number,
-    ): Promise<ApplicationUserWithRolesAndPermissionsModel> {
-        await this.validateAppAccessByAppUser(appId, appIdFromToken);
+    async getAppUserByAppUser(appId: number, appUserId: number): Promise<ApplicationUserWithRolesAndPermissionsModel> {
+        await this.validateAppExists(appId);
         return this.getAppUser(appId, appUserId);
     }
 
@@ -117,13 +101,8 @@ export class AppUsersService {
         return this.updateAppUser(appId, appUserId, email);
     }
 
-    async updateAppUserByAppUser(
-        appId: number,
-        appIdFromToken: number,
-        appUserId: number,
-        email: string,
-    ): Promise<ApplicationUserModel> {
-        await this.validateAppAccessByAppUser(appId, appIdFromToken);
+    async updateAppUserByAppUser(appId: number, appUserId: number, email: string): Promise<ApplicationUserModel> {
+        await this.validateAppExists(appId);
         return this.updateAppUser(appId, appUserId, email);
     }
 
@@ -161,8 +140,8 @@ export class AppUsersService {
         await this.deleteAppUser(appId, appUserId);
     }
 
-    async deleteAppUserByAppUser(appId: number, appIdFromToken: number, appUserId: number): Promise<void> {
-        await this.validateAppAccessByAppUser(appId, appIdFromToken);
+    async deleteAppUserByAppUser(appId: number, appUserId: number): Promise<void> {
+        await this.validateAppExists(appId);
         await this.deleteAppUser(appId, appUserId);
     }
 
@@ -185,12 +164,8 @@ export class AppUsersService {
         return this.getAppUserRoles(appId, appUserId);
     }
 
-    async getAppUserRolesByAppUser(
-        appId: number,
-        appIdFromToken: number,
-        appUserId: number,
-    ): Promise<ApplicationRoleWithPermissionsModel[]> {
-        await this.validateAppAccessByAppUser(appId, appIdFromToken);
+    async getAppUserRolesByAppUser(appId: number, appUserId: number): Promise<ApplicationRoleWithPermissionsModel[]> {
+        await this.validateAppExists(appId);
         return this.getAppUserRoles(appId, appUserId);
     }
 
@@ -214,13 +189,8 @@ export class AppUsersService {
         return this.addRoleToAppUser(appId, appUserId, roleId);
     }
 
-    async addRoleToAppUserByAppUser(
-        appId: number,
-        appIdFromToken: number,
-        appUserId: number,
-        roleId: number,
-    ): Promise<void> {
-        await this.validateAppAccessByAppUser(appId, appIdFromToken);
+    async addRoleToAppUserByAppUser(appId: number, appUserId: number, roleId: number): Promise<void> {
+        await this.validateAppExists(appId);
         return this.addRoleToAppUser(appId, appUserId, roleId);
     }
 
@@ -254,13 +224,8 @@ export class AppUsersService {
         await this.removeRoleFromAppUser(appId, appUserId, roleId);
     }
 
-    async removeRoleFromAppUserByAppUser(
-        appId: number,
-        appIdFromToken: number,
-        appUserId: number,
-        roleId: number,
-    ): Promise<void> {
-        await this.validateAppAccessByAppUser(appId, appIdFromToken);
+    async removeRoleFromAppUserByAppUser(appId: number, appUserId: number, roleId: number): Promise<void> {
+        await this.validateAppExists(appId);
         await this.removeRoleFromAppUser(appId, appUserId, roleId);
     }
 

@@ -20,33 +20,25 @@ export class AppRolesService {
         private readonly appPermissionsRepository: AppPermissionsRepository,
     ) {}
 
-    private async validateAppAccessByServiceUser(
-        appId: number,
-        serviceUserId: number,
-        serviceIsGod: boolean,
-    ): Promise<ApplicationModel> {
+    private async validateAppExists(appId: number): Promise<ApplicationModel> {
         const app = await this.appsRepository.findById(appId);
 
         if (!app) {
             throw new NotFoundException('Application not found');
-        }
-
-        if (!serviceIsGod && app.ownerId !== serviceUserId) {
-            throw new ForbiddenException('You can only manage users in your own applications');
         }
 
         return app;
     }
 
-    private async validateAppAccessByAppUser(appId: number, appIdFromToken: number): Promise<ApplicationModel> {
-        const app = await this.appsRepository.findById(appId);
+    private async validateAppAccessByServiceUser(
+        appId: number,
+        serviceUserId: number,
+        serviceIsGod: boolean,
+    ): Promise<ApplicationModel> {
+        const app = await this.validateAppExists(appId);
 
-        if (!app) {
-            throw new NotFoundException('Application not found');
-        }
-
-        if (appId !== appIdFromToken) {
-            throw new ForbiddenException('Can only access users of application');
+        if (!serviceIsGod && app.ownerId !== serviceUserId) {
+            throw new ForbiddenException('You can only manage users in your own applications');
         }
 
         return app;
@@ -66,12 +58,11 @@ export class AppRolesService {
 
     async createRoleByAppUser(
         appId: number,
-        appIdFromToken: number,
         name: string,
         description?: string,
         permissionIds?: number[],
     ): Promise<ApplicationRoleWithPermissionsModel> {
-        await this.validateAppAccessByAppUser(appId, appIdFromToken);
+        await this.validateAppExists(appId);
         return this.createRole(appId, name, description, permissionIds);
     }
 
@@ -107,8 +98,8 @@ export class AppRolesService {
         return this.appRolesRepository.findAllByApp(appId);
     }
 
-    async getAllRolesByAppUser(appId: number, appIdFromToken: number): Promise<ApplicationRoleModel[]> {
-        await this.validateAppAccessByAppUser(appId, appIdFromToken);
+    async getAllRolesByAppUser(appId: number): Promise<ApplicationRoleModel[]> {
+        await this.validateAppExists(appId);
         return this.appRolesRepository.findAllByApp(appId);
     }
 
@@ -122,12 +113,8 @@ export class AppRolesService {
         return this.getRole(appId, roleId);
     }
 
-    async getRoleByAppUser(
-        appId: number,
-        appIdFromToken: number,
-        roleId: number,
-    ): Promise<ApplicationRoleWithPermissionsModel> {
-        await this.validateAppAccessByAppUser(appId, appIdFromToken);
+    async getRoleByAppUser(appId: number, roleId: number): Promise<ApplicationRoleWithPermissionsModel> {
+        await this.validateAppExists(appId);
         return this.getRole(appId, roleId);
     }
 
@@ -156,13 +143,12 @@ export class AppRolesService {
 
     async updateRoleByAppUser(
         appId: number,
-        appIdFromToken: number,
         roleId: number,
         name?: string,
         description?: string,
         permissionIds?: number[],
     ): Promise<ApplicationRoleWithPermissionsModel> {
-        await this.validateAppAccessByAppUser(appId, appIdFromToken);
+        await this.validateAppExists(appId);
         return this.updateRole(appId, roleId, name, description, permissionIds);
     }
 
@@ -227,8 +213,8 @@ export class AppRolesService {
         await this.deleteRole(appId, roleId);
     }
 
-    async deleteRoleByAppUser(appId: number, appIdFromToken: number, roleId: number): Promise<void> {
-        await this.validateAppAccessByAppUser(appId, appIdFromToken);
+    async deleteRoleByAppUser(appId: number, roleId: number): Promise<void> {
+        await this.validateAppExists(appId);
         await this.deleteRole(appId, roleId);
     }
 

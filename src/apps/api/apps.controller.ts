@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
 import { AppResponseDto } from './dto/app-response.dto';
 import { UpdateAppRequestDto } from './dto/update-app-request.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -12,7 +12,7 @@ import { AppPermission } from 'src/app-auth/enums/app-permissions.enum';
 
 @ApiTags('Apps (Management)')
 @ApiBearerAuth('JWT-auth-app')
-@Controller('apps/:appId')
+@Controller('app')
 export class AppsController {
     constructor(private readonly appsService: AppsService) {}
 
@@ -36,11 +36,8 @@ export class AppsController {
         status: 404,
         description: 'App not found',
     })
-    async getApp(
-        @AppUser() user: AuthenticatedAppUser,
-        @Param('appId', ParseIntPipe) appId: number,
-    ): Promise<AppResponseDto> {
-        const app = await this.appsService.findAppByIdByAppUser(appId, user.id);
+    async getApp(@AppUser() user: AuthenticatedAppUser): Promise<AppResponseDto> {
+        const app = await this.appsService.findAppByIdByAppUser(user.appId);
         return new AppResponseDto(app);
     }
 
@@ -70,10 +67,9 @@ export class AppsController {
     })
     async updateApp(
         @AppUser() user: AuthenticatedAppUser,
-        @Param('appId', ParseIntPipe) appId: number,
         @Body() updateAppDto: UpdateAppRequestDto,
     ): Promise<AppResponseDto> {
-        const app = await this.appsService.updateByAppUser(appId, user.id, updateAppDto.name, updateAppDto.description);
+        const app = await this.appsService.updateByAppUser(user.appId, updateAppDto.name, updateAppDto.description);
         return new AppResponseDto(app);
     }
 }
