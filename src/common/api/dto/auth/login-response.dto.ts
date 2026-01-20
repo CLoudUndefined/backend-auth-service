@@ -8,7 +8,7 @@ export class LoginResponseDto {
     accessToken: string;
 
     @ApiProperty({
-        example: 'dcc43482efa34...',
+        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
         description: 'Refresh Token to obtain a new Access Token when the current one expires',
     })
     refreshToken: string;
