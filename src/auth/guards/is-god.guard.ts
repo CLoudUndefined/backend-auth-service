@@ -1,13 +1,25 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ServiceUsersRepository } from 'src/database/repositories/service-users.repository';
 
 @Injectable()
 export class IsGodGuard implements CanActivate {
-    canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+    constructor(private readonly serviceUsersRepository: ServiceUsersRepository) {}
+
+    async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest();
         const user = request.user;
 
-        if (!user?.isGod) {
+        if (!user) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
+        const serviceUser = await this.serviceUsersRepository.findById(user.id);
+
+        if (!serviceUser) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
+        if (!serviceUser.isGod) {
             throw new ForbiddenException('God privileges required');
         }
 
