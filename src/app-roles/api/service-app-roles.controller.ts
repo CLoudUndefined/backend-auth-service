@@ -59,7 +59,6 @@ export class ServiceAppRolesController {
         const role = await this.appRolesService.createRoleByServiceUser(
             appId,
             user.id,
-            user.isGod,
             createAppRoleDto.name,
             createAppRoleDto.description,
             createAppRoleDto.permissionIds,
@@ -99,7 +98,7 @@ export class ServiceAppRolesController {
         @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
     ): Promise<AppRoleResponseDto[]> {
-        const roles = await this.appRolesService.getAllRolesByServiceUser(appId, user.id, user.isGod);
+        const roles = await this.appRolesService.getAllRolesByServiceUser(appId, user.id);
         return roles.map((role) => {
             return new AppRoleResponseDto(role);
         });
@@ -141,7 +140,7 @@ export class ServiceAppRolesController {
         @Param('appId', ParseIntPipe) appId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<AppRoleWithPermissionsResponseDto> {
-        const role = await this.appRolesService.getRoleByServiceUser(appId, user.id, user.isGod, roleId);
+        const role = await this.appRolesService.getRoleByServiceUser(appId, user.id, roleId);
         return new AppRoleWithPermissionsResponseDto(role);
     }
 
@@ -189,7 +188,6 @@ export class ServiceAppRolesController {
         const role = await this.appRolesService.updateRoleByServiceUser(
             appId,
             user.id,
-            user.isGod,
             roleId,
             updateAppRoleDto.name,
             updateAppRoleDto.description,
@@ -238,7 +236,7 @@ export class ServiceAppRolesController {
         @Param('appId', ParseIntPipe) appId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<MessageResponseDto> {
-        await this.appRolesService.deleteRoleByServiceUser(appId, user.id, user.isGod, roleId);
+        await this.appRolesService.deleteRoleByServiceUser(appId, user.id, roleId);
         return { message: 'Role deleted successfully' };
     }
 }

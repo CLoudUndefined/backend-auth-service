@@ -1,4 +1,10 @@
-import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+    ConflictException,
+    ForbiddenException,
+    Injectable,
+    NotFoundException,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { AppUsersRepository } from 'src/database/repositories/app-users.repository';
 import { ApplicationUserModel } from 'src/database/models/application-user.model';
 import {
@@ -9,6 +15,7 @@ import { AppsRepository } from 'src/database/repositories/apps.repository';
 import { ApplicationRoleWithPermissionsModel } from 'src/types/application-role.types';
 import { ApplicationModel } from 'src/database/models/application.model';
 import { AppRolesRepository } from 'src/database/repositories/app-roles.repository';
+import { ServiceUsersRepository } from 'src/database/repositories/service-users.repository';
 
 @Injectable()
 export class AppUsersService {
@@ -16,6 +23,7 @@ export class AppUsersService {
         private readonly appUsersRepository: AppUsersRepository,
         private readonly appRolesRepository: AppRolesRepository,
         private readonly appsRepository: AppsRepository,
+        private readonly serviceUsersRepository: ServiceUsersRepository,
     ) {}
 
     private async validateAppExists(appId: number): Promise<ApplicationModel> {
@@ -28,15 +36,17 @@ export class AppUsersService {
         return app;
     }
 
-    private async validateAppAccessByServiceUser(
-        appId: number,
-        serviceUserId: number,
-        serviceUserIsGod: boolean,
-    ): Promise<ApplicationModel> {
+    private async validateAppAccessByServiceUser(appId: number, serviceUserId: number): Promise<ApplicationModel> {
+        const user = await this.serviceUsersRepository.findById(serviceUserId);
+
+        if (!user) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
         const app = await this.validateAppExists(appId);
 
-        if (!serviceUserIsGod && app.ownerId !== serviceUserId) {
-            throw new ForbiddenException('Can only access own applications or required god-mode');
+        if (!user.isGod && app.ownerId !== user.id) {
+            throw new ForbiddenException('You can only manage users in your own applications');
         }
 
         return app;
@@ -45,10 +55,9 @@ export class AppUsersService {
     async listAppUsersByServiceUser(
         appId: number,
         serviceUserId: number,
-        serviceUserIsGod: boolean,
         roleId?: number,
     ): Promise<ApplicationUserWithRolesModel[]> {
-        await this.validateAppAccessByServiceUser(appId, serviceUserId, serviceUserIsGod);
+        await this.validateAppAccessByServiceUser(appId, serviceUserId);
         return this.listAppUsers(appId, roleId);
     }
 
@@ -68,10 +77,9 @@ export class AppUsersService {
     async getAppUserByServiceUser(
         appId: number,
         serviceUserId: number,
-        serviceUserIsGod: boolean,
         appUserId: number,
     ): Promise<ApplicationUserWithRolesAndPermissionsModel> {
-        await this.validateAppAccessByServiceUser(appId, serviceUserId, serviceUserIsGod);
+        await this.validateAppAccessByServiceUser(appId, serviceUserId);
         return this.getAppUser(appId, appUserId);
     }
 
@@ -93,11 +101,10 @@ export class AppUsersService {
     async updateAppUserByServiceUser(
         appId: number,
         serviceUserId: number,
-        serviceUserIsGod: boolean,
         appUserId: number,
         email: string,
     ): Promise<ApplicationUserModel> {
-        await this.validateAppAccessByServiceUser(appId, serviceUserId, serviceUserIsGod);
+        await this.validateAppAccessByServiceUser(appId, serviceUserId);
         return this.updateAppUser(appId, appUserId, email);
     }
 
@@ -130,13 +137,8 @@ export class AppUsersService {
         return updated;
     }
 
-    async deleteAppUserByServiceUser(
-        appId: number,
-        serviceUserId: number,
-        serviceUserIsGod: boolean,
-        appUserId: number,
-    ): Promise<void> {
-        await this.validateAppAccessByServiceUser(appId, serviceUserId, serviceUserIsGod);
+    async deleteAppUserByServiceUser(appId: number, serviceUserId: number, appUserId: number): Promise<void> {
+        await this.validateAppAccessByServiceUser(appId, serviceUserId);
         await this.deleteAppUser(appId, appUserId);
     }
 
@@ -157,10 +159,9 @@ export class AppUsersService {
     async getAppUserRolesByServiceUser(
         appId: number,
         serviceUserId: number,
-        serviceUserIsGod: boolean,
         appUserId: number,
     ): Promise<ApplicationRoleWithPermissionsModel[]> {
-        await this.validateAppAccessByServiceUser(appId, serviceUserId, serviceUserIsGod);
+        await this.validateAppAccessByServiceUser(appId, serviceUserId);
         return this.getAppUserRoles(appId, appUserId);
     }
 
@@ -181,11 +182,10 @@ export class AppUsersService {
     async addRoleToAppUserByServiceUser(
         appId: number,
         serviceUserId: number,
-        serviceUserIsGod: boolean,
         appUserId: number,
         roleId: number,
     ): Promise<void> {
-        await this.validateAppAccessByServiceUser(appId, serviceUserId, serviceUserIsGod);
+        await this.validateAppAccessByServiceUser(appId, serviceUserId);
         return this.addRoleToAppUser(appId, appUserId, roleId);
     }
 
@@ -216,11 +216,10 @@ export class AppUsersService {
     async removeRoleFromAppUserByServiceUser(
         appId: number,
         serviceUserId: number,
-        serviceUserIsGod: boolean,
         appUserId: number,
         roleId: number,
     ): Promise<void> {
-        await this.validateAppAccessByServiceUser(appId, serviceUserId, serviceUserIsGod);
+        await this.validateAppAccessByServiceUser(appId, serviceUserId);
         await this.removeRoleFromAppUser(appId, appUserId, roleId);
     }
 

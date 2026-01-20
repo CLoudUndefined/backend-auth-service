@@ -4,17 +4,20 @@ import {
     ForbiddenException,
     Injectable,
     NotFoundException,
+    UnauthorizedException,
 } from '@nestjs/common';
 import { AppsRepository } from 'src/database/repositories/apps.repository';
 import { EncryptionService } from 'src/encryption/encryption.service';
 import * as crypto from 'crypto';
 import { ApplicationWithOwnerModel } from 'src/types/application.types';
+import { ServiceUsersRepository } from 'src/database/repositories/service-users.repository';
 
 @Injectable()
 export class AppsService {
     constructor(
         private readonly appsRepository: AppsRepository,
         private readonly encryptionService: EncryptionService,
+        private readonly serviceUsersRepository: ServiceUsersRepository,
     ) {}
 
     private generateEncryptedSecret(): string {
@@ -33,13 +36,18 @@ export class AppsService {
 
     private async validateAppAccessByServiceUser(
         appId: number,
-        userId: number,
-        isGod: boolean,
+        serviceUserId: number,
     ): Promise<ApplicationWithOwnerModel> {
+        const user = await this.serviceUsersRepository.findById(serviceUserId);
+
+        if (!user) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
         const app = await this.validateAppExists(appId);
 
-        if (!isGod && app.ownerId !== userId) {
-            throw new ForbiddenException('Can only access own applications or required god-mode');
+        if (!user.isGod && app.ownerId !== user.id) {
+            throw new ForbiddenException('You can only manage users in your own applications');
         }
 
         return app;
@@ -70,8 +78,8 @@ export class AppsService {
         return this.validateAppExists(appId);
     }
 
-    async findAppByIdByServiceUser(appId: number, userId: number, isGod: boolean): Promise<ApplicationWithOwnerModel> {
-        return this.validateAppAccessByServiceUser(appId, userId, isGod);
+    async findAppByIdByServiceUser(appId: number, userId: number): Promise<ApplicationWithOwnerModel> {
+        return this.validateAppAccessByServiceUser(appId, userId);
     }
 
     async updateByAppUser(appId: number, name?: string, description?: string): Promise<ApplicationWithOwnerModel> {
@@ -82,11 +90,10 @@ export class AppsService {
     async updateByServiceUser(
         appId: number,
         userId: number,
-        isGod: boolean,
         name?: string,
         description?: string,
     ): Promise<ApplicationWithOwnerModel> {
-        await this.validateAppAccessByServiceUser(appId, userId, isGod);
+        await this.validateAppAccessByServiceUser(appId, userId);
         return this.update(appId, name, description);
     }
 
@@ -104,13 +111,13 @@ export class AppsService {
         return updatedApp;
     }
 
-    async deleteByServiceUser(appId: number, userId: number, isGod: boolean): Promise<void> {
-        await this.validateAppAccessByServiceUser(appId, userId, isGod);
+    async deleteByServiceUser(appId: number, userId: number): Promise<void> {
+        await this.validateAppAccessByServiceUser(appId, userId);
         await this.appsRepository.delete(appId);
     }
 
-    async regenerateSecretByServiceUser(appId: number, userId: number, isGod: boolean): Promise<void> {
-        await this.validateAppAccessByServiceUser(appId, userId, isGod);
+    async regenerateSecretByServiceUser(appId: number, userId: number): Promise<void> {
+        await this.validateAppAccessByServiceUser(appId, userId);
 
         const updatedApp = await this.appsRepository.updateWithOwner(appId, {
             encryptedSecret: this.generateEncryptedSecret(),

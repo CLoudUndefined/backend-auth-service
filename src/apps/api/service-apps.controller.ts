@@ -94,7 +94,7 @@ export class ServiceAppsController {
         @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
     ): Promise<AppResponseDto> {
-        const app = await this.appsService.findAppByIdByServiceUser(appId, user.id, user.isGod);
+        const app = await this.appsService.findAppByIdByServiceUser(appId, user.id);
         return new AppResponseDto(app);
     }
 
@@ -137,7 +137,6 @@ export class ServiceAppsController {
         const app = await this.appsService.updateByServiceUser(
             appId,
             user.id,
-            user.isGod,
             updateAppDto.name,
             updateAppDto.description,
         );
@@ -175,7 +174,7 @@ export class ServiceAppsController {
         @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
     ): Promise<MessageResponseDto> {
-        await this.appsService.deleteByServiceUser(appId, user.id, user.isGod);
+        await this.appsService.deleteByServiceUser(appId, user.id);
         return { message: 'Application deleted successfully' };
     }
 
@@ -211,7 +210,7 @@ export class ServiceAppsController {
         @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
     ): Promise<MessageResponseDto> {
-        await this.appsService.regenerateSecretByServiceUser(appId, user.id, user.isGod);
+        await this.appsService.regenerateSecretByServiceUser(appId, user.id);
         return { message: 'App secret regenerated successfully' };
     }
 }
