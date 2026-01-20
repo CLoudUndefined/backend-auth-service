@@ -21,36 +21,25 @@ export class AppsService {
         return this.encryptionService.encrypt(crypto.randomBytes(64).toString('hex'));
     }
 
-    private async validateAppAccessByServiceUser(
-        appId: number,
-        userId: number,
-        isGod: boolean,
-    ): Promise<ApplicationWithOwnerModel> {
+    private async validateAppExists(appId: number): Promise<ApplicationWithOwnerModel> {
         const app = await this.appsRepository.findByIdWithOwner(appId);
 
         if (!app) {
             throw new NotFoundException('Application not found');
-        }
-
-        if (!isGod && app.ownerId !== userId) {
-            throw new ForbiddenException('Can only access own applications or required god-mode');
         }
 
         return app;
     }
 
-    private async validateAppAccessByAppUser(
+    private async validateAppAccessByServiceUser(
         appId: number,
-        appIdFromToken: number,
+        userId: number,
+        isGod: boolean,
     ): Promise<ApplicationWithOwnerModel> {
-        const app = await this.appsRepository.findByIdWithOwner(appId);
+        const app = await this.validateAppExists(appId);
 
-        if (!app) {
-            throw new NotFoundException('Application not found');
-        }
-
-        if (appId !== appIdFromToken) {
-            throw new ForbiddenException('Can only access users of application');
+        if (!isGod && app.ownerId !== userId) {
+            throw new ForbiddenException('Can only access own applications or required god-mode');
         }
 
         return app;
@@ -77,21 +66,16 @@ export class AppsService {
         return this.appsRepository.findAllWithOwner();
     }
 
-    async findAppByIdByAppUser(appId: number, appIdFromToken: number): Promise<ApplicationWithOwnerModel> {
-        return this.validateAppAccessByAppUser(appId, appIdFromToken);
+    async findAppByIdByAppUser(appId: number): Promise<ApplicationWithOwnerModel> {
+        return this.validateAppExists(appId);
     }
 
     async findAppByIdByServiceUser(appId: number, userId: number, isGod: boolean): Promise<ApplicationWithOwnerModel> {
         return this.validateAppAccessByServiceUser(appId, userId, isGod);
     }
 
-    async updateByAppUser(
-        appId: number,
-        appIdFromToken: number,
-        name?: string,
-        description?: string,
-    ): Promise<ApplicationWithOwnerModel> {
-        await this.validateAppAccessByAppUser(appId, appIdFromToken);
+    async updateByAppUser(appId: number, name?: string, description?: string): Promise<ApplicationWithOwnerModel> {
+        await this.validateAppExists(appId);
         return this.update(appId, name, description);
     }
 

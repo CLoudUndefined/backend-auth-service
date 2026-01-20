@@ -15,7 +15,7 @@ import { AppPermission } from 'src/app-auth/enums/app-permissions.enum';
 
 @ApiTags('App (Role)')
 @ApiBearerAuth('JWT-auth-app')
-@Controller('apps/:appId/roles')
+@Controller('app/roles')
 export class AppRolesController {
     constructor(private readonly appRolesService: AppRolesService) {}
 
@@ -53,11 +53,9 @@ export class AppRolesController {
     })
     async createRole(
         @AppUser() user: AuthenticatedAppUser,
-        @Param('appId', ParseIntPipe) appId: number,
         @Body() createRoleDto: CreateAppRoleRequestDto,
     ): Promise<AppRoleWithPermissionsResponseDto> {
         const role = await this.appRolesService.createRoleByAppUser(
-            appId,
             user.appId,
             createRoleDto.name,
             createRoleDto.description,
@@ -95,11 +93,8 @@ export class AppRolesController {
         status: 404,
         description: 'App not found',
     })
-    async getAllRoles(
-        @AppUser() user: AuthenticatedAppUser,
-        @Param('appId', ParseIntPipe) appId: number,
-    ): Promise<AppRoleResponseDto[]> {
-        const roles = await this.appRolesService.getAllRolesByAppUser(appId, user.appId);
+    async getAllRoles(@AppUser() user: AuthenticatedAppUser): Promise<AppRoleResponseDto[]> {
+        const roles = await this.appRolesService.getAllRolesByAppUser(user.appId);
         return roles.map((role) => new AppRoleResponseDto(role));
     }
 
@@ -137,10 +132,9 @@ export class AppRolesController {
     })
     async getRole(
         @AppUser() user: AuthenticatedAppUser,
-        @Param('appId', ParseIntPipe) appId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<AppRoleWithPermissionsResponseDto> {
-        const role = await this.appRolesService.getRoleByAppUser(appId, user.appId, roleId);
+        const role = await this.appRolesService.getRoleByAppUser(user.appId, roleId);
         return new AppRoleWithPermissionsResponseDto(role);
     }
 
@@ -182,12 +176,10 @@ export class AppRolesController {
     })
     async updateRole(
         @AppUser() user: AuthenticatedAppUser,
-        @Param('appId', ParseIntPipe) appId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
         @Body() updateAppRoleDto: UpdateAppRoleRequestDto,
     ): Promise<AppRoleWithPermissionsResponseDto> {
         const role = await this.appRolesService.updateRoleByAppUser(
-            appId,
             user.appId,
             roleId,
             updateAppRoleDto.name,
@@ -235,10 +227,9 @@ export class AppRolesController {
     })
     async deleteRole(
         @AppUser() user: AuthenticatedAppUser,
-        @Param('appId', ParseIntPipe) appId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<MessageResponseDto> {
-        await this.appRolesService.deleteRoleByAppUser(appId, user.appId, roleId);
+        await this.appRolesService.deleteRoleByAppUser(user.appId, roleId);
         return { message: 'Role deleted successfully' };
     }
 }
