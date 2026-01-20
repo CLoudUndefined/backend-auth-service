@@ -23,6 +23,7 @@ import * as Joi from 'joi';
                 POSTGRES_PASSWORD: Joi.string().required(),
                 POSTGRES_DB: Joi.string().default('backend_auth_db'),
                 JWT_SECRET: Joi.string().min(64).required(),
+                JWT_REFRESH_SECRET: Joi.string().min(64).required(),
                 JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.string().required(),
                 JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.string().required(),
                 APP_ENCRYPTION_KEY: Joi.string().length(64).hex().required(),
