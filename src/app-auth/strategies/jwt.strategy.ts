@@ -5,7 +5,6 @@ import { EncryptionService } from 'src/encryption/encryption.service';
 import { AuthenticatedAppUser } from '../interfaces/authenticated-app-user.interface';
 import { AppsRepository } from 'src/database/repositories/apps.repository';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
-import { AppUsersRepository } from 'src/database/repositories/app-users.repository';
 import { PassportStrategy } from '@nestjs/passport';
 
 @Injectable()
@@ -14,7 +13,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-app') {
         private readonly jwtService: JwtService,
         private readonly encryptionService: EncryptionService,
         private readonly appsRepository: AppsRepository,
-        private readonly appUsersRepository: AppUsersRepository,
     ) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -45,12 +43,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt-app') {
     }
 
     async validate(payload: JwtPayload): Promise<AuthenticatedAppUser> {
-        const user = await this.appUsersRepository.findByIdInAppWithRolesAndPermissions(payload.appId, payload.sub);
-
-        if (!user) {
-            throw new UnauthorizedException('User not found');
-        }
-
-        return { appId: user.appId, id: user.id, email: user.email, roles: user.roles };
+        return { appId: payload.appId, id: payload.sub, roles: [] };
     }
 }

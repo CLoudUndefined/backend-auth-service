@@ -37,7 +37,7 @@ export class AppsController {
         description: 'App not found',
     })
     async getApp(@AppUser() user: AuthenticatedAppUser): Promise<AppResponseDto> {
-        const app = await this.appsService.findAppByIdByAppUser(user.appId);
+        const app = await this.appsService.findAppByIdByAppUser(user.appId, user.id);
         return new AppResponseDto(app);
     }
 
@@ -69,7 +69,12 @@ export class AppsController {
         @AppUser() user: AuthenticatedAppUser,
         @Body() updateAppDto: UpdateAppRequestDto,
     ): Promise<AppResponseDto> {
-        const app = await this.appsService.updateByAppUser(user.appId, updateAppDto.name, updateAppDto.description);
+        const app = await this.appsService.updateByAppUser(
+            user.appId,
+            user.id,
+            updateAppDto.name,
+            updateAppDto.description,
+        );
         return new AppResponseDto(app);
     }
 }

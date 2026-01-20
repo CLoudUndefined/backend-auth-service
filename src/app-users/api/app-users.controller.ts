@@ -58,7 +58,7 @@ export class AppUsersController {
         @AppUser() user: AuthenticatedAppUser,
         @Query() query: GetAppUsersQueryDto,
     ): Promise<AppUserWithRolesResponseDto[]> {
-        const appUsers = await this.appUsersService.listAppUsersByAppUser(user.appId, query.roleId);
+        const appUsers = await this.appUsersService.listAppUsersByAppUser(user.appId, user.id, query.roleId);
         return appUsers.map((appUser) => new AppUserWithRolesResponseDto(appUser));
     }
 
@@ -102,7 +102,7 @@ export class AppUsersController {
         @AppUser() user: AuthenticatedAppUser,
         @Param('appUserId', ParseIntPipe) appUserId: number,
     ): Promise<AppUserWithRolesAndPermissionsResponseDto> {
-        const appUser = await this.appUsersService.getAppUserByAppUser(user.appId, appUserId);
+        const appUser = await this.appUsersService.getAppUserByAppUser(user.appId, user.id, appUserId);
         return new AppUserWithRolesAndPermissionsResponseDto(appUser);
     }
 
@@ -153,6 +153,7 @@ export class AppUsersController {
     ): Promise<AppUserResponseDto> {
         const appUser = await this.appUsersService.updateAppUserByAppUser(
             user.appId,
+            user.id,
             appUserId,
             updateAppUserDto.email,
         );
@@ -195,7 +196,7 @@ export class AppUsersController {
         @AppUser() user: AuthenticatedAppUser,
         @Param('appUserId', ParseIntPipe) appUserId: number,
     ): Promise<MessageResponseDto> {
-        await this.appUsersService.deleteAppUserByAppUser(user.appId, appUserId);
+        await this.appUsersService.deleteAppUserByAppUser(user.appId, user.id, appUserId);
         return { message: 'User deleted successfully' };
     }
 
@@ -236,7 +237,7 @@ export class AppUsersController {
         @AppUser() user: AuthenticatedAppUser,
         @Param('appUserId', ParseIntPipe) appUserId: number,
     ): Promise<AppRoleWithPermissionsResponseDto[]> {
-        const roles = await this.appUsersService.getAppUserRolesByAppUser(user.appId, appUserId);
+        const roles = await this.appUsersService.getAppUserRolesByAppUser(user.appId, user.id, appUserId);
         return roles.map((role) => new AppRoleWithPermissionsResponseDto(role));
     }
 
@@ -295,7 +296,7 @@ export class AppUsersController {
         @Param('appUserId', ParseIntPipe) appUserId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<MessageResponseDto> {
-        await this.appUsersService.addRoleToAppUserByAppUser(user.appId, appUserId, roleId);
+        await this.appUsersService.addRoleToAppUserByAppUser(user.appId, user.id, appUserId, roleId);
         return { message: 'Role added successfully' };
     }
 
@@ -345,7 +346,7 @@ export class AppUsersController {
         @Param('appUserId', ParseIntPipe) appUserId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<MessageResponseDto> {
-        await this.appUsersService.removeRoleFromAppUserByAppUser(user.appId, appUserId, roleId);
+        await this.appUsersService.removeRoleFromAppUserByAppUser(user.appId, user.id, appUserId, roleId);
         return { message: 'Role removed successfully' };
     }
 }

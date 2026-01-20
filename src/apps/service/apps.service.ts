@@ -11,12 +11,14 @@ import { EncryptionService } from 'src/encryption/encryption.service';
 import * as crypto from 'crypto';
 import { ApplicationWithOwnerModel } from 'src/types/application.types';
 import { ServiceUsersRepository } from 'src/database/repositories/service-users.repository';
+import { AppUsersRepository } from 'src/database/repositories/app-users.repository';
 
 @Injectable()
 export class AppsService {
     constructor(
         private readonly appsRepository: AppsRepository,
         private readonly encryptionService: EncryptionService,
+        private readonly appUsersRepository: AppUsersRepository,
         private readonly serviceUsersRepository: ServiceUsersRepository,
     ) {}
 
@@ -53,6 +55,18 @@ export class AppsService {
         return app;
     }
 
+    private async validateAppAccessByAppUser(appId: number, appUserId: number): Promise<ApplicationWithOwnerModel> {
+        const user = await this.appUsersRepository.findByIdInApp(appId, appUserId);
+
+        if (!user) {
+            throw new UnauthorizedException('Invalid credentials');
+        }
+
+        const app = await this.validateAppExists(appId);
+
+        return app;
+    }
+
     async createByServiceUser(ownerId: number, name: string, description?: string): Promise<ApplicationWithOwnerModel> {
         const isAppExist = await this.appsRepository.exists(ownerId, name);
 
@@ -74,16 +88,21 @@ export class AppsService {
         return this.appsRepository.findAllWithOwner();
     }
 
-    async findAppByIdByAppUser(appId: number): Promise<ApplicationWithOwnerModel> {
-        return this.validateAppExists(appId);
+    async findAppByIdByAppUser(appId: number, appUserId: number): Promise<ApplicationWithOwnerModel> {
+        return this.validateAppAccessByAppUser(appId, appUserId);
     }
 
     async findAppByIdByServiceUser(appId: number, userId: number): Promise<ApplicationWithOwnerModel> {
         return this.validateAppAccessByServiceUser(appId, userId);
     }
 
-    async updateByAppUser(appId: number, name?: string, description?: string): Promise<ApplicationWithOwnerModel> {
-        await this.validateAppExists(appId);
+    async updateByAppUser(
+        appId: number,
+        appUserId: number,
+        name?: string,
+        description?: string,
+    ): Promise<ApplicationWithOwnerModel> {
+        await this.validateAppAccessByAppUser(appId, appUserId);
         return this.update(appId, name, description);
     }
 

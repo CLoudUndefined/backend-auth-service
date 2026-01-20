@@ -89,7 +89,7 @@ export class AppAuthService {
         await this.verifyCredentialOrThrow(plainPassword, user.passwordHash);
 
         const accessToken = this.jwtService.sign(
-            { appId, sub: user.id, email: user.email },
+            { appId, sub: user.id },
             { secret: this.encryptionService.decrypt(app.encryptedSecret) },
         );
 
@@ -164,7 +164,7 @@ export class AppAuthService {
         }
 
         const accessToken = this.jwtService.sign(
-            { appId, sub: user.id, email: user.email },
+            { appId, sub: user.id },
             { secret: this.encryptionService.decrypt(app.encryptedSecret) },
         );
 

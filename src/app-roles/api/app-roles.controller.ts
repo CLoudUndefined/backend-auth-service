@@ -57,6 +57,7 @@ export class AppRolesController {
     ): Promise<AppRoleWithPermissionsResponseDto> {
         const role = await this.appRolesService.createRoleByAppUser(
             user.appId,
+            user.id,
             createRoleDto.name,
             createRoleDto.description,
             createRoleDto.permissionIds,
@@ -94,7 +95,7 @@ export class AppRolesController {
         description: 'App not found',
     })
     async getAllRoles(@AppUser() user: AuthenticatedAppUser): Promise<AppRoleResponseDto[]> {
-        const roles = await this.appRolesService.getAllRolesByAppUser(user.appId);
+        const roles = await this.appRolesService.getAllRolesByAppUser(user.appId, user.id);
         return roles.map((role) => new AppRoleResponseDto(role));
     }
 
@@ -134,7 +135,7 @@ export class AppRolesController {
         @AppUser() user: AuthenticatedAppUser,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<AppRoleWithPermissionsResponseDto> {
-        const role = await this.appRolesService.getRoleByAppUser(user.appId, roleId);
+        const role = await this.appRolesService.getRoleByAppUser(user.appId, user.id, roleId);
         return new AppRoleWithPermissionsResponseDto(role);
     }
 
@@ -181,6 +182,7 @@ export class AppRolesController {
     ): Promise<AppRoleWithPermissionsResponseDto> {
         const role = await this.appRolesService.updateRoleByAppUser(
             user.appId,
+            user.id,
             roleId,
             updateAppRoleDto.name,
             updateAppRoleDto.description,
@@ -229,7 +231,7 @@ export class AppRolesController {
         @AppUser() user: AuthenticatedAppUser,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<MessageResponseDto> {
-        await this.appRolesService.deleteRoleByAppUser(user.appId, roleId);
+        await this.appRolesService.deleteRoleByAppUser(user.appId, user.id, roleId);
         return { message: 'Role deleted successfully' };
     }
 }
