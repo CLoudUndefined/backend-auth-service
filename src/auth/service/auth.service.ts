@@ -69,11 +69,7 @@ export class AuthService {
 
         await this.verifyCredentialOrThrow(plainPassword, user.passwordHash);
 
-        const accessToken = this.jwtService.sign({
-            sub: user.id,
-            email: user.email,
-            isGod: user.isGod,
-        });
+        const accessToken = this.jwtService.sign({ sub: user.id });
 
         const refreshToken = crypto.randomBytes(64).toString('hex');
         const refreshTokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
@@ -131,11 +127,7 @@ export class AuthService {
             throw new ForbiddenException('User is banned');
         }
 
-        const accessToken = this.jwtService.sign({
-            sub: user.id,
-            email: user.email,
-            isGod: user.isGod,
-        });
+        const accessToken = this.jwtService.sign({ sub: user.id });
 
         await this.serviceUsersRepository.deleteRefreshToken(storedToken.id);
 
