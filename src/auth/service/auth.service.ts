@@ -71,7 +71,13 @@ export class AuthService {
 
         const accessToken = this.jwtService.sign({ sub: user.id });
 
-        const refreshToken = crypto.randomBytes(64).toString('hex');
+        const refreshToken = this.jwtService.sign(
+            { sub: user.id },
+            {
+                secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
+                expiresIn: this.configService.getOrThrow<StringValue>('JWT_REFRESH_TOKEN_EXPIRES_IN', '7d'),
+            },
+        );
         const refreshTokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
 
         await this.serviceUsersRepository.createRefreshToken(
@@ -105,16 +111,10 @@ export class AuthService {
 
     async refreshToken(refreshToken: string): Promise<AuthTokensDto> {
         const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
-
         const storedToken = await this.serviceUsersRepository.findRefreshTokenByHash(tokenHash);
 
         if (!storedToken) {
             throw new NotFoundException('Invalid refresh token');
-        }
-
-        if (new Date() > storedToken.expiresAt) {
-            await this.serviceUsersRepository.deleteRefreshToken(storedToken.id);
-            throw new UnauthorizedException('Refresh token expired');
         }
 
         const user = await this.serviceUsersRepository.findById(storedToken.userId);
@@ -131,7 +131,13 @@ export class AuthService {
 
         await this.serviceUsersRepository.deleteRefreshToken(storedToken.id);
 
-        const newRefreshToken = crypto.randomBytes(64).toString('hex');
+        const newRefreshToken = this.jwtService.sign(
+            { sub: user.id },
+            {
+                secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
+                expiresIn: this.configService.getOrThrow<StringValue>('JWT_REFRESH_TOKEN_EXPIRES_IN', '7d'),
+            },
+        );
         const newRefreshTokenHash = crypto.createHash('sha256').update(newRefreshToken).digest('hex');
 
         await this.serviceUsersRepository.createRefreshToken(
