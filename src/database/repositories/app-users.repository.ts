@@ -1,21 +1,26 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ApiProxyAuthenticationRequiredResponse } from '@nestjs/swagger';
 import type { ModelClass } from 'objection';
 import { ApplicationUserRecoveryModel } from 'src/database/models/application-user-recovery.model';
 import { ApplicationUserRefreshTokenModel } from 'src/database/models/application-user-refresh-tokens.model';
 import { ApplicationUserModel } from 'src/database/models/application-user.model';
+import {
+    ApplicationUserWithRolesAndPermissionsModel,
+    ApplicationUserWithRolesModel,
+} from 'src/types/application-user.types';
+import { ApplicationUserRoleModel } from '../models/application-user-role.model';
 
 @Injectable()
 export class AppUsersRepository {
     constructor(
-        @Inject(ApplicationUserModel) private userModel: ModelClass<ApplicationUserModel>,
-        @Inject(ApplicationUserRecoveryModel) private recoveryModel: ModelClass<ApplicationUserRecoveryModel>,
+        @Inject(ApplicationUserModel) private readonly userModel: ModelClass<ApplicationUserModel>,
+        @Inject(ApplicationUserRecoveryModel) private readonly recoveryModel: ModelClass<ApplicationUserRecoveryModel>,
         @Inject(ApplicationUserRefreshTokenModel)
-        private refreshTokenModel: ModelClass<ApplicationUserRefreshTokenModel>,
+        private readonly refreshTokenModel: ModelClass<ApplicationUserRefreshTokenModel>,
+        @Inject(ApplicationUserRoleModel) private readonly userRoleModel: ModelClass<ApplicationUserRoleModel>,
     ) {}
 
     async create(appId: number, email: string, passwordHash: string): Promise<ApplicationUserModel> {
-        return this.userModel.query().insert({
+        return this.userModel.query().insertAndFetch({
             appId,
             email,
             passwordHash,
@@ -31,29 +36,48 @@ export class AppUsersRepository {
         return this.userModel.query().findOne({ appId, email });
     }
 
+    async findByIdInApp(appId: number, id: number): Promise<ApplicationUserModel | undefined> {
+        return this.userModel.query().findOne({ appId, id });
+    }
+
+    async findByIdInAppWithRolesAndPermissions(
+        appId: number,
+        id: number,
+    ): Promise<ApplicationUserWithRolesAndPermissionsModel | undefined> {
+        return await this.userModel
+            .query()
+            .findOne({ appId, id })
+            .withGraphFetched('roles.permissions')
+            .castTo<ApplicationUserWithRolesAndPermissionsModel>();
+    }
+
     async findAllByApp(appId: number): Promise<ApplicationUserModel[]> {
         return this.userModel.query().where({ appId });
     }
 
-    async findUsersByRole(appId: number, roleId: number): Promise<ApplicationUserModel[]> {
-        return this.userModel
+    async findAllByAppWithRoles(appId: number): Promise<ApplicationUserWithRolesModel[]> {
+        return await this.userModel
+            .query()
+            .where({ appId })
+            .withGraphFetched('roles')
+            .castTo<ApplicationUserWithRolesModel[]>();
+    }
+
+    async findUsersByRoleWithRoles(appId: number, roleId: number): Promise<ApplicationUserWithRolesModel[]> {
+        const users = await this.userModel
             .query()
             .where({ appId })
             .whereExists(this.userModel.relatedQuery('roles').where('applicationRoles.id', roleId))
-            .withGraphFetched('roles.permissions');
+            .withGraphFetched('roles')
+            .castTo<ApplicationUserWithRolesModel[]>();
+        return users;
     }
 
     async update(
         id: number,
         data: Partial<Pick<ApplicationUserModel, 'email' | 'passwordHash' | 'isBanned'>>,
     ): Promise<ApplicationUserModel | undefined> {
-        const user = await this.userModel.query().patchAndFetchById(id, data);
-
-        if (!user) {
-            return undefined;
-        }
-
-        return this.userModel.query().findById(user.id);
+        return this.userModel.query().patchAndFetchById(id, data);
     }
 
     async delete(id: number): Promise<number> {
@@ -118,6 +142,10 @@ export class AppUsersRepository {
         });
     }
 
+    async findRecoveryById(recoveryId: number): Promise<ApplicationUserRecoveryModel | undefined> {
+        return this.recoveryModel.query().findById(recoveryId);
+    }
+
     async findRecoveriesByUserId(userId: number): Promise<ApplicationUserRecoveryModel[]> {
         return this.recoveryModel.query().where({ userId });
     }
@@ -135,6 +163,12 @@ export class AppUsersRepository {
 
     async exists(appId: number, email: string): Promise<boolean> {
         const result = await this.userModel.query().where({ appId, email }).select(1).first();
+        return !!result;
+    }
+
+    async hasRole(userId: number, roleId: number): Promise<boolean> {
+        const result = await this.userRoleModel.query().findOne({ userId, roleId });
+
         return !!result;
     }
 }

@@ -35,6 +35,9 @@ POSTGRES_DB=backend_auth_db
 
 GOD_USER_EMAIL=god@system.local
 GOD_USER_PASSWORD=Arrive.Slabs.Doubt.Research7
+JWT_SECRET=DO NOT USE THIS VALUE. INSTEAD, CREATE A COMPLEX SECRET AND KEEP IT SAFE
+JWT_ACCESS_TOKEN_EXPIRES_IN=15m
+JWT_REFRESH_TOKEN_EXPIRES_IN=7d
 ```
 
 3. **Запуск базы данных (PostgreSQL):**
@@ -97,7 +100,7 @@ ERD:
 | --- | --- | --- |
 | Инициализация проекта, ERD, контракт для REST API | 30/11/25 | ***Выполнено!*** |
 | Реализация работы с БД | 10/12/25 | ***Выполнено!*** |
-| Реализация бизнес-логики | 18/01/26 | ***Запланировано*** |
+| Реализация бизнес-логики | 18/01/26 | ***В Процессе!*** |
 | Написание юнит-тестов | 23/01/26 | ***Запланировано*** |
 | Реализация GraphQL | 3/02/26 | ***Запланировано*** |
 
