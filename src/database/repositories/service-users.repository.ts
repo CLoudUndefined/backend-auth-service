@@ -7,13 +7,14 @@ import { ServiceUserModel } from 'src/database/models/service-user.model';
 @Injectable()
 export class ServiceUsersRepository {
     constructor(
-        @Inject(ServiceUserModel) private userModel: ModelClass<ServiceUserModel>,
-        @Inject(ServiceUserRecoveryModel) private recoveryModel: ModelClass<ServiceUserRecoveryModel>,
-        @Inject(ServiceUserRefreshTokenModel) private refreshTokenModel: ModelClass<ServiceUserRefreshTokenModel>,
+        @Inject(ServiceUserModel) private readonly userModel: ModelClass<ServiceUserModel>,
+        @Inject(ServiceUserRecoveryModel) readonly recoveryModel: ModelClass<ServiceUserRecoveryModel>,
+        @Inject(ServiceUserRefreshTokenModel)
+        private readonly refreshTokenModel: ModelClass<ServiceUserRefreshTokenModel>,
     ) {}
 
     async create(email: string, passwordHash: string, isGod?: boolean): Promise<ServiceUserModel> {
-        return this.userModel.query().insert({
+        return this.userModel.query().insertAndFetch({
             email,
             passwordHash,
             isGod: isGod ?? false,
@@ -84,6 +85,10 @@ export class ServiceUsersRepository {
         return this.recoveryModel.query().where({ userId });
     }
 
+    async findRecoveryById(id: number): Promise<ServiceUserRecoveryModel | undefined> {
+        return this.recoveryModel.query().findById(id);
+    }
+
     async updateRecovery(
         id: number,
         data: Partial<Pick<ServiceUserRecoveryModel, 'question' | 'answerHash'>>,
@@ -95,7 +100,7 @@ export class ServiceUsersRepository {
         return this.recoveryModel.query().deleteById(id);
     }
 
-    async exists(email: string): Promise<boolean> {
+    async existsByEmail(email: string): Promise<boolean> {
         const result = await this.userModel.query().where({ email }).select(1).first();
         return !!result;
     }
