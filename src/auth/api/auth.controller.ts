@@ -107,6 +107,7 @@ export class AuthController {
 
     @Post('refresh')
     @UseGuards(JwtServiceRefreshGuard)
+    @ApiBearerAuth('JWT-refresh-service')
     @HttpCode(200)
     @ApiOperation({
         summary: 'Refresh access token',

@@ -150,6 +150,7 @@ export class AppAuthController {
 
     @Post('refresh')
     @UseGuards(JwtAppRefreshGuard)
+    @ApiBearerAuth('JWT-refresh-app')
     @HttpCode(200)
     @ApiOperation({
         summary: 'Refresh specific app user token',
