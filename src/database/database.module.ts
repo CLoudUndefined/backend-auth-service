@@ -48,7 +48,10 @@ const models = [
     ServiceUserModel,
     ServiceUserRecoveryModel,
     ServiceUserRefreshTokenModel,
-];
+].map((model) => ({
+    provide: model,
+    useValue: model,
+}));
 
 @Global()
 @Module({

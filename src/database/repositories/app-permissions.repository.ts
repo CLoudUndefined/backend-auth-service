@@ -4,7 +4,7 @@ import { ApplicationPermissionModel } from 'src/database/models/application-perm
 
 @Injectable()
 export class AppPermissionsRepository {
-    constructor(@Inject(ApplicationPermissionModel) private model: ModelClass<ApplicationPermissionModel>) {}
+    constructor(@Inject(ApplicationPermissionModel) private readonly model: ModelClass<ApplicationPermissionModel>) {}
 
     async findAll(): Promise<ApplicationPermissionModel[]> {
         return this.model.query();
@@ -16,5 +16,14 @@ export class AppPermissionsRepository {
 
     async findByIds(ids: number[]): Promise<ApplicationPermissionModel[]> {
         return this.model.query().findByIds(ids);
+    }
+
+    async findExistingIds(ids: number[]): Promise<number[]> {
+        if (ids.length === 0) {
+            return [];
+        }
+
+        const existing = await this.model.query().whereIn('id', ids).select('id');
+        return existing.map((item) => item.id);
     }
 }
