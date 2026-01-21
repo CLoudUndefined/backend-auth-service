@@ -1,8 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AppUserResponseDto } from 'src/app-users/api/dto/app-user-response.dto';
 import { ChangePasswordRequestDto } from 'src/common/api/dto/auth/change-password-request.dto';
-import { LoginResponseDto } from 'src/common/api/dto/auth/login-response.dto';
 import { LoginRequestDto } from 'src/common/api/dto/auth/login-request.dto';
 import { RecoveryAskResponseDto } from 'src/common/api/dto/auth/recovery-ask-response.dto';
 import { RecoveryAskRequestDto } from 'src/common/api/dto/auth/recovery-ask-request.dto';
@@ -19,6 +17,7 @@ import { ApplicationUserModel } from 'src/database/models/application-user.model
 import { RemoveRecoveryRequestDto } from 'src/common/api/dto/auth/remove-recovery-request.dto';
 import { JwtAppRefreshGuard } from '../guards/jwt-refresh.guard';
 import { BearerToken } from 'src/common/decorators/bearer-token.decorator';
+import { TokensResponseDto } from 'src/common/api/dto/auth/tokens-response.dto';
 
 @ApiTags('App (User Auth)')
 @Controller('apps/:appId/auth')
@@ -36,8 +35,8 @@ export class AppAuthController {
     })
     @ApiResponse({
         status: 201,
-        description: 'User registered',
-        type: AppUserResponseDto,
+        description: 'Register successful',
+        type: TokensResponseDto,
     })
     @ApiResponse({
         status: 400,
@@ -54,16 +53,14 @@ export class AppAuthController {
     async register(
         @Param('appId', ParseIntPipe) appId: number,
         @Body() registerDto: RegisterRequestDto,
-    ): Promise<AppUserResponseDto> {
-        const user = await this.appAuthService.register(
+    ): Promise<TokensResponseDto> {
+        return this.appAuthService.register(
             appId,
             registerDto.email,
             registerDto.password,
             registerDto.recoveryQuestion,
             registerDto.recoveryAnswer,
         );
-
-        return new AppUserResponseDto(user);
     }
 
     @Post('login')
@@ -79,7 +76,7 @@ export class AppAuthController {
     @ApiResponse({
         status: 200,
         description: 'Login successful',
-        type: LoginResponseDto,
+        type: TokensResponseDto,
     })
     @ApiResponse({
         status: 400,
@@ -100,7 +97,7 @@ export class AppAuthController {
     async login(
         @Param('appId', ParseIntPipe) appId: number,
         @Body() loginDto: LoginRequestDto,
-    ): Promise<LoginResponseDto> {
+    ): Promise<TokensResponseDto> {
         return this.appAuthService.login(appId, loginDto.email, loginDto.password);
     }
 
@@ -163,7 +160,7 @@ export class AppAuthController {
     @ApiResponse({
         status: 200,
         description: 'Tokens refreshed successfully',
-        type: LoginResponseDto,
+        type: TokensResponseDto,
     })
     @ApiResponse({
         status: 400,
@@ -184,7 +181,7 @@ export class AppAuthController {
     async refreshToken(
         @BearerToken() refreshToken: string,
         @Param('appId', ParseIntPipe) appId: number,
-    ): Promise<LoginResponseDto> {
+    ): Promise<TokensResponseDto> {
         return this.appAuthService.refreshToken(appId, refreshToken);
     }
 

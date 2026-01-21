@@ -1,11 +1,9 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
-import { ServiceUserResponseDto } from 'src/service-users/api/dto/service-user-response.dto';
 import { RegisterRequestDto } from 'src/common/api/dto/auth/register-request.dto';
 import { LoginRequestDto } from 'src/common/api/dto/auth/login-request.dto';
 import { ChangePasswordRequestDto } from 'src/common/api/dto/auth/change-password-request.dto';
 import { RecoveryAskRequestDto } from 'src/common/api/dto/auth/recovery-ask-request.dto';
 import { RecoveryResetRequestDto } from 'src/common/api/dto/auth/recovery-reset-request.dto';
-import { LoginResponseDto } from 'src/common/api/dto/auth/login-response.dto';
 import { MessageResponseDto } from 'src/common/api/dto/message-response.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AddRecoveryRequestDto } from 'src/common/api/dto/auth/add-recovery-request.dto';
@@ -18,6 +16,7 @@ import { JwtServiceAuthGuard } from '../guards/jwt-service-auth.guard';
 import { RemoveRecoveryRequestDto } from 'src/common/api/dto/auth/remove-recovery-request.dto';
 import { JwtServiceRefreshGuard } from '../guards/jwt-service-refresh.guard';
 import { BearerToken } from 'src/common/decorators/bearer-token.decorator';
+import { TokensResponseDto } from 'src/common/api/dto/auth/tokens-response.dto';
 
 @ApiTags('Service (User Auth)')
 @Controller('auth')
@@ -31,8 +30,8 @@ export class AuthController {
     })
     @ApiResponse({
         status: 201,
-        description: 'User registered successfully',
-        type: ServiceUserResponseDto,
+        description: 'Register successful',
+        type: TokensResponseDto,
     })
     @ApiResponse({
         status: 400,
@@ -42,14 +41,13 @@ export class AuthController {
         status: 409,
         description: 'Email already exists',
     })
-    async register(@Body() registerDto: RegisterRequestDto): Promise<ServiceUserResponseDto> {
-        const user = await this.authService.register(
+    async register(@Body() registerDto: RegisterRequestDto): Promise<TokensResponseDto> {
+        return this.authService.register(
             registerDto.email,
             registerDto.password,
             registerDto.recoveryQuestion,
             registerDto.recoveryAnswer,
         );
-        return new ServiceUserResponseDto(user);
     }
 
     @Post('login')
@@ -61,7 +59,7 @@ export class AuthController {
     @ApiResponse({
         status: 200,
         description: 'Login successful',
-        type: LoginResponseDto,
+        type: TokensResponseDto,
     })
     @ApiResponse({
         status: 400,
@@ -71,7 +69,7 @@ export class AuthController {
         status: 401,
         description: 'Invalid email or password',
     })
-    async login(@Body() loginDto: LoginRequestDto): Promise<LoginResponseDto> {
+    async login(@Body() loginDto: LoginRequestDto): Promise<TokensResponseDto> {
         return this.authService.login(loginDto.email, loginDto.password);
     }
 
@@ -116,7 +114,7 @@ export class AuthController {
     @ApiResponse({
         status: 200,
         description: 'Tokens refreshed successfully',
-        type: LoginResponseDto,
+        type: TokensResponseDto,
     })
     @ApiResponse({
         status: 400,
@@ -126,7 +124,7 @@ export class AuthController {
         status: 401,
         description: 'Invalid or expired Refresh Token',
     })
-    async refreshToken(@BearerToken() refreshToken: string): Promise<LoginResponseDto> {
+    async refreshToken(@BearerToken() refreshToken: string): Promise<TokensResponseDto> {
         return this.authService.refreshToken(refreshToken);
     }
 

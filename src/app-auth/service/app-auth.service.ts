@@ -9,7 +9,6 @@ import {
 import { AppUsersRepository } from 'src/database/repositories/app-users.repository';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { ApplicationUserModel } from 'src/database/models/application-user.model';
 import { AuthTokensDto } from 'src/common/service/dto/auth/auth-tokens.dto';
 import { JwtService } from '@nestjs/jwt';
 import { AppsRepository } from 'src/database/repositories/apps.repository';
@@ -42,7 +41,7 @@ export class AppAuthService {
         plainPassword: string,
         recoveryQuestion?: string,
         recoveryAnswer?: string,
-    ): Promise<ApplicationUserModel> {
+    ): Promise<AuthTokensDto> {
         const [app, existingUser] = await Promise.all([
             this.appsRepository.findById(appId),
             this.appUsersRepository.exists(appId, email),
@@ -65,7 +64,27 @@ export class AppAuthService {
             await this.appUsersRepository.createRecovery(user.id, recoveryQuestion, answerHash);
         }
 
-        return user;
+        const accessToken = this.jwtService.sign(
+            { appId, sub: user.id },
+            { secret: this.encryptionService.decrypt(app.encryptedSecret) },
+        );
+
+        const refreshToken = this.jwtService.sign(
+            { appId, sub: user.id },
+            {
+                secret: this.encryptionService.decrypt(app.encryptedSecret),
+                expiresIn: this.configService.getOrThrow<StringValue>('JWT_REFRESH_TOKEN_EXPIRES_IN', '7d'),
+            },
+        );
+        const refreshTokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+
+        await this.appUsersRepository.createRefreshToken(
+            user.id,
+            refreshTokenHash,
+            new Date(Date.now() + ms(this.configService.getOrThrow<StringValue>('JWT_REFRESH_TOKEN_EXPIRES_IN', '7d'))),
+        );
+
+        return { accessToken, refreshToken };
     }
 
     async login(appId: number, email: string, plainPassword: string): Promise<AuthTokensDto> {

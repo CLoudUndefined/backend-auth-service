@@ -6,7 +6,6 @@ import {
     NotFoundException,
     UnauthorizedException,
 } from '@nestjs/common';
-import { ServiceUserModel } from 'src/database/models/service-user.model';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { JwtService } from '@nestjs/jwt';
@@ -37,7 +36,7 @@ export class AuthService {
         plainPassword: string,
         recoveryQuestion?: string,
         recoveryAnswer?: string,
-    ): Promise<ServiceUserModel> {
+    ): Promise<AuthTokensDto> {
         const existingUser = await this.serviceUsersRepository.existsByEmail(email);
 
         if (existingUser) {
@@ -53,7 +52,24 @@ export class AuthService {
             await this.serviceUsersRepository.createRecovery(user.id, recoveryQuestion, answerHash);
         }
 
-        return user;
+        const accessToken = this.jwtService.sign({ sub: user.id });
+
+        const refreshToken = this.jwtService.sign(
+            { sub: user.id },
+            {
+                secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
+                expiresIn: this.configService.getOrThrow<StringValue>('JWT_REFRESH_TOKEN_EXPIRES_IN', '7d'),
+            },
+        );
+        const refreshTokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+
+        await this.serviceUsersRepository.createRefreshToken(
+            user.id,
+            refreshTokenHash,
+            new Date(Date.now() + ms(this.configService.getOrThrow<StringValue>('JWT_REFRESH_TOKEN_EXPIRES_IN', '7d'))),
+        );
+
+        return { accessToken, refreshToken };
     }
 
     async login(email: string, plainPassword: string): Promise<AuthTokensDto> {
