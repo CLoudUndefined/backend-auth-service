@@ -72,10 +72,6 @@ export class ServiceAppsController {
         summary: 'Get app by ID',
         description: 'Returns details of a specific application.',
     })
-    @ApiParam({
-        name: 'id',
-        example: 1,
-    })
     @ApiResponse({
         status: 200,
         description: 'App details found',
@@ -98,15 +94,11 @@ export class ServiceAppsController {
         return new AppResponseDto(app);
     }
 
-    @Put(':appid')
+    @Put(':appId')
     @UseGuards(JwtServiceAuthGuard)
     @ApiOperation({
         summary: 'Update application',
         description: 'Updates name or description of the application.',
-    })
-    @ApiParam({
-        name: 'id',
-        example: 1,
     })
     @ApiResponse({
         status: 200,
@@ -143,15 +135,11 @@ export class ServiceAppsController {
         return new AppResponseDto(app);
     }
 
-    @Delete(':appid')
+    @Delete(':appId')
     @UseGuards(JwtServiceAuthGuard)
     @ApiOperation({
         summary: 'Delete application',
         description: 'Deletes the application and all associated users/roles definitively.',
-    })
-    @ApiParam({
-        name: 'id',
-        example: 1,
     })
     @ApiResponse({
         status: 200,
@@ -184,10 +172,6 @@ export class ServiceAppsController {
     @ApiOperation({
         summary: 'Regenerate application secret',
         description: 'Generates a new JWT secret for the application. ALL existing tokens will be invalidated.',
-    })
-    @ApiParam({
-        name: 'id',
-        example: 1,
     })
     @ApiResponse({
         status: 200,

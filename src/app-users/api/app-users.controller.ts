@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, U
 import { AppUserResponseDto } from './dto/app-user-response.dto';
 import { MessageResponseDto } from 'src/common/api/dto/message-response.dto';
 import { UpdateAppUserRequestDto } from './dto/update-app-user-request.dto';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetAppUsersQueryDto } from './dto/get-app-users-query.dto';
 import { JwtAppAuthGuard } from 'src/app-auth/guards/jwt-app-auth.guard';
 import { AppPermissionGuard } from 'src/app-auth/guards/app-permissions.guard';
@@ -28,9 +28,10 @@ export class AppUsersController {
         summary: 'List users of an application',
         description: 'Retrieves all registered users for the specific application. Optionally filter by role.',
     })
-    @ApiParam({
-        name: 'appId',
-        example: 1,
+    @ApiQuery({
+        name: 'roleId',
+        required: false,
+        type: Number,
     })
     @ApiResponse({
         status: 200,
@@ -68,10 +69,6 @@ export class AppUsersController {
     @ApiOperation({
         summary: 'Get specific app user',
         description: 'Returns details of a registered user in the app.',
-    })
-    @ApiParam({
-        name: 'appId',
-        example: 1,
     })
     @ApiParam({
         name: 'appUserId',
@@ -112,10 +109,6 @@ export class AppUsersController {
     @ApiOperation({
         summary: 'Update app user',
         description: 'Updates user email.',
-    })
-    @ApiParam({
-        name: 'appId',
-        example: 1,
     })
     @ApiParam({
         name: 'appUserId',
@@ -168,10 +161,6 @@ export class AppUsersController {
         description: 'Removes a user from the application.',
     })
     @ApiParam({
-        name: 'appId',
-        example: 1,
-    })
-    @ApiParam({
         name: 'appUserId',
         example: 2,
     })
@@ -206,10 +195,6 @@ export class AppUsersController {
     @ApiOperation({
         summary: 'Get user roles',
         description: 'Retrieves all roles assigned to the user.',
-    })
-    @ApiParam({
-        name: 'appId',
-        example: 1,
     })
     @ApiParam({
         name: 'appUserId',
@@ -252,10 +237,6 @@ export class AppUsersController {
     @ApiOperation({
         summary: 'Add role to user',
         description: 'Assigns a specific role to the user.',
-    })
-    @ApiParam({
-        name: 'appId',
-        example: 1,
     })
     @ApiParam({
         name: 'appUserId',
@@ -311,10 +292,6 @@ export class AppUsersController {
     @ApiOperation({
         summary: 'Remove role from user',
         description: 'Removes a specific role from the user.',
-    })
-    @ApiParam({
-        name: 'appId',
-        example: 1,
     })
     @ApiParam({
         name: 'appUserId',

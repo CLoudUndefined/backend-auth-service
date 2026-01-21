@@ -26,10 +26,6 @@ export class AppRolesController {
         summary: 'Create a new role in the app',
         description: 'Creates a role definition that can be assigned to app users.',
     })
-    @ApiParam({
-        name: 'appId',
-        example: 1,
-    })
     @ApiResponse({
         status: 201,
         description: 'Role created',
@@ -72,10 +68,6 @@ export class AppRolesController {
         summary: 'List all roles in the app',
         description: 'Returns all roles defined within the application.',
     })
-    @ApiParam({
-        name: 'appId',
-        example: 1,
-    })
     @ApiResponse({
         status: 200,
         description: 'List of roles',
@@ -105,10 +97,6 @@ export class AppRolesController {
     @ApiOperation({
         summary: 'Get role details',
         description: 'Returns specific role information.',
-    })
-    @ApiParam({
-        name: 'appId',
-        example: 1,
     })
     @ApiParam({
         name: 'roleId',
@@ -145,10 +133,6 @@ export class AppRolesController {
     @ApiOperation({
         summary: 'Update role',
         description: 'Updates role name or description.',
-    })
-    @ApiParam({
-        name: 'appId',
-        example: 1,
     })
     @ApiParam({
         name: 'roleId',
@@ -197,10 +181,6 @@ export class AppRolesController {
     @ApiOperation({
         summary: 'Delete role',
         description: 'Deletes a role. May fail if role is assigned to users.',
-    })
-    @ApiParam({
-        name: 'appId',
-        example: 1,
     })
     @ApiParam({
         name: 'roleId',
