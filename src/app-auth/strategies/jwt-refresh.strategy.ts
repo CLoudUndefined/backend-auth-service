@@ -15,7 +15,7 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh-
         private readonly encryptionService: EncryptionService,
     ) {
         super({
-            jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
+            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
             secretOrKeyProvider: async (
                 request: JwtSecretRequestType,

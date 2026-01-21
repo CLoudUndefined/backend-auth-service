@@ -9,7 +9,7 @@ import { AuthenticatedServiceUser } from '../interfaces/authenticated-service-us
 export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh-service') {
     constructor(private readonly configService: ConfigService) {
         super({
-            jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
+            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
             secretOrKey: configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
         });
