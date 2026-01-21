@@ -1,10 +1,10 @@
 import { Body, Controller, Delete, Get, NotImplementedException, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
-import { CreateAppRequestDto } from './dto/create-app-request.dto';
-import { AppResponseDto } from './dto/app-response.dto';
-import { UpdateAppRequestDto } from './dto/update-app-request.dto';
-import { MessageResponseDto } from 'src/common/dto/message-response.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { MessageResponseDto } from 'src/common/dto/message-response.dto';
+import { AppResponseDto } from './dto/app-response.dto';
+import { CreateAppRequestDto } from './dto/create-app-request.dto';
 import { CreateAppResponseDto } from './dto/create-app-response.dto';
+import { UpdateAppRequestDto } from './dto/update-app-request.dto';
 
 @ApiTags('Service (Apps Management)')
 @ApiBearerAuth('JWT-auth-service')
@@ -142,6 +142,7 @@ export class ServiceAppsController {
         description: 'App not found',
     })
     async remove(@Param('id', ParseIntPipe) id: number): Promise<MessageResponseDto> {
+        console.log('application was deleted :>> ', { appId: id });
         throw new NotImplementedException('Logic not implemented yet');
     }
 }
