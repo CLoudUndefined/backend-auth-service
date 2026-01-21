@@ -12,13 +12,13 @@ import { UpdateRecoveryRequestDto } from 'src/common/api/dto/auth/update-recover
 import { MessageResponseDto } from 'src/common/api/dto/message-response.dto';
 import { AddRecoveryRequestDto } from 'src/common/api/dto/auth/add-recovery-request.dto';
 import { ListRecoveryResponseDto } from 'src/common/api/dto/auth/list-recovery-response.dto';
-import { RefreshTokenRequestDto } from 'src/common/api/dto/auth/refresh-token-request.dto';
 import { AppAuthService } from '../service/app-auth.service';
 import { JwtAppAuthGuard } from '../guards/jwt-app-auth.guard';
 import { AppUser } from 'src/common/decorators/app-user.decorator';
 import { ApplicationUserModel } from 'src/database/models/application-user.model';
 import { RemoveRecoveryRequestDto } from 'src/common/api/dto/auth/remove-recovery-request.dto';
 import { JwtAppRefreshGuard } from '../guards/jwt-refresh.guard';
+import { BearerToken } from 'src/common/decorators/bearer-token.decorator';
 
 @ApiTags('App (User Auth)')
 @Controller('apps/:appId/auth')
@@ -181,10 +181,10 @@ export class AppAuthController {
         description: 'App not found',
     })
     async refreshToken(
+        @BearerToken() refreshToken: string,
         @Param('appId', ParseIntPipe) appId: number,
-        @Body() refreshTokenDto: RefreshTokenRequestDto,
     ): Promise<LoginResponseDto> {
-        return this.appAuthService.refreshToken(appId, refreshTokenDto.refreshToken);
+        return this.appAuthService.refreshToken(appId, refreshToken);
     }
 
     @Post('recovery')

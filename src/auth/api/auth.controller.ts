@@ -11,13 +11,13 @@ import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@ne
 import { AddRecoveryRequestDto } from 'src/common/api/dto/auth/add-recovery-request.dto';
 import { UpdateRecoveryRequestDto } from 'src/common/api/dto/auth/update-recovery-request.dto';
 import { ListRecoveryResponseDto } from 'src/common/api/dto/auth/list-recovery-response.dto';
-import { RefreshTokenRequestDto } from 'src/common/api/dto/auth/refresh-token-request.dto';
 import { AuthService } from '../service/auth.service';
 import { ServiceUser } from 'src/common/decorators/service-user.decorator';
 import { ServiceUserModel } from 'src/database/models/service-user.model';
 import { JwtServiceAuthGuard } from '../guards/jwt-service-auth.guard';
 import { RemoveRecoveryRequestDto } from 'src/common/api/dto/auth/remove-recovery-request.dto';
 import { JwtServiceRefreshGuard } from '../guards/jwt-service-refresh.guard';
+import { BearerToken } from 'src/common/decorators/bearer-token.decorator';
 
 @ApiTags('Service (User Auth)')
 @Controller('auth')
@@ -125,8 +125,8 @@ export class AuthController {
         status: 401,
         description: 'Invalid or expired Refresh Token',
     })
-    async refreshToken(@Body() refreshTokenDto: RefreshTokenRequestDto): Promise<LoginResponseDto> {
-        return this.authService.refreshToken(refreshTokenDto.refreshToken);
+    async refreshToken(@BearerToken() refreshToken: string): Promise<LoginResponseDto> {
+        return this.authService.refreshToken(refreshToken);
     }
 
     @Post('recovery')
