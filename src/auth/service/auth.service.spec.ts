@@ -8,6 +8,9 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 
 jest.mock('bcrypt');
+jest.mock('crypto', () => ({
+    createHash: jest.fn(),
+}));
 
 describe('AuthService', () => {
     let service: AuthService;
@@ -32,6 +35,7 @@ describe('AuthService', () => {
         getOrThrow: jest.fn(),
     };
     const mockBcrypt = jest.mocked(bcrypt);
+    const mockCryptoCreateHash = jest.mocked(crypto.createHash);
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -60,6 +64,11 @@ describe('AuthService', () => {
 
         beforeEach(() => {
             jest.clearAllMocks();
+
+            mockCryptoCreateHash.mockImplementation(() => ({
+                update: jest.fn().mockReturnThis(),
+                digest: jest.fn().mockReturnValue('mock-hash-hex'),
+            }));
         });
 
         it('should throw ConflictException if user with email already exists', async () => {
@@ -82,11 +91,10 @@ describe('AuthService', () => {
                 .mockReturnValueOnce(expiresIn);
 
             const result = await service.register(email, plainPassword);
-            const expectedRefreshHash = crypto.createHash('sha256').update('mock-refresh-token').digest('hex');
 
             expect(mockServiceUsersRepository.createRefreshToken).toHaveBeenCalledWith(
                 userId,
-                expectedRefreshHash,
+                'mock-hash-hex',
                 expect.any(Date),
             );
 
@@ -106,6 +114,8 @@ describe('AuthService', () => {
             expect(mockConfigService.getOrThrow).toHaveBeenNthCalledWith(1, 'JWT_REFRESH_SECRET');
             expect(mockConfigService.getOrThrow).toHaveBeenNthCalledWith(2, 'JWT_REFRESH_TOKEN_EXPIRES_IN', '7d');
             expect(mockConfigService.getOrThrow).toHaveBeenNthCalledWith(3, 'JWT_REFRESH_TOKEN_EXPIRES_IN', '7d');
+
+            expect(crypto.createHash).toHaveBeenCalledWith('sha256');
 
             expect(result).toEqual({ accessToken: 'mock-access-token', refreshToken: 'mock-refresh-token' });
         });
@@ -127,11 +137,10 @@ describe('AuthService', () => {
                 .mockReturnValueOnce(expiresIn);
 
             const result = await service.register(email, plainPassword, recoveryQuestion, recoveryAnswer);
-            const expectedRefreshHash = crypto.createHash('sha256').update('mock-refresh-token').digest('hex');
 
             expect(mockServiceUsersRepository.createRefreshToken).toHaveBeenCalledWith(
                 userId,
-                expectedRefreshHash,
+                'mock-hash-hex',
                 expect.any(Date),
             );
 
@@ -158,6 +167,8 @@ describe('AuthService', () => {
             expect(mockConfigService.getOrThrow).toHaveBeenNthCalledWith(2, 'JWT_REFRESH_TOKEN_EXPIRES_IN', '7d');
             expect(mockConfigService.getOrThrow).toHaveBeenNthCalledWith(3, 'JWT_REFRESH_TOKEN_EXPIRES_IN', '7d');
 
+            expect(crypto.createHash).toHaveBeenCalledWith('sha256');
+
             expect(result).toEqual({ accessToken: 'mock-access-token', refreshToken: 'mock-refresh-token' });
         });
     });
@@ -170,6 +181,11 @@ describe('AuthService', () => {
 
         beforeEach(() => {
             jest.clearAllMocks();
+
+            mockCryptoCreateHash.mockImplementation(() => ({
+                update: jest.fn().mockReturnThis(),
+                digest: jest.fn().mockReturnValue('mock-hash-hex'),
+            }));
         });
 
         it('should throw UnauthorizedException if user not found with email', async () => {
@@ -216,7 +232,6 @@ describe('AuthService', () => {
                 .mockReturnValueOnce(expiresIn);
 
             const result = await service.login(email, plainPassword);
-            const expectedRefreshHash = crypto.createHash('sha256').update('mock-refresh-token').digest('hex');
 
             expect(bcrypt.compare).toHaveBeenCalledWith(plainPassword, 'mock-password-hash');
 
@@ -231,9 +246,11 @@ describe('AuthService', () => {
             expect(mockConfigService.getOrThrow).toHaveBeenNthCalledWith(2, 'JWT_REFRESH_TOKEN_EXPIRES_IN', '7d');
             expect(mockConfigService.getOrThrow).toHaveBeenNthCalledWith(3, 'JWT_REFRESH_TOKEN_EXPIRES_IN', '7d');
 
+            expect(crypto.createHash).toHaveBeenCalledWith('sha256');
+
             expect(mockServiceUsersRepository.createRefreshToken).toHaveBeenCalledWith(
                 userId,
-                expectedRefreshHash,
+                'mock-hash-hex',
                 expect.any(Date),
             );
 
