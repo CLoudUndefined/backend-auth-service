@@ -3,7 +3,13 @@ import { AuthService } from './auth.service';
 import { ServiceUsersRepository } from 'src/database/repositories/service-users.repository';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { BadRequestException, ConflictException, ForbiddenException, UnauthorizedException } from '@nestjs/common';
+import {
+    BadRequestException,
+    ConflictException,
+    ForbiddenException,
+    NotFoundException,
+    UnauthorizedException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 
@@ -320,6 +326,111 @@ describe('AuthService', () => {
                 passwordHash: 'mock-new-password-hash',
             });
             expect(mockServiceUsersRepository.deleteAllUserRefreshTokens).toHaveBeenCalledWith(userId);
+        });
+    });
+
+    describe('refreshToken', () => {
+        const recoveryId = 1;
+        const userId = 2;
+        const refreshToken = 'mock-refresh-token';
+        const expiresIn = '7d';
+
+        beforeEach(() => {
+            jest.clearAllMocks();
+
+            mockCryptoCreateHash.mockImplementation(() => ({
+                update: jest.fn().mockReturnThis(),
+                digest: jest.fn().mockReturnValue('mock-refresh-token-hash'),
+            }));
+        });
+
+        it('should throw NotFoundException if refresh token not found in database', async () => {
+            mockServiceUsersRepository.findRefreshTokenByHash.mockResolvedValue(undefined);
+
+            await expect(service.refreshToken(refreshToken)).rejects.toThrow(NotFoundException);
+
+            expect(crypto.createHash).toHaveBeenCalledWith('sha256');
+            expect(mockServiceUsersRepository.findRefreshTokenByHash).toHaveBeenCalledWith('mock-refresh-token-hash');
+        });
+
+        it('should throw UnauthorizedException if user not found', async () => {
+            mockServiceUsersRepository.findRefreshTokenByHash.mockResolvedValue({
+                id: recoveryId,
+                userId: userId,
+            });
+            mockServiceUsersRepository.findById.mockResolvedValue(undefined);
+
+            await expect(service.refreshToken(refreshToken)).rejects.toThrow(UnauthorizedException);
+
+            expect(mockServiceUsersRepository.findRefreshTokenByHash).toHaveBeenCalledWith('mock-refresh-token-hash');
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(userId);
+        });
+
+        it('should throw ForbiddenException if user is banned', async () => {
+            mockServiceUsersRepository.findRefreshTokenByHash.mockResolvedValue({
+                id: recoveryId,
+                userId: userId,
+            });
+            mockServiceUsersRepository.findById.mockResolvedValue({
+                id: userId,
+                isBanned: true,
+            });
+
+            await expect(service.refreshToken(refreshToken)).rejects.toThrow(ForbiddenException);
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(userId);
+        });
+
+        it('should successfully refresh tokens and rotate refresh token', async () => {
+            mockCryptoCreateHash
+                .mockImplementationOnce(() => ({
+                    update: jest.fn().mockReturnThis(),
+                    digest: jest.fn().mockReturnValue('mock-refresh-token-hash'),
+                }))
+                .mockImplementationOnce(() => ({
+                    update: jest.fn().mockReturnThis(),
+                    digest: jest.fn().mockReturnValue('mock-new-refresh-token-hash'),
+                }));
+
+            mockServiceUsersRepository.findRefreshTokenByHash.mockResolvedValue({
+                id: recoveryId,
+                userId: userId,
+            });
+            mockServiceUsersRepository.findById.mockResolvedValue({
+                id: userId,
+                isBanned: false,
+            });
+            mockJwtService.sign
+                .mockReturnValueOnce('mock-new-access-token')
+                .mockReturnValueOnce('mock-new-refresh-token');
+
+            mockConfigService.getOrThrow
+                .mockReturnValueOnce('mock-refresh-secret')
+                .mockReturnValueOnce(expiresIn)
+                .mockReturnValueOnce(expiresIn);
+
+            const result = await service.refreshToken(refreshToken);
+
+            expect(crypto.createHash).toHaveBeenCalledWith('sha256');
+            expect(mockServiceUsersRepository.findRefreshTokenByHash).toHaveBeenCalledWith('mock-refresh-token-hash');
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(userId);
+            expect(mockServiceUsersRepository.deleteRefreshToken).toHaveBeenCalledWith(recoveryId);
+            expect(mockJwtService.sign).toHaveBeenNthCalledWith(1, { sub: userId });
+            expect(mockJwtService.sign).toHaveBeenNthCalledWith(
+                2,
+                { sub: userId },
+                { secret: 'mock-refresh-secret', expiresIn },
+            );
+            expect(mockServiceUsersRepository.createRefreshToken).toHaveBeenCalledWith(
+                userId,
+                'mock-new-refresh-token-hash',
+                expect.any(Date),
+            );
+
+            expect(result).toEqual({
+                accessToken: 'mock-new-access-token',
+                refreshToken: 'mock-new-refresh-token',
+            });
         });
     });
 });
