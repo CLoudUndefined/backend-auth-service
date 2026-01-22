@@ -452,4 +452,26 @@ describe('AuthService', () => {
             );
         });
     });
+
+    describe('listRecovery', () => {
+        const userId = 1;
+        const mockRecoveries = [
+            { id: 1, question: 'mock-recovery-question-1', answerHash: 'mock-recovery-answer-hash-1' },
+            { id: 2, question: 'mock-recovery-question-2', answerHash: 'mock-recovery.answer-hash-2' },
+        ];
+
+        it('should return list of recovery questions with id and question only', async () => {
+            mockServiceUsersRepository.findRecoveriesByUserId.mockResolvedValue(mockRecoveries);
+
+            const result = await service.listRecovery(userId);
+
+            expect(mockServiceUsersRepository.findRecoveriesByUserId).toHaveBeenCalledWith(userId);
+            expect(result).toEqual({
+                questions: [
+                    { id: 1, question: 'mock-recovery-question-1' },
+                    { id: 2, question: 'mock-recovery-question-2' },
+                ],
+            });
+        });
+    });
 });
