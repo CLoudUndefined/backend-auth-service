@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { ServiceUsersRepository } from 'src/database/repositories/service-users.repository';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { ConflictException, ForbiddenException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 
@@ -255,6 +255,71 @@ describe('AuthService', () => {
             );
 
             expect(result).toEqual({ accessToken: 'mock-access-token', refreshToken: 'mock-refresh-token' });
+        });
+    });
+
+    describe('changePassword', () => {
+        const userId = 1;
+        const oldPassword = 'mock-old-password';
+        const newPassword = 'mock-new-password';
+
+        beforeEach(() => {
+            jest.clearAllMocks();
+        });
+
+        it('should throw NotFoundException if refresh token not found', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue(undefined);
+
+            await expect(service.changePassword(userId, oldPassword, newPassword)).rejects.toThrow(
+                UnauthorizedException,
+            );
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(userId);
+        });
+
+        it('should throw BadRequestException if old and new passwords are the same', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({
+                id: userId,
+                passwordHash: 'mock-password-hash',
+            });
+
+            await expect(service.changePassword(userId, oldPassword, oldPassword)).rejects.toThrow(BadRequestException);
+        });
+
+        it('should throw UnauthorizedException if old password is incorrect', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({
+                id: userId,
+                passwordHash: 'mock-password-hash',
+            });
+
+            mockBcrypt.compare.mockResolvedValue(false);
+
+            await expect(service.changePassword(userId, oldPassword, newPassword)).rejects.toThrow(
+                UnauthorizedException,
+            );
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(userId);
+            expect(bcrypt.compare).toHaveBeenCalledWith(oldPassword, 'mock-password-hash');
+        });
+
+        it('should successfully change password and delete all refresh tokens', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({
+                id: userId,
+                passwordHash: 'mock-old-password-hash',
+            });
+
+            mockBcrypt.compare.mockResolvedValue(true);
+            mockBcrypt.hash.mockResolvedValue('mock-new-password-hash');
+
+            await service.changePassword(userId, oldPassword, newPassword);
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(userId);
+            expect(bcrypt.compare).toHaveBeenCalledWith(oldPassword, 'mock-old-password-hash');
+            expect(bcrypt.hash).toHaveBeenCalledWith(newPassword, 10);
+            expect(mockServiceUsersRepository.update).toHaveBeenCalledWith(userId, {
+                passwordHash: 'mock-new-password-hash',
+            });
+            expect(mockServiceUsersRepository.deleteAllUserRefreshTokens).toHaveBeenCalledWith(userId);
         });
     });
 });
