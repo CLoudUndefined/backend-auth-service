@@ -33,6 +33,7 @@ describe('AuthService', () => {
         deleteRefreshToken: jest.fn(),
         findRecoveriesByUserId: jest.fn(),
         updateRecovery: jest.fn(),
+        findRecoveryById: jest.fn(),
     };
     const mockJwtService = {
         sign: jest.fn(),
@@ -509,6 +510,103 @@ describe('AuthService', () => {
                     { id: 2, question: 'mock-recovery-question-2' },
                 ],
             });
+        });
+    });
+
+    describe('resetPasswordByRecovery', () => {
+        const recoveryId = 1;
+        const userId = 2;
+        const anotherUserId = 3;
+        const email = 'developer@example.com';
+        const recoveryAnswer = 'mock-recovery-answer';
+        const newPassword = 'mock-new-password';
+
+        beforeEach(() => {
+            jest.clearAllMocks();
+        });
+
+        it('should throw UnauthorizedException if user is not found', async () => {
+            mockServiceUsersRepository.findByEmail.mockResolvedValue(undefined);
+            mockServiceUsersRepository.findRecoveryById.mockResolvedValue({
+                id: recoveryId,
+                userId: userId,
+                question: 'mock-recovery-question',
+                answerHash: 'mock-recovery-answer-hash',
+            });
+
+            await expect(
+                service.resetPasswordByRecovery(recoveryId, email, recoveryAnswer, newPassword),
+            ).rejects.toThrow(UnauthorizedException);
+
+            expect(mockServiceUsersRepository.findByEmail).toHaveBeenCalledWith(email);
+            expect(mockServiceUsersRepository.findRecoveryById).toHaveBeenCalledWith(recoveryId);
+        });
+
+        it('should throw UnauthorizedException if recovery is not found', async () => {
+            mockServiceUsersRepository.findByEmail.mockResolvedValue({ id: userId });
+            mockServiceUsersRepository.findRecoveryById.mockResolvedValue(undefined);
+
+            await expect(
+                service.resetPasswordByRecovery(recoveryId, email, recoveryAnswer, newPassword),
+            ).rejects.toThrow(UnauthorizedException);
+
+            expect(mockServiceUsersRepository.findByEmail).toHaveBeenCalledWith(email);
+            expect(mockServiceUsersRepository.findRecoveryById).toHaveBeenCalledWith(recoveryId);
+        });
+
+        it('should throw ForbiddenException if recovery does not belong to user', async () => {
+            mockServiceUsersRepository.findByEmail.mockResolvedValue({ id: userId });
+            mockServiceUsersRepository.findRecoveryById.mockResolvedValue({
+                id: recoveryId,
+                userId: anotherUserId,
+                question: 'mock-recovery-question',
+                answerHash: 'mock-recovery-answer-hash',
+            });
+
+            await expect(
+                service.resetPasswordByRecovery(recoveryId, email, recoveryAnswer, newPassword),
+            ).rejects.toThrow(ForbiddenException);
+
+            expect(mockServiceUsersRepository.findByEmail).toHaveBeenCalledWith(email);
+            expect(mockServiceUsersRepository.findRecoveryById).toHaveBeenCalledWith(recoveryId);
+        });
+
+        it('should throw UnauthorizedException if recovery answer is incorrect', async () => {
+            mockServiceUsersRepository.findByEmail.mockResolvedValue({ id: userId });
+            mockServiceUsersRepository.findRecoveryById.mockResolvedValue({
+                id: recoveryId,
+                userId: userId,
+                question: 'mock-recovery-question',
+                answerHash: 'mock-recovery-answer-hash',
+            });
+            mockBcrypt.compare.mockResolvedValue(false);
+
+            await expect(
+                service.resetPasswordByRecovery(recoveryId, email, recoveryAnswer, newPassword),
+            ).rejects.toThrow(UnauthorizedException);
+
+            expect(bcrypt.compare).toHaveBeenCalledWith(recoveryAnswer, 'mock-recovery-answer-hash');
+        });
+
+        it('should successfully reset password and delete all refresh tokens', async () => {
+            mockServiceUsersRepository.findByEmail.mockResolvedValue({ id: userId });
+            mockServiceUsersRepository.findRecoveryById.mockResolvedValue({
+                id: recoveryId,
+                userId: userId,
+                question: 'mock-recovery-question',
+                answerHash: 'mock-recovery-answer-hash',
+            });
+            mockBcrypt.compare.mockResolvedValue(true);
+            mockBcrypt.hash.mockResolvedValue('mock-new-password-hash');
+
+            await service.resetPasswordByRecovery(recoveryId, email, recoveryAnswer, newPassword);
+
+            expect(bcrypt.compare).toHaveBeenCalledWith(recoveryAnswer, 'mock-recovery-answer-hash');
+            expect(bcrypt.hash).toHaveBeenCalledWith(newPassword, 10);
+            expect(mockServiceUsersRepository.update).toHaveBeenCalledWith(userId, {
+                passwordHash: 'mock-new-password-hash',
+            });
+            expect(mockServiceUsersRepository.deleteAllUserRefreshTokens).toHaveBeenCalledWith(userId);
         });
     });
 });
