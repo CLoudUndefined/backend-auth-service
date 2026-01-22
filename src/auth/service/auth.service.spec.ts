@@ -474,4 +474,41 @@ describe('AuthService', () => {
             });
         });
     });
+
+    describe('askRecoveryQuestions', () => {
+        const email = 'developer@example.com';
+        const userId = 3;
+        const mockRecoveries = [
+            { id: 1, question: 'mock-recovery-question-1', answerHash: 'mock-recovery-answer-hash-1' },
+            { id: 2, question: 'mock-recovery-question-2', answerHash: 'mock-recovery.answer-hash-2' },
+        ];
+
+        beforeEach(() => {
+            jest.clearAllMocks();
+        });
+
+        it('should throw NotFoundException if user not found with email', async () => {
+            mockServiceUsersRepository.findByEmail.mockResolvedValue(undefined);
+
+            await expect(service.askRecoveryQuestions(email)).rejects.toThrow(NotFoundException);
+
+            expect(mockServiceUsersRepository.findByEmail).toHaveBeenCalledWith(email);
+        });
+
+        it('should return list of recovery questions with id and question only', async () => {
+            mockServiceUsersRepository.findByEmail.mockResolvedValue({ id: userId });
+            mockServiceUsersRepository.findRecoveriesByUserId.mockResolvedValue(mockRecoveries);
+
+            const result = await service.askRecoveryQuestions(email);
+
+            expect(mockServiceUsersRepository.findByEmail).toHaveBeenCalledWith(email);
+            expect(mockServiceUsersRepository.findRecoveriesByUserId).toHaveBeenCalledWith(userId);
+            expect(result).toEqual({
+                questions: [
+                    { id: 1, question: 'mock-recovery-question-1' },
+                    { id: 2, question: 'mock-recovery-question-2' },
+                ],
+            });
+        });
+    });
 });
