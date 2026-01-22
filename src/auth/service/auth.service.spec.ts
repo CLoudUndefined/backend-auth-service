@@ -433,4 +433,23 @@ describe('AuthService', () => {
             });
         });
     });
+
+    describe('addRecovery', () => {
+        const userId = 1;
+        const recoveryQuestion = 'mock-recovery-question';
+        const recoveryAnswer = 'mock-recovery-answer';
+
+        it('should successfully add recovery question and answer', async () => {
+            mockBcrypt.hash.mockResolvedValue('mock-hash-answer');
+
+            await service.addRecovery(userId, recoveryQuestion, recoveryAnswer);
+
+            expect(bcrypt.hash).toHaveBeenCalledWith(recoveryAnswer, 10);
+            expect(mockServiceUsersRepository.createRecovery).toHaveBeenCalledWith(
+                userId,
+                recoveryQuestion,
+                'mock-hash-answer',
+            );
+        });
+    });
 });
