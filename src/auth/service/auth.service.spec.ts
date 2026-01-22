@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { ServiceUsersRepository } from 'src/database/repositories/service-users.repository';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { ConflictException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 
@@ -157,6 +157,85 @@ describe('AuthService', () => {
             expect(mockConfigService.getOrThrow).toHaveBeenNthCalledWith(1, 'JWT_REFRESH_SECRET');
             expect(mockConfigService.getOrThrow).toHaveBeenNthCalledWith(2, 'JWT_REFRESH_TOKEN_EXPIRES_IN', '7d');
             expect(mockConfigService.getOrThrow).toHaveBeenNthCalledWith(3, 'JWT_REFRESH_TOKEN_EXPIRES_IN', '7d');
+
+            expect(result).toEqual({ accessToken: 'mock-access-token', refreshToken: 'mock-refresh-token' });
+        });
+    });
+
+    describe('login', () => {
+        const userId = 1;
+        const email = 'develop@example.com';
+        const plainPassword = 'mock-plain-password';
+        const expiresIn = '7d';
+
+        beforeEach(() => {
+            jest.clearAllMocks();
+        });
+
+        it('should throw UnauthorizedException if user not found with email', async () => {
+            mockServiceUsersRepository.findByEmail.mockResolvedValue(undefined);
+
+            await expect(service.login(email, plainPassword)).rejects.toThrow(UnauthorizedException);
+
+            expect(mockServiceUsersRepository.findByEmail).toHaveBeenCalledWith(email);
+        });
+
+        it('should throw ForbiddenException if user is banned', async () => {
+            mockServiceUsersRepository.findByEmail.mockResolvedValue({ isBanned: true });
+
+            await expect(service.login(email, plainPassword)).rejects.toThrow(ForbiddenException);
+
+            expect(mockServiceUsersRepository.findByEmail).toHaveBeenCalledWith(email);
+        });
+
+        it('should throw UnauthorizedException if password is wrong', async () => {
+            mockServiceUsersRepository.findByEmail.mockResolvedValue({
+                id: userId,
+                isBanned: false,
+                passwordHash: 'mock-password-hash',
+            });
+
+            mockBcrypt.compare.mockResolvedValue(false);
+
+            await expect(service.login(email, plainPassword)).rejects.toThrow(UnauthorizedException);
+
+            expect(bcrypt.compare).toHaveBeenCalledWith(plainPassword, 'mock-password-hash');
+        });
+
+        it('should successfully login user', async () => {
+            mockServiceUsersRepository.findByEmail.mockResolvedValue({
+                id: userId,
+                isBanned: false,
+                passwordHash: 'mock-password-hash',
+            });
+            mockBcrypt.compare.mockResolvedValue(true);
+            mockJwtService.sign.mockReturnValueOnce('mock-access-token').mockReturnValueOnce('mock-refresh-token');
+            mockConfigService.getOrThrow
+                .mockReturnValueOnce('mock-refresh-secret')
+                .mockReturnValueOnce(expiresIn)
+                .mockReturnValueOnce(expiresIn);
+
+            const result = await service.login(email, plainPassword);
+            const expectedRefreshHash = crypto.createHash('sha256').update('mock-refresh-token').digest('hex');
+
+            expect(bcrypt.compare).toHaveBeenCalledWith(plainPassword, 'mock-password-hash');
+
+            expect(mockJwtService.sign).toHaveBeenNthCalledWith(1, { sub: userId });
+            expect(mockJwtService.sign).toHaveBeenNthCalledWith(
+                2,
+                { sub: userId },
+                { secret: 'mock-refresh-secret', expiresIn },
+            );
+
+            expect(mockConfigService.getOrThrow).toHaveBeenNthCalledWith(1, 'JWT_REFRESH_SECRET');
+            expect(mockConfigService.getOrThrow).toHaveBeenNthCalledWith(2, 'JWT_REFRESH_TOKEN_EXPIRES_IN', '7d');
+            expect(mockConfigService.getOrThrow).toHaveBeenNthCalledWith(3, 'JWT_REFRESH_TOKEN_EXPIRES_IN', '7d');
+
+            expect(mockServiceUsersRepository.createRefreshToken).toHaveBeenCalledWith(
+                userId,
+                expectedRefreshHash,
+                expect.any(Date),
+            );
 
             expect(result).toEqual({ accessToken: 'mock-access-token', refreshToken: 'mock-refresh-token' });
         });
