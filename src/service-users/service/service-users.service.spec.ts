@@ -124,4 +124,20 @@ describe('ServiceUsersService', () => {
             expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(userId);
         });
     });
+
+    describe('findAll', () => {
+        const users = [
+            { id: 1, email: 'developer-1@example.com' },
+            { id: 2, email: 'developer-2@example.com' },
+        ];
+
+        it('should successfully return all service users', async () => {
+            mockServiceUsersRepository.findAll.mockResolvedValue(users);
+
+            const result = await service.findAll();
+
+            expect(result).toEqual(users);
+            expect(mockServiceUsersRepository.findAll).toHaveBeenCalledWith();
+        });
+    });
 });
