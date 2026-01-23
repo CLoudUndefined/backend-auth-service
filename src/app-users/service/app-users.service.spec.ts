@@ -283,4 +283,42 @@ describe('AppUsersService', () => {
             expect(mockAppUsersRepository.addRole).toHaveBeenCalledWith(appUserId, roleId);
         });
     });
+
+    describe('removeRoleFromAppUser', () => {
+        const appId = 1;
+        const appUserId = 2;
+        const roleId = 3;
+
+        it('should throw NotFoundException if app user not found', async () => {
+            mockAppUsersRepository.findByIdInApp.mockResolvedValue(null);
+
+            await expect(service.removeRoleFromAppUser(appId, appUserId, roleId)).rejects.toThrow(NotFoundException);
+
+            expect(mockAppUsersRepository.findByIdInApp).toHaveBeenCalledWith(appId, appUserId);
+            expect(mockAppUsersRepository.hasRole).not.toHaveBeenCalled();
+        });
+
+        it('should throw NotFoundException if user does not have role', async () => {
+            mockAppUsersRepository.findByIdInApp.mockResolvedValue({ id: appUserId });
+            mockAppUsersRepository.hasRole.mockResolvedValue(false);
+
+            await expect(service.removeRoleFromAppUser(appId, appUserId, roleId)).rejects.toThrow(NotFoundException);
+
+            expect(mockAppUsersRepository.hasRole).toHaveBeenCalledWith(appUserId, roleId);
+            expect(mockAppUsersRepository.removeRole).not.toHaveBeenCalled();
+        });
+
+        it('should successfully remove role from user', async () => {
+            mockAppUsersRepository.findByIdInApp.mockResolvedValue({ id: appUserId });
+            mockAppUsersRepository.hasRole.mockResolvedValue(true);
+            mockAppUsersRepository.removeRole.mockResolvedValue(undefined);
+
+            await service.removeRoleFromAppUser(appId, appUserId, roleId);
+
+            expect(mockAppUsersRepository.findByIdInApp).toHaveBeenCalledWith(appId, appUserId);
+            expect(mockAppUsersRepository.hasRole).toHaveBeenCalledWith(appUserId, roleId);
+
+            expect(mockAppUsersRepository.removeRole).toHaveBeenCalledWith(appUserId, roleId);
+        });
+    });
 });
