@@ -11,6 +11,7 @@ import { ServiceUser } from 'src/common/decorators/service-user.decorator';
 import { AppUserWithRolesAndPermissionsResponseDto } from './dto/app-user-with-roles-and-permissions-response.dto';
 import { AppRoleWithPermissionsResponseDto } from 'src/app-roles/api/dto/app-role-with-permissions-response.dto';
 import { type AuthenticatedServiceUser } from 'src/auth/interfaces/authenticated-service-user.interface';
+import { AppAccessGuard } from 'src/auth/guards/app-access.guard';
 
 @ApiTags('Service (App Users)')
 @ApiBearerAuth('JWT-auth-service')
@@ -19,7 +20,7 @@ export class ServiceAppUsersController {
     constructor(private readonly appUsersService: AppUsersService) {}
 
     @Get()
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'List users of an application',
         description: 'Retrieves all registered users for the specific application. Optionally filter by role.',
@@ -67,7 +68,7 @@ export class ServiceAppUsersController {
     }
 
     @Get(':appUserId')
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'Get specific app user',
         description: 'Returns details of a registered user in the app.',
@@ -111,7 +112,7 @@ export class ServiceAppUsersController {
     }
 
     @Put(':appUserId')
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'Update app user',
         description: 'Updates user email.',
@@ -165,7 +166,7 @@ export class ServiceAppUsersController {
     }
 
     @Delete(':appUserId')
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'Delete app user',
         description: 'Removes a user from the application.',
@@ -205,7 +206,7 @@ export class ServiceAppUsersController {
     }
 
     @Get(':appUserId/roles')
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'Get user roles',
         description: 'Retrieves all roles assigned to the user.',
@@ -248,7 +249,7 @@ export class ServiceAppUsersController {
     }
 
     @Post(':appUserId/roles/:roleId')
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'Add role to user',
         description: 'Assigns a specific role to the user.',
@@ -301,7 +302,7 @@ export class ServiceAppUsersController {
     }
 
     @Delete(':appUserId/roles/:roleId')
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'Remove role from user',
         description: 'Removes a specific role from the user.',
