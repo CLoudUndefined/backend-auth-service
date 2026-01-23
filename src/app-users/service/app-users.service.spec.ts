@@ -148,4 +148,85 @@ describe('AppUsersService', () => {
             expect(result).toEqual(users);
         });
     });
+
+    describe('getAppUserByServiceUser', () => {
+        const appId = 1;
+        const serviceUserId = 2;
+        const appUserId = 3;
+        const anotherServiceUserId = 4;
+        const appUser = {
+            id: appUserId,
+            email: 'application-user@app.com',
+            roles: [{ id: 1, name: 'mock-role-name', permissions: [] }],
+        };
+
+        it('should throw UnauthorizedException if service user not found', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue(undefined);
+
+            await expect(service.getAppUserByServiceUser(appId, serviceUserId, appUserId)).rejects.toThrow(
+                UnauthorizedException,
+            );
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(serviceUserId);
+        });
+
+        it('should throw NotFoundException if application not found', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({ id: serviceUserId });
+            mockAppsRepository.findById.mockResolvedValue(undefined);
+
+            await expect(service.getAppUserByServiceUser(appId, serviceUserId, appUserId)).rejects.toThrow(
+                NotFoundException,
+            );
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(serviceUserId);
+            expect(mockAppsRepository.findById).toHaveBeenCalledWith(appId);
+        });
+
+        it('should throw ForbiddenException if service user is not god and not app owner', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({ id: serviceUserId, isGod: false });
+            mockAppsRepository.findById.mockResolvedValue({ id: appId, ownerId: anotherServiceUserId });
+
+            await expect(service.getAppUserByServiceUser(appId, serviceUserId, appUserId)).rejects.toThrow(
+                ForbiddenException,
+            );
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(serviceUserId);
+            expect(mockAppsRepository.findById).toHaveBeenCalledWith(appId);
+        });
+
+        it('should throw NotFoundException if app user not found', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({ id: serviceUserId, isGod: false });
+            mockAppsRepository.findById.mockResolvedValue({ id: appId, ownerId: serviceUserId });
+            mockAppUsersRepository.findByIdInAppWithRolesAndPermissions.mockResolvedValue(null);
+
+            await expect(service.getAppUserByServiceUser(appId, serviceUserId, appUserId)).rejects.toThrow(
+                NotFoundException,
+            );
+
+            expect(mockAppUsersRepository.findByIdInAppWithRolesAndPermissions).toHaveBeenCalledWith(appId, appUserId);
+        });
+
+        it('should successfully return app user when owner', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({ id: serviceUserId, isGod: false });
+            mockAppsRepository.findById.mockResolvedValue({ id: appId, ownerId: serviceUserId });
+            mockAppUsersRepository.findByIdInAppWithRolesAndPermissions.mockResolvedValue(appUser);
+
+            const result = await service.getAppUserByServiceUser(appId, serviceUserId, appUserId);
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(serviceUserId);
+            expect(mockAppsRepository.findById).toHaveBeenCalledWith(appId);
+            expect(mockAppUsersRepository.findByIdInAppWithRolesAndPermissions).toHaveBeenCalledWith(appId, appUserId);
+            expect(result).toEqual(appUser);
+        });
+
+        it('should successfully return app user when god user', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({ id: serviceUserId, isGod: true });
+            mockAppsRepository.findById.mockResolvedValue({ id: appId, ownerId: anotherServiceUserId });
+            mockAppUsersRepository.findByIdInAppWithRolesAndPermissions.mockResolvedValue(appUser);
+
+            const result = await service.getAppUserByServiceUser(appId, serviceUserId, appUserId);
+
+            expect(result).toEqual(appUser);
+        });
+    });
 });
