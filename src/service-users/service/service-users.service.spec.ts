@@ -69,4 +69,37 @@ describe('ServiceUsersService', () => {
             expect(mockServiceUsersRepository.update).toHaveBeenCalledWith(userId, { email });
         });
     });
+
+    describe('delete', () => {
+        const userId = 1;
+
+        it('should throw NotFoundException if user does not exist', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue(undefined);
+
+            await expect(service.delete(userId)).rejects.toThrow(NotFoundException);
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(userId);
+        });
+
+        it('should throw ConflictException if user has existing applications', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({ id: userId });
+            mockAppsRepository.existsByOwnerId.mockResolvedValue(true);
+
+            await expect(service.delete(userId)).rejects.toThrow(ConflictException);
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(userId);
+            expect(mockAppsRepository.existsByOwnerId).toHaveBeenCalledWith(userId);
+        });
+
+        it('should successfully delete user when user exists and has no applications', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({ id: userId });
+            mockAppsRepository.existsByOwnerId.mockResolvedValue(false);
+
+            await service.delete(userId);
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(userId);
+            expect(mockAppsRepository.existsByOwnerId).toHaveBeenCalledWith(userId);
+            expect(mockServiceUsersRepository.delete).toHaveBeenCalledWith(userId);
+        });
+    });
 });
