@@ -102,4 +102,26 @@ describe('ServiceUsersService', () => {
             expect(mockServiceUsersRepository.delete).toHaveBeenCalledWith(userId);
         });
     });
+
+    describe('findByIdOrThrow', () => {
+        const userId = 1;
+
+        it('should throw NotFoundException if user does not exist', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue(null);
+
+            await expect(service.findByIdOrThrow(userId)).rejects.toThrow(NotFoundException);
+            await expect(service.findByIdOrThrow(userId)).rejects.toThrow('User not found');
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(userId);
+        });
+
+        it('should successfully return user if user exists', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({ id: userId });
+
+            const result = await service.findByIdOrThrow(userId);
+
+            expect(result).toEqual({ id: userId });
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(userId);
+        });
+    });
 });
