@@ -57,11 +57,10 @@ export class ServiceAppUsersController {
         description: 'App not found',
     })
     async listAppUsers(
-        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Query() query: GetAppUsersQueryDto,
     ): Promise<AppUserWithRolesResponseDto[]> {
-        const appUsers = await this.appUsersService.listAppUsersByServiceUser(appId, user.id, query.roleId);
+        const appUsers = await this.appUsersService.listAppUsers(appId, query.roleId);
         return appUsers.map((appUser) => {
             return new AppUserWithRolesResponseDto(appUser);
         });
@@ -103,11 +102,10 @@ export class ServiceAppUsersController {
         description: 'App or User not found',
     })
     async getAppUser(
-        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('appUserId', ParseIntPipe) appUserId: number,
     ): Promise<AppUserWithRolesAndPermissionsResponseDto> {
-        const appUser = await this.appUsersService.getAppUserByServiceUser(appId, user.id, appUserId);
+        const appUser = await this.appUsersService.getAppUser(appId, appUserId);
         return new AppUserWithRolesAndPermissionsResponseDto(appUser);
     }
 
@@ -151,17 +149,11 @@ export class ServiceAppUsersController {
         description: 'Conflict',
     })
     async updateAppUser(
-        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('appUserId', ParseIntPipe) appUserId: number,
         @Body() updateAppUserDto: UpdateAppUserRequestDto,
     ): Promise<AppUserResponseDto> {
-        const appUser = await this.appUsersService.updateAppUserByServiceUser(
-            appId,
-            user.id,
-            appUserId,
-            updateAppUserDto.email,
-        );
+        const appUser = await this.appUsersService.updateAppUser(appId, appUserId, updateAppUserDto.email);
         return new AppUserResponseDto(appUser);
     }
 
@@ -197,11 +189,10 @@ export class ServiceAppUsersController {
         description: 'App or User not found',
     })
     async deleteAppUser(
-        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('appUserId', ParseIntPipe) appUserId: number,
     ): Promise<MessageResponseDto> {
-        await this.appUsersService.deleteAppUserByServiceUser(appId, user.id, appUserId);
+        await this.appUsersService.deleteAppUser(appId, appUserId);
         return { message: 'User deleted successfully' };
     }
 
@@ -242,7 +233,7 @@ export class ServiceAppUsersController {
         @Param('appId', ParseIntPipe) appId: number,
         @Param('appUserId', ParseIntPipe) appUserId: number,
     ): Promise<AppRoleWithPermissionsResponseDto[]> {
-        const roles = await this.appUsersService.getAppUserRolesByServiceUser(appId, user.id, appUserId);
+        const roles = await this.appUsersService.getAppUserRoles(appId, appUserId);
         return roles.map((role) => {
             return new AppRoleWithPermissionsResponseDto(role);
         });
@@ -292,12 +283,11 @@ export class ServiceAppUsersController {
         description: 'Conflict - User already has this role',
     })
     async addRoleToAppUser(
-        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('appUserId', ParseIntPipe) appUserId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<MessageResponseDto> {
-        await this.appUsersService.addRoleToAppUserByServiceUser(appId, user.id, appUserId, roleId);
+        await this.appUsersService.addRoleToAppUser(appId, appUserId, roleId);
         return { message: 'Role added successfully' };
     }
 
@@ -337,12 +327,11 @@ export class ServiceAppUsersController {
         description: 'App, User, Role not found, or User does not have this role',
     })
     async removeRoleFromAppUser(
-        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('appUserId', ParseIntPipe) appUserId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<MessageResponseDto> {
-        await this.appUsersService.removeRoleFromAppUserByServiceUser(appId, user.id, appUserId, roleId);
+        await this.appUsersService.removeRoleFromAppUser(appId, appUserId, roleId);
         return { message: 'Role removed successfully' };
     }
 }
