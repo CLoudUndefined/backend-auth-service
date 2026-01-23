@@ -365,4 +365,85 @@ describe('AppUsersService', () => {
             expect(result).toEqual({ id: appUserId, email: newEmail });
         });
     });
+
+    describe('deleteAppUserByServiceUser', () => {
+        const appId = 1;
+        const serviceUserId = 2;
+        const appUserId = 3;
+        const anotherServiceUserId = 4;
+
+        it('should throw UnauthorizedException if service user not found', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue(undefined);
+
+            await expect(service.deleteAppUserByServiceUser(appId, serviceUserId, appUserId)).rejects.toThrow(
+                UnauthorizedException,
+            );
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(serviceUserId);
+        });
+
+        it('should throw NotFoundException if application not found', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({ id: serviceUserId });
+            mockAppsRepository.findById.mockResolvedValue(undefined);
+
+            await expect(service.deleteAppUserByServiceUser(appId, serviceUserId, appUserId)).rejects.toThrow(
+                NotFoundException,
+            );
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(serviceUserId);
+            expect(mockAppsRepository.findById).toHaveBeenCalledWith(appId);
+        });
+
+        it('should throw ForbiddenException if service user is not god and not app owner', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({ id: serviceUserId, isGod: false });
+            mockAppsRepository.findById.mockResolvedValue({ id: appId, ownerId: anotherServiceUserId });
+
+            await expect(service.deleteAppUserByServiceUser(appId, serviceUserId, appUserId)).rejects.toThrow(
+                ForbiddenException,
+            );
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(serviceUserId);
+            expect(mockAppsRepository.findById).toHaveBeenCalledWith(appId);
+        });
+
+        it('should throw NotFoundException if app user not found', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({ id: serviceUserId, isGod: false });
+            mockAppsRepository.findById.mockResolvedValue({ id: appId, ownerId: serviceUserId });
+            mockAppUsersRepository.findByIdInApp.mockResolvedValue(null);
+
+            await expect(service.deleteAppUserByServiceUser(appId, serviceUserId, appUserId)).rejects.toThrow(
+                NotFoundException,
+            );
+
+            expect(mockAppUsersRepository.findByIdInApp).toHaveBeenCalledWith(appId, appUserId);
+
+            expect(mockAppUsersRepository.delete).not.toHaveBeenCalled();
+        });
+
+        it('should successfully delete app user when owner', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({ id: serviceUserId, isGod: false });
+            mockAppsRepository.findById.mockResolvedValue({ id: appId, ownerId: serviceUserId });
+            mockAppUsersRepository.findByIdInApp.mockResolvedValue({ id: appUserId });
+            mockAppUsersRepository.delete.mockResolvedValue(undefined);
+
+            await service.deleteAppUserByServiceUser(appId, serviceUserId, appUserId);
+
+            expect(mockAppUsersRepository.findByIdInApp).toHaveBeenCalledWith(appId, appUserId);
+
+            expect(mockAppUsersRepository.delete).toHaveBeenCalledWith(appUserId);
+        });
+
+        it('should successfully delete app user when god', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({ id: serviceUserId, isGod: true });
+            mockAppsRepository.findById.mockResolvedValue({ id: appId, ownerId: anotherServiceUserId });
+            mockAppUsersRepository.findByIdInApp.mockResolvedValue({ id: appUserId });
+            mockAppUsersRepository.delete.mockResolvedValue(undefined);
+
+            await service.deleteAppUserByServiceUser(appId, serviceUserId, appUserId);
+
+            expect(mockAppUsersRepository.findByIdInApp).toHaveBeenCalledWith(appId, appUserId);
+
+            expect(mockAppUsersRepository.delete).toHaveBeenCalledWith(appUserId);
+        });
+    });
 });
