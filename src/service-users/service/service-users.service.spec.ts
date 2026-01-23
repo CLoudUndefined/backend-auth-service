@@ -140,4 +140,21 @@ describe('ServiceUsersService', () => {
             expect(mockServiceUsersRepository.findAll).toHaveBeenCalledWith();
         });
     });
+
+    describe('findAllAppsByOwnerId', () => {
+        const ownerId = 1;
+        const apps = [
+            { id: 1, name: 'mock-app-name-1', ownerId, owner: { id: ownerId } },
+            { id: 2, name: 'mock-app-name-2', ownerId, owner: { id: ownerId } },
+        ];
+
+        it('should successfully return all apps for given owner', async () => {
+            mockAppsRepository.findAllByOwnerIdWithOwner.mockResolvedValue(apps);
+
+            const result = await service.findAllAppsByOwnerId(ownerId);
+
+            expect(result).toEqual(apps);
+            expect(mockAppsRepository.findAllByOwnerIdWithOwner).toHaveBeenCalledWith(ownerId);
+        });
+    });
 });
