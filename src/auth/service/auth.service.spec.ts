@@ -609,4 +609,107 @@ describe('AuthService', () => {
             expect(mockServiceUsersRepository.deleteAllUserRefreshTokens).toHaveBeenCalledWith(userId);
         });
     });
+
+    describe('updateRecovery', () => {
+        const recoveryId = 1;
+        const userId = 2;
+        const anotherUserId = 3;
+        const currentPassword = 'mock-current-password';
+        const newRecoveryQuestion = 'mock-new-recovery-question';
+        const newRecoveryAnswer = 'mock-new-recovery-answer';
+
+        beforeEach(() => {
+            jest.clearAllMocks();
+        });
+
+        it('should throw UnathorizedException if user is not found', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue(undefined);
+            mockServiceUsersRepository.findRecoveryById.mockResolvedValue({
+                id: recoveryId,
+                userId: userId,
+                question: 'mock-recovery-question',
+                answer: 'mock-recovery-answer-hash',
+            });
+
+            await expect(
+                service.updateRecovery(userId, recoveryId, currentPassword, newRecoveryQuestion, newRecoveryAnswer),
+            ).rejects.toThrow(UnauthorizedException);
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(userId);
+            expect(mockServiceUsersRepository.findRecoveryById).toHaveBeenCalledWith(recoveryId);
+        });
+
+        it('should throw UnathorizedException if recovery is not found', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({ id: userId, passwordHash: 'mock-password-hash' });
+            mockServiceUsersRepository.findRecoveryById.mockResolvedValue(undefined);
+
+            await expect(
+                service.updateRecovery(userId, recoveryId, currentPassword, newRecoveryQuestion, newRecoveryAnswer),
+            ).rejects.toThrow(UnauthorizedException);
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(userId);
+            expect(mockServiceUsersRepository.findRecoveryById).toHaveBeenCalledWith(recoveryId);
+        });
+
+        it('should throw ForbiddenException if recovery does not belong to user', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({ id: userId, passwordHash: 'hash' });
+            mockServiceUsersRepository.findRecoveryById.mockResolvedValue({
+                id: recoveryId,
+                userId: anotherUserId,
+                question: 'mock-recovery-question',
+                answerHash: 'mock-recovery-answer-hash',
+            });
+
+            await expect(
+                service.updateRecovery(userId, recoveryId, currentPassword, newRecoveryQuestion, newRecoveryAnswer),
+            ).rejects.toThrow(ForbiddenException);
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(userId);
+            expect(mockServiceUsersRepository.findRecoveryById).toHaveBeenCalledWith(recoveryId);
+        });
+
+        it('should throw UnauthorizedException if current password is incorrect', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({
+                id: userId,
+                passwordHash: 'mock-password-hash',
+            });
+            mockServiceUsersRepository.findRecoveryById.mockResolvedValue({
+                id: recoveryId,
+                userId: userId,
+                question: 'mock-recovery-question',
+                answerHash: 'mock-recovery-answer-hash',
+            });
+            mockBcrypt.compare.mockResolvedValue(false);
+
+            await expect(
+                service.updateRecovery(userId, recoveryId, currentPassword, newRecoveryQuestion, newRecoveryAnswer),
+            ).rejects.toThrow(UnauthorizedException);
+
+            expect(bcrypt.compare).toHaveBeenCalledWith(currentPassword, 'mock-password-hash');
+        });
+
+        it('should successfully update recovery question and answer', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({
+                id: userId,
+                passwordHash: 'mock-password-hash',
+            });
+            mockServiceUsersRepository.findRecoveryById.mockResolvedValue({
+                id: recoveryId,
+                userId: userId,
+                question: 'mock-recovery-question',
+                answerHash: 'mock-recovery-answer-hash',
+            });
+            mockBcrypt.compare.mockResolvedValue(true);
+            mockBcrypt.hash.mockResolvedValue('mock-new-recovery-answer-hash');
+
+            await service.updateRecovery(userId, recoveryId, currentPassword, newRecoveryQuestion, newRecoveryAnswer);
+
+            expect(bcrypt.compare).toHaveBeenCalledWith(currentPassword, 'mock-password-hash');
+            expect(bcrypt.hash).toHaveBeenCalledWith(newRecoveryAnswer, 10);
+            expect(mockServiceUsersRepository.updateRecovery).toHaveBeenCalledWith(recoveryId, {
+                question: newRecoveryQuestion,
+                answerHash: 'mock-new-recovery-answer-hash',
+            });
+        });
+    });
 });
