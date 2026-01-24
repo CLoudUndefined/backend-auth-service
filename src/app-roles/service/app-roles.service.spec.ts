@@ -370,4 +370,40 @@ describe('AppRolesService', () => {
             expect(result).toEqual(role);
         });
     });
+
+    describe('deleteRole', () => {
+        const appId = 1;
+        const roleId = 2;
+
+        it('should throw NotFoundException if role not found', async () => {
+            mockAppRolesRepository.existsByIdInApp.mockResolvedValue(false);
+            mockAppRolesRepository.hasUsers.mockResolvedValue(false);
+
+            await expect(service.deleteRole(appId, roleId)).rejects.toThrow(NotFoundException);
+
+            expect(mockAppRolesRepository.existsByIdInApp).toHaveBeenCalledWith(appId, roleId);
+        });
+
+        it('should throw ConflictException if role is assigned to users', async () => {
+            mockAppRolesRepository.existsByIdInApp.mockResolvedValue(true);
+            mockAppRolesRepository.hasUsers.mockResolvedValue(true);
+
+            await expect(service.deleteRole(appId, roleId)).rejects.toThrow(ConflictException);
+
+            expect(mockAppRolesRepository.hasUsers).toHaveBeenCalledWith(roleId);
+        });
+
+        it('should successfully delete role', async () => {
+            mockAppRolesRepository.existsByIdInApp.mockResolvedValue(true);
+            mockAppRolesRepository.hasUsers.mockResolvedValue(false);
+            mockAppRolesRepository.delete.mockResolvedValue(undefined);
+
+            await service.deleteRole(appId, roleId);
+
+            expect(mockAppRolesRepository.existsByIdInApp).toHaveBeenCalledWith(appId, roleId);
+            expect(mockAppRolesRepository.hasUsers).toHaveBeenCalledWith(roleId);
+
+            expect(mockAppRolesRepository.delete).toHaveBeenCalledWith(roleId);
+        });
+    });
 });
