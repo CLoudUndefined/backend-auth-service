@@ -115,6 +115,21 @@ describe('AppUsersController', () => {
         });
     });
 
+    describe('deleteAppUser', () => {
+        const user = { id: 1, appId: 2 };
+        const appUserId = 3;
+
+        it('should successfully delete app user and return success message', async () => {
+            mockAppUsersService.deleteAppUser.mockResolvedValue(undefined);
+
+            const result = await controller.deleteAppUser(user, appUserId);
+
+            expect(mockAppUsersService.deleteAppUser).toHaveBeenCalledWith(user.appId, appUserId);
+
+            expect(result).toEqual({ message: 'User deleted successfully' });
+        });
+    });
+
     describe('getAppUserRoles', () => {
         const user = { id: 1, appId: 2 };
         const appUserId = 3;
