@@ -15,7 +15,7 @@ export class AppsService {
         return this.encryptionService.encrypt(crypto.randomBytes(64).toString('hex'));
     }
 
-    async create(ownerId: number, name: string, description?: string): Promise<ApplicationWithOwnerModel> {
+    async createApp(ownerId: number, name: string, description?: string): Promise<ApplicationWithOwnerModel> {
         const isAppExist = await this.appsRepository.exists(ownerId, name);
 
         if (isAppExist) {
@@ -46,7 +46,7 @@ export class AppsService {
         return app;
     }
 
-    async update(appId: number, name?: string, description?: string): Promise<ApplicationWithOwnerModel> {
+    async updateApp(appId: number, name?: string, description?: string): Promise<ApplicationWithOwnerModel> {
         if (!description && !name) {
             throw new BadRequestException('At least one field (name or description) must be provided');
         }
@@ -60,7 +60,7 @@ export class AppsService {
         return updatedApp;
     }
 
-    async delete(appId: number): Promise<void> {
+    async deleteApp(appId: number): Promise<void> {
         await this.appsRepository.delete(appId);
     }
 
