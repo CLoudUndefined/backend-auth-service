@@ -6,6 +6,7 @@ import { AppAccessGuard } from 'src/auth/guards/app-access.guard';
 import { AppUserWithRolesResponseDto } from './dto/app-user-with-roles-response.dto';
 import { AppUserWithRolesAndPermissionsResponseDto } from './dto/app-user-with-roles-and-permissions-response.dto';
 import { AppUserResponseDto } from './dto/app-user-response.dto';
+import { AppRoleWithPermissionsResponseDto } from 'src/app-roles/api/dto/app-role-with-permissions-response.dto';
 
 describe('ServiceAppUsersController', () => {
     let controller: ServiceAppUsersController;
@@ -126,6 +127,29 @@ describe('ServiceAppUsersController', () => {
             expect(mockAppUsersService.deleteAppUser).toHaveBeenCalledWith(appId, appUserId);
 
             expect(result).toEqual({ message: 'User deleted successfully' });
+        });
+    });
+
+    describe('getAppUserRoles', () => {
+        const appId = 1;
+        const appUserId = 2;
+        const roles = [
+            { id: 3, permissions: [] },
+            { id: 4, permissions: [] },
+        ];
+
+        it('should successfully return roles assigned to app user', async () => {
+            mockAppUsersService.getAppUserRoles.mockResolvedValue(roles);
+
+            const result = await controller.getAppUserRoles(appId, appUserId);
+
+            expect(mockAppUsersService.getAppUserRoles).toHaveBeenCalledWith(appId, appUserId);
+
+            expect(result).toHaveLength(2);
+            expect(result[0]).toBeInstanceOf(AppRoleWithPermissionsResponseDto);
+            expect(result[1]).toBeInstanceOf(AppRoleWithPermissionsResponseDto);
+            expect(result[0]).toMatchObject({ id: roles[0].id });
+            expect(result[1]).toMatchObject({ id: roles[1].id });
         });
     });
 });
