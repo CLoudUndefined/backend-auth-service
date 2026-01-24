@@ -6,6 +6,7 @@ import { AppPermissionGuard } from 'src/app-auth/guards/app-permissions.guard';
 import { AppUserWithRolesResponseDto } from './dto/app-user-with-roles-response.dto';
 import { AppUserWithRolesAndPermissionsResponseDto } from './dto/app-user-with-roles-and-permissions-response.dto';
 import { AppUserResponseDto } from './dto/app-user-response.dto';
+import { AppRoleWithPermissionsResponseDto } from 'src/app-roles/api/dto/app-role-with-permissions-response.dto';
 
 describe('AppUsersController', () => {
     let controller: AppUsersController;
@@ -111,6 +112,29 @@ describe('AppUsersController', () => {
             expect(result).toMatchObject({
                 id: appUser.id,
             });
+        });
+    });
+
+    describe('getAppUserRoles', () => {
+        const user = { id: 1, appId: 2 };
+        const appUserId = 3;
+        const roles = [
+            { id: 4, permissions: [] },
+            { id: 5, permissions: [] },
+        ];
+
+        it('should successfully return roles assigned to app user', async () => {
+            mockAppUsersService.getAppUserRoles.mockResolvedValue(roles);
+
+            const result = await controller.getAppUserRoles(user, appUserId);
+
+            expect(mockAppUsersService.getAppUserRoles).toHaveBeenCalledWith(user.appId, appUserId);
+
+            expect(result).toHaveLength(2);
+            expect(result[0]).toBeInstanceOf(AppRoleWithPermissionsResponseDto);
+            expect(result[1]).toBeInstanceOf(AppRoleWithPermissionsResponseDto);
+            expect(result[0]).toMatchObject({ id: roles[0].id });
+            expect(result[1]).toMatchObject({ id: roles[1].id });
         });
     });
 });
