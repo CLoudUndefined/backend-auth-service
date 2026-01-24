@@ -144,4 +144,19 @@ describe('AppRolesController', () => {
             });
         });
     });
+
+    describe('deleteRole', () => {
+        const user = { id: 1, appId: 2 };
+        const roleId = 3;
+
+        it('should successfully delete role and return success message', async () => {
+            mockAppRolesService.deleteRole.mockResolvedValue(undefined);
+
+            const result = await controller.deleteRole(user, roleId);
+
+            expect(mockAppRolesService.deleteRole).toHaveBeenCalledWith(user.appId, roleId);
+
+            expect(result).toEqual({ message: 'Role deleted successfully' });
+        });
+    });
 });
