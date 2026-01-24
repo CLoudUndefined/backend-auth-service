@@ -162,4 +162,31 @@ describe('AppRolesService', () => {
             expect(result).toEqual(roles);
         });
     });
+
+    describe('getRole', () => {
+        const appId = 1;
+        const roleId = 2;
+        const role = {
+            id: roleId,
+            permissions: [{ id: 3 }, { id: 4 }],
+        };
+
+        it('should throw NotFoundException if role not found', async () => {
+            mockAppRolesRepository.findByIdWithPermissionsInApp.mockResolvedValue(undefined);
+
+            await expect(service.getRole(appId, roleId)).rejects.toThrow(NotFoundException);
+
+            expect(mockAppRolesRepository.findByIdWithPermissionsInApp).toHaveBeenCalledWith(appId, roleId);
+        });
+
+        it('should successfully return role with permissions', async () => {
+            mockAppRolesRepository.findByIdWithPermissionsInApp.mockResolvedValue(role);
+
+            const result = await service.getRole(appId, roleId);
+
+            expect(mockAppRolesRepository.findByIdWithPermissionsInApp).toHaveBeenCalledWith(appId, roleId);
+
+            expect(result).toEqual(role);
+        });
+    });
 });
