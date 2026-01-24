@@ -109,4 +109,39 @@ describe('ServiceAppRolesController', () => {
             });
         });
     });
+
+    describe('updateRole', () => {
+        const appId = 1;
+        const roleId = 2;
+        const updatedRole = {
+            id: roleId,
+            name: 'mock-new-role-name',
+            description: 'mock-new-role-description',
+            permissions: [{ id: 1 }, { id: 2 }],
+        };
+        const updateRoleDto = {
+            name: 'mock-new-role-name',
+            description: 'mock-new-role-description',
+            permissionIds: [1, 2],
+        };
+
+        it('should successfully update role', async () => {
+            mockAppRolesService.updateRole.mockResolvedValue(updatedRole);
+
+            const result = await controller.updateRole(appId, roleId, updateRoleDto);
+
+            expect(mockAppRolesService.updateRole).toHaveBeenCalledWith(
+                appId,
+                roleId,
+                updateRoleDto.name,
+                updateRoleDto.description,
+                updateRoleDto.permissionIds,
+            );
+
+            expect(result).toBeInstanceOf(AppRoleWithPermissionsResponseDto);
+            expect(result).toMatchObject({
+                id: updatedRole.id,
+            });
+        });
+    });
 });
