@@ -1,48 +1,18 @@
-import {
-    BadRequestException,
-    ConflictException,
-    Injectable,
-    NotFoundException,
-    UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { AppsRepository } from 'src/database/repositories/apps.repository';
 import { EncryptionService } from 'src/common/encryption/encryption.service';
 import * as crypto from 'crypto';
 import { ApplicationWithOwnerModel } from 'src/types/application.types';
-import { AppUsersRepository } from 'src/database/repositories/app-users.repository';
 
 @Injectable()
 export class AppsService {
     constructor(
         private readonly appsRepository: AppsRepository,
         private readonly encryptionService: EncryptionService,
-        private readonly appUsersRepository: AppUsersRepository,
     ) {}
 
     private generateEncryptedSecret(): string {
         return this.encryptionService.encrypt(crypto.randomBytes(64).toString('hex'));
-    }
-
-    private async validateAppExists(appId: number): Promise<ApplicationWithOwnerModel> {
-        const app = await this.appsRepository.findByIdWithOwner(appId);
-
-        if (!app) {
-            throw new NotFoundException('Application not found');
-        }
-
-        return app;
-    }
-
-    private async validateAppAccessByAppUser(appId: number, appUserId: number): Promise<ApplicationWithOwnerModel> {
-        const user = await this.appUsersRepository.findByIdInApp(appId, appUserId);
-
-        if (!user) {
-            throw new UnauthorizedException('Invalid credentials');
-        }
-
-        const app = await this.validateAppExists(appId);
-
-        return app;
     }
 
     async create(ownerId: number, name: string, description?: string): Promise<ApplicationWithOwnerModel> {
@@ -66,10 +36,6 @@ export class AppsService {
         return this.appsRepository.findAllWithOwner();
     }
 
-    async findAppByIdByAppUser(appId: number, appUserId: number): Promise<ApplicationWithOwnerModel> {
-        return this.validateAppAccessByAppUser(appId, appUserId);
-    }
-
     async findAppById(appId: number): Promise<ApplicationWithOwnerModel> {
         const app = await this.appsRepository.findByIdWithOwner(appId);
 
@@ -78,16 +44,6 @@ export class AppsService {
         }
 
         return app;
-    }
-
-    async updateByAppUser(
-        appId: number,
-        appUserId: number,
-        name?: string,
-        description?: string,
-    ): Promise<ApplicationWithOwnerModel> {
-        await this.validateAppAccessByAppUser(appId, appUserId);
-        return this.update(appId, name, description);
     }
 
     async update(appId: number, name?: string, description?: string): Promise<ApplicationWithOwnerModel> {
