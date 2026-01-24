@@ -80,7 +80,6 @@ describe('AppUsersController', () => {
     describe('getAppUser', () => {
         const appUserId = 1;
         const user = { id: 2, appId: 3 };
-
         const appUser = { id: appUserId, roles: [] };
 
         it('should successfully return app user details and call service with correct params', async () => {
