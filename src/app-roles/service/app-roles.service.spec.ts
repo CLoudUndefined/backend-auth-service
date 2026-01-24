@@ -147,4 +147,19 @@ describe('AppRolesService', () => {
             expect(result).toEqual(createdRoleWithPermissions);
         });
     });
+
+    describe('getAllRoles', () => {
+        const appId = 1;
+        const roles = [{ id: 2 }, { id: 3 }];
+
+        it('should successfully return all roles for app', async () => {
+            mockAppRolesRepository.findAllByApp.mockResolvedValue(roles);
+
+            const result = await service.getAllRoles(appId);
+
+            expect(mockAppRolesRepository.findAllByApp).toHaveBeenCalledWith(appId);
+
+            expect(result).toEqual(roles);
+        });
+    });
 });
