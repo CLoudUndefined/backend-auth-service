@@ -4,6 +4,7 @@ import { AppUsersService } from '../service/app-users.service';
 import { JwtAppAuthGuard } from 'src/app-auth/guards/jwt-app-auth.guard';
 import { AppPermissionGuard } from 'src/app-auth/guards/app-permissions.guard';
 import { AppUserWithRolesResponseDto } from './dto/app-user-with-roles-response.dto';
+import { AppUserWithRolesAndPermissionsResponseDto } from './dto/app-user-with-roles-and-permissions-response.dto';
 
 describe('AppUsersController', () => {
     let controller: AppUsersController;
@@ -71,6 +72,26 @@ describe('AppUsersController', () => {
             expect(mockAppUsersService.listAppUsers).toHaveBeenCalledWith(user.appId, roleId);
             expect(result[0]).toBeInstanceOf(AppUserWithRolesResponseDto);
             expect(result).toHaveLength(1);
+        });
+    });
+
+    describe('getAppUser', () => {
+        const appUserId = 1;
+        const user = { id: 2, appId: 3 };
+
+        const appUser = { id: appUserId, roles: [] };
+
+        it('should successfully return app user details and call service with correct params', async () => {
+            mockAppUsersService.getAppUser.mockResolvedValue(appUser);
+
+            const result = await controller.getAppUser(user, appUserId);
+
+            expect(mockAppUsersService.getAppUser).toHaveBeenCalledWith(user.appId, appUserId);
+
+            expect(result).toBeInstanceOf(AppUserWithRolesAndPermissionsResponseDto);
+            expect(result).toMatchObject({
+                id: appUser.id,
+            });
         });
     });
 });
