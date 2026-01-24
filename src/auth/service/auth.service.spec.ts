@@ -56,6 +56,8 @@ describe('AuthService', () => {
         }).compile();
 
         service = module.get<AuthService>(AuthService);
+
+        jest.clearAllMocks();
     });
 
     it('should be defined', () => {
@@ -71,8 +73,6 @@ describe('AuthService', () => {
         const expiresIn = '7d';
 
         beforeEach(() => {
-            jest.clearAllMocks();
-
             mockCryptoCreateHash.mockImplementation(() => ({
                 update: jest.fn().mockReturnThis(),
                 digest: jest.fn().mockReturnValue('mock-hash-hex'),
@@ -188,8 +188,6 @@ describe('AuthService', () => {
         const expiresIn = '7d';
 
         beforeEach(() => {
-            jest.clearAllMocks();
-
             mockCryptoCreateHash.mockImplementation(() => ({
                 update: jest.fn().mockReturnThis(),
                 digest: jest.fn().mockReturnValue('mock-hash-hex'),
@@ -271,10 +269,6 @@ describe('AuthService', () => {
         const oldPassword = 'mock-old-password';
         const newPassword = 'mock-new-password';
 
-        beforeEach(() => {
-            jest.clearAllMocks();
-        });
-
         it('should throw NotFoundException if refresh token not found', async () => {
             mockServiceUsersRepository.findById.mockResolvedValue(undefined);
 
@@ -338,8 +332,6 @@ describe('AuthService', () => {
         const expiresIn = '7d';
 
         beforeEach(() => {
-            jest.clearAllMocks();
-
             mockCryptoCreateHash.mockImplementation(() => ({
                 update: jest.fn().mockReturnThis(),
                 digest: jest.fn().mockReturnValue('mock-refresh-token-hash'),
@@ -485,10 +477,6 @@ describe('AuthService', () => {
             { id: 2, question: 'mock-recovery-question-2', answerHash: 'mock-recovery.answer-hash-2' },
         ];
 
-        beforeEach(() => {
-            jest.clearAllMocks();
-        });
-
         it('should throw NotFoundException if user not found with email', async () => {
             mockServiceUsersRepository.findByEmail.mockResolvedValue(undefined);
 
@@ -521,10 +509,6 @@ describe('AuthService', () => {
         const email = 'developer@example.com';
         const recoveryAnswer = 'mock-recovery-answer';
         const newPassword = 'mock-new-password';
-
-        beforeEach(() => {
-            jest.clearAllMocks();
-        });
 
         it('should throw UnauthorizedException if user is not found', async () => {
             mockServiceUsersRepository.findByEmail.mockResolvedValue(undefined);
@@ -618,10 +602,6 @@ describe('AuthService', () => {
         const currentPassword = 'mock-current-password';
         const newRecoveryQuestion = 'mock-new-recovery-question';
         const newRecoveryAnswer = 'mock-new-recovery-answer';
-
-        beforeEach(() => {
-            jest.clearAllMocks();
-        });
 
         it('should throw UnathorizedException if user is not found', async () => {
             mockServiceUsersRepository.findById.mockResolvedValue(undefined);
@@ -719,10 +699,6 @@ describe('AuthService', () => {
         const userId = 2;
         const anotherUserId = 3;
         const currentPassword = 'mock-current-password';
-
-        beforeEach(() => {
-            jest.clearAllMocks();
-        });
 
         it('should throw UnauthorizedException if user is not found', async () => {
             mockServiceUsersRepository.findById.mockResolvedValue(undefined);
