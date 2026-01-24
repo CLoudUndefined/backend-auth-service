@@ -3,12 +3,13 @@ import { CreateAppRequestDto } from './dto/create-app-request.dto';
 import { AppResponseDto } from './dto/app-response.dto';
 import { UpdateAppRequestDto } from './dto/update-app-request.dto';
 import { MessageResponseDto } from 'src/common/api/dto/message-response.dto';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtServiceAuthGuard } from 'src/auth/guards/jwt-service-auth.guard';
 import { AppsService } from '../service/apps.service';
 import { ServiceUser } from 'src/common/decorators/service-user.decorator';
 import { IsGodGuard } from 'src/auth/guards/is-god.guard';
 import { type AuthenticatedServiceUser } from 'src/auth/interfaces/authenticated-service-user.interface';
+import { AppAccessGuard } from 'src/auth/guards/app-access.guard';
 
 @ApiTags('Service (Apps Management)')
 @ApiBearerAuth('JWT-auth-service')
@@ -67,7 +68,7 @@ export class ServiceAppsController {
     }
 
     @Get(':appId')
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'Get app by ID',
         description: 'Returns details of a specific application.',
@@ -95,7 +96,7 @@ export class ServiceAppsController {
     }
 
     @Put(':appId')
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'Update application',
         description: 'Updates name or description of the application.',
@@ -136,7 +137,7 @@ export class ServiceAppsController {
     }
 
     @Delete(':appId')
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'Delete application',
         description: 'Deletes the application and all associated users/roles definitively.',
@@ -168,7 +169,7 @@ export class ServiceAppsController {
 
     @Post(':appId/regenerate')
     @HttpCode(200)
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'Regenerate application secret',
         description: 'Generates a new JWT secret for the application. ALL existing tokens will be invalidated.',
