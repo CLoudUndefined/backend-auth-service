@@ -40,7 +40,7 @@ export class ServiceAppsController {
         @ServiceUser() user: AuthenticatedServiceUser,
         @Body() createAppDto: CreateAppRequestDto,
     ): Promise<AppResponseDto> {
-        const app = await this.appsService.createByServiceUser(user.id, createAppDto.name, createAppDto.description);
+        const app = await this.appsService.create(user.id, createAppDto.name, createAppDto.description);
         return new AppResponseDto(app);
     }
 
@@ -61,7 +61,7 @@ export class ServiceAppsController {
         description: 'Unauthorized',
     })
     async findAllApps(): Promise<AppResponseDto[]> {
-        const apps = await this.appsService.findAllAppsByServiceUser();
+        const apps = await this.appsService.findAllApps();
         return apps.map((app) => {
             return new AppResponseDto(app);
         });
@@ -87,11 +87,8 @@ export class ServiceAppsController {
         description: 'Forbidden - can only view own apps or requires god-mode',
     })
     @ApiResponse({ status: 404, description: 'App not found' })
-    async findAppById(
-        @ServiceUser() user: AuthenticatedServiceUser,
-        @Param('appId', ParseIntPipe) appId: number,
-    ): Promise<AppResponseDto> {
-        const app = await this.appsService.findAppByIdByServiceUser(appId, user.id);
+    async findAppById(@Param('appId', ParseIntPipe) appId: number): Promise<AppResponseDto> {
+        const app = await this.appsService.findAppById(appId);
         return new AppResponseDto(app);
     }
 
@@ -123,16 +120,10 @@ export class ServiceAppsController {
         description: 'App not found',
     })
     async updateApp(
-        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Body() updateAppDto: UpdateAppRequestDto,
     ): Promise<AppResponseDto> {
-        const app = await this.appsService.updateByServiceUser(
-            appId,
-            user.id,
-            updateAppDto.name,
-            updateAppDto.description,
-        );
+        const app = await this.appsService.update(appId, updateAppDto.name, updateAppDto.description);
         return new AppResponseDto(app);
     }
 
@@ -159,11 +150,8 @@ export class ServiceAppsController {
         status: 404,
         description: 'App not found',
     })
-    async deleteApp(
-        @ServiceUser() user: AuthenticatedServiceUser,
-        @Param('appId', ParseIntPipe) appId: number,
-    ): Promise<MessageResponseDto> {
-        await this.appsService.deleteByServiceUser(appId, user.id);
+    async deleteApp(@Param('appId', ParseIntPipe) appId: number): Promise<MessageResponseDto> {
+        await this.appsService.delete(appId);
         return { message: 'Application deleted successfully' };
     }
 
@@ -191,11 +179,8 @@ export class ServiceAppsController {
         status: 404,
         description: 'App not found',
     })
-    async regenerateSecret(
-        @ServiceUser() user: AuthenticatedServiceUser,
-        @Param('appId', ParseIntPipe) appId: number,
-    ): Promise<MessageResponseDto> {
-        await this.appsService.regenerateSecretByServiceUser(appId, user.id);
+    async regenerateSecret(@Param('appId', ParseIntPipe) appId: number): Promise<MessageResponseDto> {
+        await this.appsService.regenerateSecret(appId);
         return { message: 'App secret regenerated successfully' };
     }
 }
