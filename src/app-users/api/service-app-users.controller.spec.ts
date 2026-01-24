@@ -168,4 +168,20 @@ describe('ServiceAppUsersController', () => {
             expect(result).toEqual({ message: 'Role added successfully' });
         });
     });
+
+    describe('removeRoleFromAppUser', () => {
+        const appId = 1;
+        const appUserId = 2;
+        const roleId = 3;
+
+        it('should successfully remove role from app user and return success message', async () => {
+            mockAppUsersService.removeRoleFromAppUser.mockResolvedValue(undefined);
+
+            const result = await controller.removeRoleFromAppUser(appId, appUserId, roleId);
+
+            expect(mockAppUsersService.removeRoleFromAppUser).toHaveBeenCalledWith(appId, appUserId, roleId);
+
+            expect(result).toEqual({ message: 'Role removed successfully' });
+        });
+    });
 });
