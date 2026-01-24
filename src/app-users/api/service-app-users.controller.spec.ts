@@ -152,4 +152,20 @@ describe('ServiceAppUsersController', () => {
             expect(result[1]).toMatchObject({ id: roles[1].id });
         });
     });
+
+    describe('addRoleToAppUser', () => {
+        const appId = 1;
+        const appUserId = 2;
+        const roleId = 3;
+
+        it('should successfully add role to app user and return success message', async () => {
+            mockAppUsersService.addRoleToAppUser.mockResolvedValue(undefined);
+
+            const result = await controller.addRoleToAppUser(appId, appUserId, roleId);
+
+            expect(mockAppUsersService.addRoleToAppUser).toHaveBeenCalledWith(appId, appUserId, roleId);
+
+            expect(result).toEqual({ message: 'Role added successfully' });
+        });
+    });
 });
