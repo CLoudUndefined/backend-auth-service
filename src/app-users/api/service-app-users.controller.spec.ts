@@ -5,6 +5,7 @@ import { JwtServiceAuthGuard } from 'src/auth/guards/jwt-service-auth.guard';
 import { AppAccessGuard } from 'src/auth/guards/app-access.guard';
 import { AppUserWithRolesResponseDto } from './dto/app-user-with-roles-response.dto';
 import { AppUserWithRolesAndPermissionsResponseDto } from './dto/app-user-with-roles-and-permissions-response.dto';
+import { AppUserResponseDto } from './dto/app-user-response.dto';
 
 describe('ServiceAppUsersController', () => {
     let controller: ServiceAppUsersController;
@@ -88,6 +89,25 @@ describe('ServiceAppUsersController', () => {
             expect(mockAppUsersService.getAppUser).toHaveBeenCalledWith(appId, appUserId);
 
             expect(result).toBeInstanceOf(AppUserWithRolesAndPermissionsResponseDto);
+            expect(result).toMatchObject({
+                id: appUser.id,
+            });
+        });
+    });
+
+    describe('updateAppUser', () => {
+        const appId = 1;
+        const email = 'new-application-user@example.com';
+        const appUser = { id: 2, email };
+
+        it('should successfully update app user email', async () => {
+            mockAppUsersService.updateAppUser.mockResolvedValue(appUser);
+
+            const result = await controller.updateAppUser(appId, appUser.id, { email });
+
+            expect(mockAppUsersService.updateAppUser).toHaveBeenCalledWith(appId, appUser.id, email);
+
+            expect(result).toBeInstanceOf(AppUserResponseDto);
             expect(result).toMatchObject({
                 id: appUser.id,
             });
