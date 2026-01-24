@@ -87,4 +87,26 @@ describe('ServiceAppRolesController', () => {
             expect(result[1]).toMatchObject({ id: roles[1].id });
         });
     });
+
+    describe('getRole', () => {
+        const appId = 1;
+        const roleId = 2;
+        const role = {
+            id: roleId,
+            permissions: [{ id: 3 }, { id: 4 }],
+        };
+
+        it('should successfully return role details', async () => {
+            mockAppRolesService.getRole.mockResolvedValue(role);
+
+            const result = await controller.getRole(appId, roleId);
+
+            expect(mockAppRolesService.getRole).toHaveBeenCalledWith(appId, roleId);
+
+            expect(result).toBeInstanceOf(AppRoleWithPermissionsResponseDto);
+            expect(result).toMatchObject({
+                id: role.id,
+            });
+        });
+    });
 });
