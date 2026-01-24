@@ -4,6 +4,7 @@ import { AppRolesService } from '../service/app-roles.service';
 import { JwtServiceAuthGuard } from 'src/auth/guards/jwt-service-auth.guard';
 import { AppAccessGuard } from 'src/auth/guards/app-access.guard';
 import { AppRoleWithPermissionsResponseDto } from './dto/app-role-with-permissions-response.dto';
+import { AppRoleResponseDto } from './dto/app-role-response.dto';
 
 describe('ServiceAppRolesController', () => {
     let controller: ServiceAppRolesController;
@@ -65,6 +66,25 @@ describe('ServiceAppRolesController', () => {
             expect(result).toMatchObject({
                 id: role.id,
             });
+        });
+    });
+
+    describe('getAllRoles', () => {
+        const appId = 1;
+        const roles = [{ id: 2 }, { id: 3 }];
+
+        it('should successfully return all roles for app', async () => {
+            mockAppRolesService.getAllRoles.mockResolvedValue(roles);
+
+            const result = await controller.getAllRoles(appId);
+
+            expect(mockAppRolesService.getAllRoles).toHaveBeenCalledWith(appId);
+
+            expect(result).toHaveLength(2);
+            expect(result[0]).toBeInstanceOf(AppRoleResponseDto);
+            expect(result[1]).toBeInstanceOf(AppRoleResponseDto);
+            expect(result[0]).toMatchObject({ id: roles[0].id });
+            expect(result[1]).toMatchObject({ id: roles[1].id });
         });
     });
 });
