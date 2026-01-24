@@ -134,8 +134,8 @@ describe('AppUsersController', () => {
         const user = { id: 1, appId: 2 };
         const appUserId = 3;
         const roles = [
-            { id: 1, permissions: [] },
-            { id: 2, permissions: [] },
+            { id: 4, permissions: [] },
+            { id: 5, permissions: [] },
         ];
 
         it('should successfully return roles assigned to app user', async () => {
