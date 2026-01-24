@@ -25,7 +25,7 @@ export class ServiceAppsController {
     })
     @ApiResponse({
         status: 201,
-        description: 'App created successfully',
+        description: 'Application created successfully',
         type: AppResponseDto,
     })
     @ApiResponse({
@@ -40,7 +40,7 @@ export class ServiceAppsController {
         @ServiceUser() user: AuthenticatedServiceUser,
         @Body() createAppDto: CreateAppRequestDto,
     ): Promise<AppResponseDto> {
-        const app = await this.appsService.create(user.id, createAppDto.name, createAppDto.description);
+        const app = await this.appsService.createApp(user.id, createAppDto.name, createAppDto.description);
         return new AppResponseDto(app);
     }
 
@@ -75,7 +75,7 @@ export class ServiceAppsController {
     })
     @ApiResponse({
         status: 200,
-        description: 'App details found',
+        description: 'Application details found',
         type: AppResponseDto,
     })
     @ApiResponse({
@@ -86,7 +86,7 @@ export class ServiceAppsController {
         status: 403,
         description: 'Forbidden - can only view own apps or requires god-mode',
     })
-    @ApiResponse({ status: 404, description: 'App not found' })
+    @ApiResponse({ status: 404, description: 'Application not found' })
     async findAppById(@Param('appId', ParseIntPipe) appId: number): Promise<AppResponseDto> {
         const app = await this.appsService.findAppById(appId);
         return new AppResponseDto(app);
@@ -100,7 +100,7 @@ export class ServiceAppsController {
     })
     @ApiResponse({
         status: 200,
-        description: 'App updated',
+        description: 'Application updated',
         type: AppResponseDto,
     })
     @ApiResponse({
@@ -117,13 +117,13 @@ export class ServiceAppsController {
     })
     @ApiResponse({
         status: 404,
-        description: 'App not found',
+        description: 'Application not found',
     })
     async updateApp(
         @Param('appId', ParseIntPipe) appId: number,
         @Body() updateAppDto: UpdateAppRequestDto,
     ): Promise<AppResponseDto> {
-        const app = await this.appsService.update(appId, updateAppDto.name, updateAppDto.description);
+        const app = await this.appsService.updateApp(appId, updateAppDto.name, updateAppDto.description);
         return new AppResponseDto(app);
     }
 
@@ -135,7 +135,7 @@ export class ServiceAppsController {
     })
     @ApiResponse({
         status: 200,
-        description: 'App deleted',
+        description: 'Application deleted',
         type: MessageResponseDto,
     })
     @ApiResponse({
@@ -148,11 +148,11 @@ export class ServiceAppsController {
     })
     @ApiResponse({
         status: 404,
-        description: 'App not found',
+        description: 'Application not found',
     })
     async deleteApp(@Param('appId', ParseIntPipe) appId: number): Promise<MessageResponseDto> {
-        await this.appsService.delete(appId);
-        return { message: 'Application deleted successfully' };
+        await this.appsService.deleteApp(appId);
+        return { message: 'Applicationication deleted successfully' };
     }
 
     @Post(':appId/regenerate')
@@ -164,7 +164,7 @@ export class ServiceAppsController {
     })
     @ApiResponse({
         status: 200,
-        description: 'App secret regenerated successfully',
+        description: 'Application secret regenerated successfully',
         type: MessageResponseDto,
     })
     @ApiResponse({
@@ -177,10 +177,10 @@ export class ServiceAppsController {
     })
     @ApiResponse({
         status: 404,
-        description: 'App not found',
+        description: 'Application not found',
     })
     async regenerateSecret(@Param('appId', ParseIntPipe) appId: number): Promise<MessageResponseDto> {
         await this.appsService.regenerateSecret(appId);
-        return { message: 'App secret regenerated successfully' };
+        return { message: 'Application secret regenerated successfully' };
     }
 }
