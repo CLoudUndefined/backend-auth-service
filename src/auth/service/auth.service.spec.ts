@@ -77,7 +77,10 @@ describe('AuthService', () => {
                 update: jest.fn().mockReturnThis(),
                 digest: jest.fn().mockReturnValue('mock-hash-hex'),
             }));
-            mockConfigService.getOrThrow.mockReturnValueOnce('mock-secret').mockReturnValueOnce('7d');
+            mockConfigService.getOrThrow
+                .mockReturnValueOnce('mock-secret')
+                .mockReturnValueOnce('7d')
+                .mockReturnValueOnce('7d');
         });
 
         it('should throw ConflictException if user with email already exists', async () => {
@@ -107,6 +110,9 @@ describe('AuthService', () => {
             );
             expect(mockServiceUsersRepository.createRecovery).not.toHaveBeenCalled();
 
+            const expiresAt = mockServiceUsersRepository.createRefreshToken.mock.calls[0][2];
+            expect(expiresAt.getTime()).toBeGreaterThan(Date.now());
+
             expect(result).toEqual({ accessToken: jwtToken, refreshToken: jwtToken });
         });
 
@@ -133,6 +139,9 @@ describe('AuthService', () => {
                 expect.not.stringMatching(recoveryAnswer),
             );
 
+            const expiresAt = mockServiceUsersRepository.createRefreshToken.mock.calls[0][2];
+            expect(expiresAt.getTime()).toBeGreaterThan(Date.now());
+
             expect(result).toEqual({ accessToken: jwtToken, refreshToken: jwtToken });
         });
     });
@@ -145,7 +154,10 @@ describe('AuthService', () => {
         const jwtToken = 'mock-jwt-token';
 
         beforeEach(async () => {
-            mockConfigService.getOrThrow.mockReturnValueOnce('mock-secret').mockReturnValueOnce('7d');
+            mockConfigService.getOrThrow
+                .mockReturnValueOnce('mock-secret')
+                .mockReturnValueOnce('7d')
+                .mockReturnValueOnce('7d');
         });
 
         it('should throw UnauthorizedException if user not found with email', async () => {
@@ -192,6 +204,9 @@ describe('AuthService', () => {
                 expect.not.stringMatching(jwtToken),
                 expect.any(Date),
             );
+
+            const expiresAt = mockServiceUsersRepository.createRefreshToken.mock.calls[0][2];
+            expect(expiresAt.getTime()).toBeGreaterThan(Date.now());
 
             expect(result).toEqual({ accessToken: jwtToken, refreshToken: jwtToken });
         });
@@ -260,7 +275,7 @@ describe('AuthService', () => {
         const recoveryId = 1;
         const userId = 2;
         const refreshToken = 'mock-refresh-token';
-        const newJwtToken = 'mpck-new-jwt-token';
+        const newJwtToken = 'mock-new-jwt-token';
 
         beforeEach(() => {
             mockCryptoCreateHash.mockImplementation(() => ({
@@ -268,7 +283,10 @@ describe('AuthService', () => {
                 digest: jest.fn().mockReturnValue('mock-token-hash'),
             }));
 
-            mockConfigService.getOrThrow.mockReturnValueOnce('mock-secret').mockReturnValueOnce('7d');
+            mockConfigService.getOrThrow
+                .mockReturnValueOnce('mock-secret')
+                .mockReturnValueOnce('7d')
+                .mockReturnValueOnce('7d');
         });
 
         it('should throw NotFoundException if refresh token not found in database', async () => {
@@ -328,6 +346,9 @@ describe('AuthService', () => {
                 expect.not.stringMatching(newJwtToken),
                 expect.any(Date),
             );
+
+            const expiresAt = mockServiceUsersRepository.createRefreshToken.mock.calls[0][2];
+            expect(expiresAt.getTime()).toBeGreaterThan(Date.now());
 
             expect(result).toEqual({
                 accessToken: newJwtToken,
