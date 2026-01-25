@@ -11,12 +11,12 @@ import { UpdateRecoveryRequestDto } from 'src/common/api/dto/auth/update-recover
 import { ListRecoveryResponseDto } from 'src/common/api/dto/auth/list-recovery-response.dto';
 import { AuthService } from '../service/auth.service';
 import { ServiceUser } from 'src/common/decorators/service-user.decorator';
-import { ServiceUserModel } from 'src/database/models/service-user.model';
 import { JwtServiceAuthGuard } from '../guards/jwt-service-auth.guard';
 import { RemoveRecoveryRequestDto } from 'src/common/api/dto/auth/remove-recovery-request.dto';
 import { JwtServiceRefreshGuard } from '../guards/jwt-service-refresh.guard';
 import { BearerToken } from 'src/common/decorators/bearer-token.decorator';
 import { TokensResponseDto } from 'src/common/api/dto/auth/tokens-response.dto';
+import { type AuthenticatedServiceUser } from '../interfaces/authenticated-service-user.interface';
 
 @ApiTags('Service (User Auth)')
 @Controller('auth')
@@ -95,7 +95,7 @@ export class AuthController {
         description: 'Unauthorized',
     })
     async changePassword(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Body() changePasswordDto: ChangePasswordRequestDto,
     ): Promise<MessageResponseDto> {
         await this.authService.changePassword(user.id, changePasswordDto.oldPassword, changePasswordDto.newPassword);
@@ -149,7 +149,7 @@ export class AuthController {
         description: 'Unauthorized',
     })
     async addRecovery(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Body() addRecoveryDto: AddRecoveryRequestDto,
     ): Promise<MessageResponseDto> {
         await this.authService.addRecovery(user.id, addRecoveryDto.recoveryQuestion, addRecoveryDto.recoveryAnswer);
@@ -173,7 +173,7 @@ export class AuthController {
         status: 401,
         description: 'Unauthorized',
     })
-    async listRecovery(@ServiceUser() user: ServiceUserModel): Promise<ListRecoveryResponseDto> {
+    async listRecovery(@ServiceUser() user: AuthenticatedServiceUser): Promise<ListRecoveryResponseDto> {
         return this.authService.listRecovery(user.id);
     }
 
@@ -255,7 +255,7 @@ export class AuthController {
         description: 'Recovery question not found',
     })
     async updateRecovery(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('recoveryId', ParseIntPipe) recoveryId: number,
         @Body() updateRecoveryDto: UpdateRecoveryRequestDto,
     ): Promise<MessageResponseDto> {
@@ -295,7 +295,7 @@ export class AuthController {
         description: 'Recovery question not found',
     })
     async removeRecovery(
-        @ServiceUser() user: ServiceUserModel,
+        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('recoveryId', ParseIntPipe) recoveryId: number,
         @Body() removeRecoveryDto: RemoveRecoveryRequestDto,
     ): Promise<MessageResponseDto> {
