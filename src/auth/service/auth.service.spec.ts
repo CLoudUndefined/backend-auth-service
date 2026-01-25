@@ -70,7 +70,8 @@ describe('AuthService', () => {
         const plainPassword = 'mock-plain-password';
         const recoveryQuestion = 'mock-recovery-question';
         const recoveryAnswer = 'mock-recovery-answer';
-        const jwtToken = 'mock-jwt-token';
+        const jwtAccessToken = 'mock-access-token';
+        const jwtRefreshToken = 'mock-refresh-token';
 
         beforeEach(async () => {
             mockCryptoCreateHash.mockImplementation(() => ({
@@ -94,13 +95,13 @@ describe('AuthService', () => {
         it('should successfully register user without recovery question and answer', async () => {
             mockServiceUsersRepository.existsByEmail.mockResolvedValue(false);
             mockServiceUsersRepository.create.mockResolvedValue({ id: userId });
-            mockJwtService.sign.mockReturnValue(jwtToken);
+            mockJwtService.sign.mockReturnValueOnce(jwtAccessToken).mockReturnValueOnce(jwtRefreshToken);
 
             const result = await service.register(email, plainPassword);
 
             expect(mockServiceUsersRepository.createRefreshToken).toHaveBeenCalledWith(
                 userId,
-                expect.not.stringMatching(jwtToken),
+                expect.not.stringMatching(jwtRefreshToken),
                 expect.any(Date),
             );
             expect(mockServiceUsersRepository.create).toHaveBeenCalledWith(
@@ -113,19 +114,19 @@ describe('AuthService', () => {
             const expiresAt = mockServiceUsersRepository.createRefreshToken.mock.calls[0][2];
             expect(expiresAt.getTime()).toBeGreaterThan(Date.now());
 
-            expect(result).toEqual({ accessToken: jwtToken, refreshToken: jwtToken });
+            expect(result).toEqual({ accessToken: jwtAccessToken, refreshToken: jwtRefreshToken });
         });
 
         it('should successfully register user with recovery question and answer', async () => {
             mockServiceUsersRepository.existsByEmail.mockResolvedValue(false);
             mockServiceUsersRepository.create.mockResolvedValue({ id: userId });
-            mockJwtService.sign.mockReturnValue(jwtToken);
+            mockJwtService.sign.mockReturnValueOnce(jwtAccessToken).mockReturnValueOnce(jwtRefreshToken);
 
             const result = await service.register(email, plainPassword, recoveryQuestion, recoveryAnswer);
 
             expect(mockServiceUsersRepository.createRefreshToken).toHaveBeenCalledWith(
                 userId,
-                expect.not.stringMatching(jwtToken),
+                expect.not.stringMatching(jwtRefreshToken),
                 expect.any(Date),
             );
             expect(mockServiceUsersRepository.create).toHaveBeenCalledWith(
@@ -142,7 +143,7 @@ describe('AuthService', () => {
             const expiresAt = mockServiceUsersRepository.createRefreshToken.mock.calls[0][2];
             expect(expiresAt.getTime()).toBeGreaterThan(Date.now());
 
-            expect(result).toEqual({ accessToken: jwtToken, refreshToken: jwtToken });
+            expect(result).toEqual({ accessToken: jwtAccessToken, refreshToken: jwtRefreshToken });
         });
     });
 
@@ -151,7 +152,8 @@ describe('AuthService', () => {
         const email = 'develop@example.com';
         const plainPassword = 'mock-plain-password';
         const passwordHash = 'mock-password-hash';
-        const jwtToken = 'mock-jwt-token';
+        const jwtAccessToken = 'mock-access-token';
+        const jwtRefreshToken = 'mock-refresh-token';
 
         beforeEach(async () => {
             mockConfigService.getOrThrow
@@ -195,20 +197,20 @@ describe('AuthService', () => {
                 passwordHash: passwordHash,
             });
             mockBcrypt.compare.mockResolvedValue(true);
-            mockJwtService.sign.mockReturnValue(jwtToken);
+            mockJwtService.sign.mockReturnValueOnce(jwtAccessToken).mockReturnValueOnce(jwtRefreshToken);
 
             const result = await service.login(email, plainPassword);
 
             expect(mockServiceUsersRepository.createRefreshToken).toHaveBeenCalledWith(
                 userId,
-                expect.not.stringMatching(jwtToken),
+                expect.not.stringMatching(jwtRefreshToken),
                 expect.any(Date),
             );
 
             const expiresAt = mockServiceUsersRepository.createRefreshToken.mock.calls[0][2];
             expect(expiresAt.getTime()).toBeGreaterThan(Date.now());
 
-            expect(result).toEqual({ accessToken: jwtToken, refreshToken: jwtToken });
+            expect(result).toEqual({ accessToken: jwtAccessToken, refreshToken: jwtRefreshToken });
         });
     });
 
