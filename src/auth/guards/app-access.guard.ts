@@ -20,7 +20,10 @@ export class AppAccessGuard implements CanActivate {
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest<ServiceRequest>();
         const user = request.user;
-        const appId = parseInt(request.params.appId, 10);
+        const appId = parseInt(
+            Array.isArray(request.params.appId) ? request.params.appId[0] : request.params.appId,
+            10,
+        );
 
         if (Number.isNaN(appId)) {
             throw new NotFoundException('Invalid application id');
