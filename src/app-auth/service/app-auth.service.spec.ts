@@ -14,8 +14,13 @@ import {
     NotFoundException,
     UnauthorizedException,
 } from '@nestjs/common';
+import { ApplicationUserModel } from 'src/database/models/application-user.model';
+import { ApplicationUserRecoveryModel } from 'src/database/models/application-user-recovery.model';
 
-jest.mock('bcrypt');
+jest.mock('bcrypt', () => ({
+    hash: jest.fn(),
+    compare: jest.fn(),
+}));
 jest.mock('crypto', () => ({
     createHash: jest.fn(),
 }));
@@ -28,13 +33,19 @@ describe('AppAuthService', () => {
         findByEmailInApp: jest.fn(),
         exists: jest.fn(),
         create: jest.fn(),
-        update: jest.fn(),
+        update: jest.fn<
+            Promise<void>,
+            [number, Partial<Pick<ApplicationUserModel, 'email' | 'passwordHash' | 'isBanned'>>]
+        >(),
         createRecovery: jest.fn(),
         findRecoveriesByUserId: jest.fn(),
         findRecoveryById: jest.fn(),
-        updateRecovery: jest.fn(),
+        updateRecovery: jest.fn<
+            Promise<ApplicationUserRecoveryModel | undefined>,
+            [number, Partial<Pick<ApplicationUserRecoveryModel, 'question' | 'answerHash'>>]
+        >(),
         deleteRecovery: jest.fn(),
-        createRefreshToken: jest.fn(),
+        createRefreshToken: jest.fn<Promise<void>, [number, string, Date]>(),
         findRefreshTokenByHash: jest.fn(),
         deleteRefreshToken: jest.fn(),
         deleteAllUserRefreshTokens: jest.fn(),
@@ -51,8 +62,13 @@ describe('AppAuthService', () => {
     const mockJwtService = {
         sign: jest.fn(),
     };
-    const mockBcrypt = jest.mocked(bcrypt);
+    const mockBcryptCompare = bcrypt.compare as jest.Mock;
+    const mockBcryptHash = bcrypt.hash as jest.Mock;
     const mockCryptoCreateHash = jest.mocked(crypto.createHash);
+    const mockHash: Partial<crypto.Hash> = {
+        update: jest.fn().mockReturnThis(),
+        digest: jest.fn().mockReturnValue('mock-hash-hex'),
+    };
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -68,6 +84,7 @@ describe('AppAuthService', () => {
 
         service = module.get<AppAuthService>(AppAuthService);
 
+        mockBcryptHash.mockResolvedValue('mock-hash-value');
         jest.clearAllMocks();
     });
 
@@ -87,11 +104,8 @@ describe('AppAuthService', () => {
         const encryptedSecret = 'mock-encrypted-secret';
         const decryptedSecret = 'mock-decrypted-secret';
 
-        beforeEach(async () => {
-            mockCryptoCreateHash.mockImplementation(() => ({
-                update: jest.fn().mockReturnThis(),
-                digest: jest.fn().mockReturnValue('mock-hash-hex'),
-            }));
+        beforeEach(() => {
+            mockCryptoCreateHash.mockReturnValue(mockHash as crypto.Hash);
             mockConfigService.getOrThrow.mockReturnValueOnce('mock-secret').mockReturnValueOnce('7d');
         });
 
@@ -137,7 +151,7 @@ describe('AppAuthService', () => {
             );
             expect(mockAppUsersRepository.createRecovery).not.toHaveBeenCalled();
 
-            const expiresAt = mockAppUsersRepository.createRefreshToken.mock.calls[0][2];
+            const [, , expiresAt]: [number, string, Date] = mockAppUsersRepository.createRefreshToken.mock.calls[0];
             expect(expiresAt.getTime()).toBeGreaterThan(Date.now());
 
             expect(result).toEqual({ accessToken: jwtAccessToken, refreshToken: jwtRefreshToken });
@@ -186,7 +200,7 @@ describe('AppAuthService', () => {
         const encryptedSecret = 'mock-encrypted-secret';
         const decryptedSecret = 'mock-decrypted-secret';
 
-        beforeEach(async () => {
+        beforeEach(() => {
             mockConfigService.getOrThrow.mockReturnValueOnce('mock-secret').mockReturnValueOnce('7d');
         });
 
@@ -224,7 +238,7 @@ describe('AppAuthService', () => {
                 passwordHash: passwordHash,
             });
 
-            mockBcrypt.compare.mockResolvedValue(false);
+            mockBcryptCompare.mockResolvedValue(false);
 
             await expect(service.login(appId, email, plainPassword)).rejects.toThrow(UnauthorizedException);
         });
@@ -236,7 +250,7 @@ describe('AppAuthService', () => {
                 isBanned: false,
                 passwordHash: passwordHash,
             });
-            mockBcrypt.compare.mockResolvedValue(true);
+            mockBcryptCompare.mockResolvedValue(true);
             mockJwtService.sign.mockReturnValueOnce(jwtAccessToken).mockReturnValueOnce(jwtRefreshToken);
             mockEncryptionService.decrypt.mockReturnValue(decryptedSecret);
 
@@ -305,7 +319,7 @@ describe('AppAuthService', () => {
                 id: userId,
                 passwordHash: 'mock-password-hash',
             });
-            mockBcrypt.compare.mockResolvedValue(false);
+            mockBcryptCompare.mockResolvedValue(false);
 
             await expect(service.changePassword(appId, userId, oldPassword, newPassword)).rejects.toThrow(
                 UnauthorizedException,
@@ -321,13 +335,16 @@ describe('AppAuthService', () => {
                 id: userId,
                 passwordHash: 'mock-old-password-hash',
             });
-            mockBcrypt.compare.mockResolvedValue(true);
+            mockBcryptCompare.mockResolvedValue(true);
 
             await service.changePassword(appId, userId, oldPassword, newPassword);
 
-            expect(mockAppUsersRepository.update).toHaveBeenCalledWith(userId, {
-                passwordHash: expect.not.stringMatching(newPassword),
-            });
+            const updateCall = mockAppUsersRepository.update.mock.calls[0];
+            expect(updateCall[0]).toBe(userId);
+            expect(updateCall[1].passwordHash).toBeDefined();
+            expect(updateCall[1].passwordHash).not.toBe(newPassword);
+            expect(typeof updateCall[1].passwordHash).toBe('string');
+
             expect(mockAppUsersRepository.deleteAllUserRefreshTokens).toHaveBeenCalledWith(userId);
         });
     });
@@ -342,11 +359,7 @@ describe('AppAuthService', () => {
         const decryptedSecret = 'mock-decrypted-secret';
 
         beforeEach(() => {
-            mockCryptoCreateHash.mockImplementation(() => ({
-                update: jest.fn().mockReturnThis(),
-                digest: jest.fn().mockReturnValue('mock-token-hash'),
-            }));
-
+            mockCryptoCreateHash.mockReturnValue(mockHash as crypto.Hash);
             mockConfigService.getOrThrow.mockReturnValueOnce('mock-secret').mockReturnValueOnce('7d');
         });
 
@@ -629,7 +642,7 @@ describe('AppAuthService', () => {
                 question: recoveryQuestion,
                 answerHash: recoveryAnswerHash,
             });
-            mockBcrypt.compare.mockResolvedValue(false);
+            mockBcryptCompare.mockResolvedValue(false);
 
             await expect(
                 service.resetPasswordByRecovery(appId, recoveryId, email, recoveryAnswer, newPassword),
@@ -648,13 +661,16 @@ describe('AppAuthService', () => {
                 question: recoveryQuestion,
                 answerHash: recoveryAnswerHash,
             });
-            mockBcrypt.compare.mockResolvedValue(true);
+            mockBcryptCompare.mockResolvedValue(true);
 
             await service.resetPasswordByRecovery(appId, recoveryId, email, recoveryAnswer, newPassword);
 
-            expect(mockAppUsersRepository.update).toHaveBeenCalledWith(userId, {
-                passwordHash: expect.not.stringMatching(newPassword),
-            });
+            const updateCall = mockAppUsersRepository.update.mock.calls[0];
+            expect(updateCall[0]).toBe(userId);
+            expect(updateCall[1].passwordHash).toBeDefined();
+            expect(updateCall[1].passwordHash).not.toBe(newPassword);
+            expect(typeof updateCall[1].passwordHash).toBe('string');
+
             expect(mockAppUsersRepository.deleteAllUserRefreshTokens).toHaveBeenCalledWith(userId);
         });
     });
@@ -767,7 +783,7 @@ describe('AppAuthService', () => {
                 question: recoveryQuestion,
                 answerHash: recoveryAnswerHash,
             });
-            mockBcrypt.compare.mockResolvedValue(false);
+            mockBcryptCompare.mockResolvedValue(false);
 
             await expect(
                 service.updateRecovery(
@@ -795,7 +811,7 @@ describe('AppAuthService', () => {
                 question: recoveryQuestion,
                 answerHash: recoveryAnswerHash,
             });
-            mockBcrypt.compare.mockResolvedValue(true);
+            mockBcryptCompare.mockResolvedValue(true);
 
             await service.updateRecovery(
                 appId,
@@ -806,10 +822,12 @@ describe('AppAuthService', () => {
                 newRecoveryAnswer,
             );
 
-            expect(mockAppUsersRepository.updateRecovery).toHaveBeenCalledWith(recoveryId, {
-                question: newRecoveryQuestion,
-                answerHash: expect.not.stringMatching(newRecoveryAnswer),
-            });
+            const updateRecoveryCall = mockAppUsersRepository.updateRecovery.mock.calls[0];
+            expect(updateRecoveryCall[0]).toBe(recoveryId);
+            expect(updateRecoveryCall[1].question).toBe(newRecoveryQuestion);
+            expect(updateRecoveryCall[1].answerHash).toBeDefined();
+            expect(updateRecoveryCall[1].answerHash).not.toBe(newRecoveryAnswer);
+            expect(typeof updateRecoveryCall[1].answerHash).toBe('string');
         });
     });
 
@@ -888,7 +906,7 @@ describe('AppAuthService', () => {
                 question: recoveryQuestion,
                 answerHash: recoveryAnswerHash,
             });
-            mockBcrypt.compare.mockResolvedValue(false);
+            mockBcryptCompare.mockResolvedValue(false);
 
             await expect(service.removeRecovery(appId, userId, recoveryId, currentPassword)).rejects.toThrow(
                 UnauthorizedException,
@@ -906,7 +924,7 @@ describe('AppAuthService', () => {
                 question: recoveryQuestion,
                 answerHash: recoveryAnswerHash,
             });
-            mockBcrypt.compare.mockResolvedValue(true);
+            mockBcryptCompare.mockResolvedValue(true);
 
             await service.removeRecovery(appId, userId, recoveryId, currentPassword);
 
