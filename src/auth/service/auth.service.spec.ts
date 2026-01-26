@@ -12,6 +12,8 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+import { ServiceUserModel } from 'src/database/models/service-user.model';
+import { ServiceUserRecoveryModel } from 'src/database/models/service-user-recovery.model';
 
 jest.mock('bcrypt');
 jest.mock('crypto', () => ({
@@ -24,15 +26,21 @@ describe('AuthService', () => {
         existsByEmail: jest.fn(),
         create: jest.fn(),
         createRecovery: jest.fn(),
-        createRefreshToken: jest.fn(),
+        createRefreshToken: jest.fn<Promise<void>, [number, string, Date]>(),
         findByEmail: jest.fn(),
         findById: jest.fn(),
-        update: jest.fn(),
+        update: jest.fn<
+            Promise<void>,
+            [number, Partial<Pick<ServiceUserModel, 'email' | 'isGod' | 'passwordHash' | 'isBanned'>>]
+        >(),
         deleteAllUserRefreshTokens: jest.fn(),
         findRefreshTokenByHash: jest.fn(),
         deleteRefreshToken: jest.fn(),
         findRecoveriesByUserId: jest.fn(),
-        updateRecovery: jest.fn(),
+        updateRecovery: jest.fn<
+            Promise<ServiceUserRecoveryModel | undefined>,
+            [number, Partial<Pick<ServiceUserRecoveryModel, 'question' | 'answerHash'>>]
+        >(),
         findRecoveryById: jest.fn(),
         deleteRecovery: jest.fn(),
     };
@@ -42,8 +50,13 @@ describe('AuthService', () => {
     const mockConfigService = {
         getOrThrow: jest.fn(),
     };
-    const mockBcrypt = jest.mocked(bcrypt);
+    const mockBcryptCompare = bcrypt.compare as jest.Mock;
+    const mockBcryptHash = bcrypt.hash as jest.Mock;
     const mockCryptoCreateHash = jest.mocked(crypto.createHash);
+    const mockHash: Partial<crypto.Hash> = {
+        update: jest.fn().mockReturnThis(),
+        digest: jest.fn().mockReturnValue('mock-hash-hex'),
+    };
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -57,6 +70,7 @@ describe('AuthService', () => {
 
         service = module.get<AuthService>(AuthService);
 
+        mockBcryptHash.mockResolvedValue('mock-hash-value');
         jest.clearAllMocks();
     });
 
@@ -73,11 +87,8 @@ describe('AuthService', () => {
         const jwtAccessToken = 'mock-access-token';
         const jwtRefreshToken = 'mock-refresh-token';
 
-        beforeEach(async () => {
-            mockCryptoCreateHash.mockImplementation(() => ({
-                update: jest.fn().mockReturnThis(),
-                digest: jest.fn().mockReturnValue('mock-hash-hex'),
-            }));
+        beforeEach(() => {
+            mockCryptoCreateHash.mockReturnValue(mockHash as crypto.Hash);
             mockConfigService.getOrThrow
                 .mockReturnValueOnce('mock-secret')
                 .mockReturnValueOnce('7d')
@@ -155,7 +166,7 @@ describe('AuthService', () => {
         const jwtAccessToken = 'mock-access-token';
         const jwtRefreshToken = 'mock-refresh-token';
 
-        beforeEach(async () => {
+        beforeEach(() => {
             mockConfigService.getOrThrow
                 .mockReturnValueOnce('mock-secret')
                 .mockReturnValueOnce('7d')
@@ -185,7 +196,7 @@ describe('AuthService', () => {
                 passwordHash: passwordHash,
             });
 
-            mockBcrypt.compare.mockResolvedValue(false);
+            mockBcryptCompare.mockResolvedValue(false);
 
             await expect(service.login(email, plainPassword)).rejects.toThrow(UnauthorizedException);
         });
@@ -196,7 +207,7 @@ describe('AuthService', () => {
                 isBanned: false,
                 passwordHash: passwordHash,
             });
-            mockBcrypt.compare.mockResolvedValue(true);
+            mockBcryptCompare.mockResolvedValue(true);
             mockJwtService.sign.mockReturnValueOnce(jwtAccessToken).mockReturnValueOnce(jwtRefreshToken);
 
             const result = await service.login(email, plainPassword);
@@ -247,7 +258,7 @@ describe('AuthService', () => {
                 id: userId,
                 passwordHash: 'mock-password-hash',
             });
-            mockBcrypt.compare.mockResolvedValue(false);
+            mockBcryptCompare.mockResolvedValue(false);
 
             await expect(service.changePassword(userId, oldPassword, newPassword)).rejects.toThrow(
                 UnauthorizedException,
@@ -262,13 +273,16 @@ describe('AuthService', () => {
                 id: userId,
                 passwordHash: 'mock-old-password-hash',
             });
-            mockBcrypt.compare.mockResolvedValue(true);
+            mockBcryptCompare.mockResolvedValue(true);
 
             await service.changePassword(userId, oldPassword, newPassword);
 
-            expect(mockServiceUsersRepository.update).toHaveBeenCalledWith(userId, {
-                passwordHash: expect.not.stringMatching(newPassword),
-            });
+            const updateCall = mockServiceUsersRepository.update.mock.calls[0];
+            expect(updateCall[0]).toBe(userId);
+            expect(updateCall[1].passwordHash).toBeDefined();
+            expect(updateCall[1].passwordHash).not.toBe(newPassword);
+            expect(typeof updateCall[1].passwordHash).toBe('string');
+
             expect(mockServiceUsersRepository.deleteAllUserRefreshTokens).toHaveBeenCalledWith(userId);
         });
     });
@@ -280,11 +294,7 @@ describe('AuthService', () => {
         const newJwtToken = 'mock-new-jwt-token';
 
         beforeEach(() => {
-            mockCryptoCreateHash.mockImplementation(() => ({
-                update: jest.fn().mockReturnThis(),
-                digest: jest.fn().mockReturnValue('mock-token-hash'),
-            }));
-
+            mockCryptoCreateHash.mockReturnValue(mockHash as crypto.Hash);
             mockConfigService.getOrThrow
                 .mockReturnValueOnce('mock-secret')
                 .mockReturnValueOnce('7d')
@@ -489,7 +499,7 @@ describe('AuthService', () => {
                 question: recoveryQuestion,
                 answerHash: recoveryAnswerHash,
             });
-            mockBcrypt.compare.mockResolvedValue(false);
+            mockBcryptCompare.mockResolvedValue(false);
 
             await expect(
                 service.resetPasswordByRecovery(recoveryId, email, recoveryAnswer, newPassword),
@@ -507,13 +517,16 @@ describe('AuthService', () => {
                 question: recoveryQuestion,
                 answerHash: recoveryAnswerHash,
             });
-            mockBcrypt.compare.mockResolvedValue(true);
+            mockBcryptCompare.mockResolvedValue(true);
 
             await service.resetPasswordByRecovery(recoveryId, email, recoveryAnswer, newPassword);
 
-            expect(mockServiceUsersRepository.update).toHaveBeenCalledWith(userId, {
-                passwordHash: expect.not.stringMatching(newPassword),
-            });
+            const updateCall = mockServiceUsersRepository.update.mock.calls[0];
+            expect(updateCall[0]).toBe(userId);
+            expect(updateCall[1].passwordHash).toBeDefined();
+            expect(updateCall[1].passwordHash).not.toBe(newPassword);
+            expect(typeof updateCall[1].passwordHash).toBe('string');
+
             expect(mockServiceUsersRepository.deleteAllUserRefreshTokens).toHaveBeenCalledWith(userId);
         });
     });
@@ -583,7 +596,7 @@ describe('AuthService', () => {
                 question: recoveryQuestion,
                 answerHash: recoveryAnswerHash,
             });
-            mockBcrypt.compare.mockResolvedValue(false);
+            mockBcryptCompare.mockResolvedValue(false);
 
             await expect(
                 service.updateRecovery(userId, recoveryId, currentPassword, newRecoveryQuestion, newRecoveryAnswer),
@@ -603,14 +616,16 @@ describe('AuthService', () => {
                 question: recoveryQuestion,
                 answerHash: recoveryAnswerHash,
             });
-            mockBcrypt.compare.mockResolvedValue(true);
+            mockBcryptCompare.mockResolvedValue(true);
 
             await service.updateRecovery(userId, recoveryId, currentPassword, newRecoveryQuestion, newRecoveryAnswer);
 
-            expect(mockServiceUsersRepository.updateRecovery).toHaveBeenCalledWith(recoveryId, {
-                question: newRecoveryQuestion,
-                answerHash: expect.not.stringMatching(newRecoveryAnswer),
-            });
+            const updateRecoveryCall = mockServiceUsersRepository.updateRecovery.mock.calls[0];
+            expect(updateRecoveryCall[0]).toBe(recoveryId);
+            expect(updateRecoveryCall[1].question).toBe(newRecoveryQuestion);
+            expect(updateRecoveryCall[1].answerHash).toBeDefined();
+            expect(updateRecoveryCall[1].answerHash).not.toBe(newRecoveryAnswer);
+            expect(typeof updateRecoveryCall[1].answerHash).toBe('string');
         });
     });
 
@@ -675,7 +690,7 @@ describe('AuthService', () => {
                 question: recoveryQuestion,
                 answerHash: recoveryAnswerHash,
             });
-            mockBcrypt.compare.mockResolvedValue(false);
+            mockBcryptCompare.mockResolvedValue(false);
 
             await expect(service.removeRecovery(userId, recoveryId, currentPassword)).rejects.toThrow(
                 UnauthorizedException,
@@ -692,7 +707,7 @@ describe('AuthService', () => {
                 question: recoveryQuestion,
                 answerHash: recoveryAnswerHash,
             });
-            mockBcrypt.compare.mockResolvedValue(true);
+            mockBcryptCompare.mockResolvedValue(true);
 
             await service.removeRecovery(userId, recoveryId, currentPassword);
 
