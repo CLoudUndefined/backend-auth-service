@@ -1,0 +1,11 @@
+type AppPermission {
+    id: Int!
+    name: String!
+    description: String
+    createdAt: String!
+}
+
+type Query {
+    permissions: [AppPermission!]!
+    permission(id: ID!): AppPermission
+}
