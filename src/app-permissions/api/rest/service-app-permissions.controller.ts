@@ -2,7 +2,7 @@ import { Controller, Get, Param, ParseIntPipe, UseGuards } from '@nestjs/common'
 import { PermissionResponseDto } from './dto/permission-response.dto';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtServiceAuthGuard } from 'src/auth/guards/jwt-service-auth.guard';
-import { AppPermissionsService } from '../service/app-permissions.service';
+import { AppPermissionsService } from '../../service/app-permissions.service';
 
 @ApiTags('Service (App Role Permission)')
 @ApiBearerAuth('JWT-auth-service')
