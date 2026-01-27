@@ -1,7 +1,6 @@
 import { Args, Query, Resolver } from '@nestjs/graphql';
-import { AppPermissionsService } from '../service/app-permissions.service';
-import { ParseIntPipe, UseGuards } from '@nestjs/common';
-import { JwtAppAuthGuard } from 'src/app-auth/guards/jwt-app-auth.guard';
+import { AppPermissionsService } from '../../service/app-permissions.service';
+import { UseGuards } from '@nestjs/common';
 import { GqlJwtAppAuthGuard } from 'src/app-auth/guards/gql-jwt-app-auth.guard';
 
 @Resolver('AppPermission')
@@ -22,7 +21,7 @@ export class AppPermissionsResolver {
 
     @Query('permission')
     @UseGuards(GqlJwtAppAuthGuard)
-    async getPermission(@Args('id', ParseIntPipe) id: number) {
+    async getPermission(@Args('id') id: number) {
         const permission = await this.appPermissionsService.getPermission(id);
         return {
             id: permission.id,
