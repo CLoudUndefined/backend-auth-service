@@ -1,0 +1,31 @@
+type AppRole {
+    id: Int!
+    name: String!
+    description: String
+    permissions: [AppPermission!]!
+    createdAt: String!
+    updatedAt: String!
+}
+
+input CreateAppRoleInput {
+    name: String!
+    description: String
+    permissionIds: [Int!]
+}
+
+input UpdateAppRoleInput {
+    name: String
+    description: String
+    permissionIds: [Int!]
+}
+
+type Query {
+    appRoles: [AppRole!]!
+    appRole(id: Int!): AppRole!
+}
+
+type Mutation {
+    createAppRole(input: CreateAppRoleInput!): AppRole!
+    updateAppRole(id: Int!, input: UpdateAppRoleInput!): AppRole!
+    deleteAppRole(id: Int!): Boolean!
+}
