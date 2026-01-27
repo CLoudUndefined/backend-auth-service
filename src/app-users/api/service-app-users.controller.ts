@@ -8,7 +8,7 @@ import { JwtServiceAuthGuard } from 'src/auth/guards/jwt-service-auth.guard';
 import { AppUsersService } from '../service/app-users.service';
 import { AppUserWithRolesResponseDto } from './dto/app-user-with-roles-response.dto';
 import { AppUserWithRolesAndPermissionsResponseDto } from './dto/app-user-with-roles-and-permissions-response.dto';
-import { AppRoleWithPermissionsResponseDto } from 'src/app-roles/api/dto/app-role-with-permissions-response.dto';
+import { AppRoleWithPermissionsResponseDto } from 'src/app-roles/api/rest/dto/app-role-with-permissions-response.dto';
 import { AppAccessGuard } from 'src/auth/guards/app-access.guard';
 
 @ApiTags('Service (App Users)')

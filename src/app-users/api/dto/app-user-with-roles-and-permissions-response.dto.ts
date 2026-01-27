@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AppRoleResponseDto } from 'src/app-roles/api/dto/app-role-response.dto';
-import { AppRoleWithPermissionsResponseDto } from 'src/app-roles/api/dto/app-role-with-permissions-response.dto';
+import { AppRoleResponseDto } from 'src/app-roles/api/rest/dto/app-role-response.dto';
+import { AppRoleWithPermissionsResponseDto } from 'src/app-roles/api/rest/dto/app-role-with-permissions-response.dto';
 import { ApplicationUserWithRolesAndPermissionsModel } from 'src/types/application-user.types';
 
 export class AppUserWithRolesAndPermissionsResponseDto {

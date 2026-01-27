@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AppRoleResponseDto } from 'src/app-roles/api/dto/app-role-response.dto';
+import { AppRoleResponseDto } from 'src/app-roles/api/rest/dto/app-role-response.dto';
 import { ApplicationUserWithRolesModel } from 'src/types/application-user.types';
 
 export class AppUserWithRolesResponseDto {

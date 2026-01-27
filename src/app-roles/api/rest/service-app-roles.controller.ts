@@ -4,7 +4,7 @@ import { CreateAppRoleRequestDto } from './dto/create-app-role-request.dto';
 import { UpdateAppRoleRequestDto } from './dto/update-app-role-request.dto';
 import { MessageResponseDto } from 'src/common/api/dto/message-response.dto';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
-import { AppRolesService } from '../service/app-roles.service';
+import { AppRolesService } from '../../service/app-roles.service';
 import { JwtServiceAuthGuard } from 'src/auth/guards/jwt-service-auth.guard';
 import { AppRoleWithPermissionsResponseDto } from './dto/app-role-with-permissions-response.dto';
 import { AppAccessGuard } from 'src/auth/guards/app-access.guard';

@@ -12,7 +12,7 @@ import { type AuthenticatedAppUser } from 'src/app-auth/interfaces/authenticated
 import { AppUserWithRolesResponseDto } from './dto/app-user-with-roles-response.dto';
 import { AppUsersService } from '../service/app-users.service';
 import { AppUserWithRolesAndPermissionsResponseDto } from './dto/app-user-with-roles-and-permissions-response.dto';
-import { AppRoleWithPermissionsResponseDto } from 'src/app-roles/api/dto/app-role-with-permissions-response.dto';
+import { AppRoleWithPermissionsResponseDto } from 'src/app-roles/api/rest/dto/app-role-with-permissions-response.dto';
 import { AppPermission } from 'src/app-auth/enums/app-permissions.enum';
 
 @ApiTags('App (Users)')
