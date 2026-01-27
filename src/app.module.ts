@@ -10,6 +10,9 @@ import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { EncryptionModule } from './common/encryption/encryption.module';
 import * as Joi from 'joi';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { join } from 'path';
 
 @Module({
     imports: [
@@ -28,6 +31,14 @@ import * as Joi from 'joi';
                 JWT_REFRESH_TOKEN_EXPIRES_IN: Joi.string().required(),
                 APP_ENCRYPTION_KEY: Joi.string().length(64).hex().required(),
             }),
+        }),
+        GraphQLModule.forRoot<ApolloDriverConfig>({
+            driver: ApolloDriver,
+            typePaths: ['./src/**/*.gql'],
+            definitions: {
+                path: join(process.cwd(), 'src/graphql.ts'),
+                outputAs: 'class',
+            },
         }),
         ServiceUsersModule,
         AuthModule,
