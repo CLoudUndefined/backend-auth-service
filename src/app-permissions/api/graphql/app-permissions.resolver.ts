@@ -2,6 +2,7 @@ import { Args, Query, Resolver } from '@nestjs/graphql';
 import { AppPermissionsService } from '../../service/app-permissions.service';
 import { UseGuards } from '@nestjs/common';
 import { GqlJwtAppAuthGuard } from 'src/app-auth/guards/gql-jwt-app-auth.guard';
+import { AppPermission } from 'src/graphql';
 
 @Resolver('AppPermission')
 export class AppPermissionsResolver {
@@ -9,7 +10,7 @@ export class AppPermissionsResolver {
 
     @Query('permissions')
     @UseGuards(GqlJwtAppAuthGuard)
-    async getPermissions() {
+    async getPermissions(): Promise<AppPermission[]> {
         const permissions = await this.appPermissionsService.getAllPermissions();
         return permissions.map((permission) => ({
             id: permission.id,
@@ -21,7 +22,7 @@ export class AppPermissionsResolver {
 
     @Query('permission')
     @UseGuards(GqlJwtAppAuthGuard)
-    async getPermission(@Args('id') id: number) {
+    async getPermission(@Args('id') id: number): Promise<AppPermission> {
         const permission = await this.appPermissionsService.getPermission(id);
         return {
             id: permission.id,
