@@ -34,10 +34,10 @@ export class AppsController {
     })
     @ApiResponse({
         status: 404,
-        description: 'App not found',
+        description: 'Application not found',
     })
     async getApp(@AppUser() user: AuthenticatedAppUser): Promise<AppResponseDto> {
-        const app = await this.appsService.findAppByIdByAppUser(user.appId, user.id);
+        const app = await this.appsService.findAppById(user.appId);
         return new AppResponseDto(app);
     }
 
@@ -50,7 +50,7 @@ export class AppsController {
     })
     @ApiResponse({
         status: 200,
-        description: 'App updated',
+        description: 'Application updated',
         type: AppResponseDto,
     })
     @ApiResponse({
@@ -63,18 +63,13 @@ export class AppsController {
     })
     @ApiResponse({
         status: 404,
-        description: 'App not found',
+        description: 'Application not found',
     })
     async updateApp(
         @AppUser() user: AuthenticatedAppUser,
         @Body() updateAppDto: UpdateAppRequestDto,
     ): Promise<AppResponseDto> {
-        const app = await this.appsService.updateByAppUser(
-            user.appId,
-            user.id,
-            updateAppDto.name,
-            updateAppDto.description,
-        );
+        const app = await this.appsService.updateApp(user.appId, updateAppDto.name, updateAppDto.description);
         return new AppResponseDto(app);
     }
 }

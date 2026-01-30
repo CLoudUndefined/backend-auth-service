@@ -7,10 +7,9 @@ import { GetAppUsersQueryDto } from './dto/get-app-users-query.dto';
 import { JwtServiceAuthGuard } from 'src/auth/guards/jwt-service-auth.guard';
 import { AppUsersService } from '../service/app-users.service';
 import { AppUserWithRolesResponseDto } from './dto/app-user-with-roles-response.dto';
-import { ServiceUser } from 'src/common/decorators/service-user.decorator';
 import { AppUserWithRolesAndPermissionsResponseDto } from './dto/app-user-with-roles-and-permissions-response.dto';
 import { AppRoleWithPermissionsResponseDto } from 'src/app-roles/api/dto/app-role-with-permissions-response.dto';
-import { type AuthenticatedServiceUser } from 'src/auth/interfaces/authenticated-service-user.interface';
+import { AppAccessGuard } from 'src/auth/guards/app-access.guard';
 
 @ApiTags('Service (App Users)')
 @ApiBearerAuth('JWT-auth-service')
@@ -19,7 +18,7 @@ export class ServiceAppUsersController {
     constructor(private readonly appUsersService: AppUsersService) {}
 
     @Get()
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'List users of an application',
         description: 'Retrieves all registered users for the specific application. Optionally filter by role.',
@@ -56,18 +55,17 @@ export class ServiceAppUsersController {
         description: 'App not found',
     })
     async listAppUsers(
-        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Query() query: GetAppUsersQueryDto,
     ): Promise<AppUserWithRolesResponseDto[]> {
-        const appUsers = await this.appUsersService.listAppUsersByServiceUser(appId, user.id, query.roleId);
+        const appUsers = await this.appUsersService.listAppUsers(appId, query.roleId);
         return appUsers.map((appUser) => {
             return new AppUserWithRolesResponseDto(appUser);
         });
     }
 
     @Get(':appUserId')
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'Get specific app user',
         description: 'Returns details of a registered user in the app.',
@@ -102,16 +100,15 @@ export class ServiceAppUsersController {
         description: 'App or User not found',
     })
     async getAppUser(
-        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('appUserId', ParseIntPipe) appUserId: number,
     ): Promise<AppUserWithRolesAndPermissionsResponseDto> {
-        const appUser = await this.appUsersService.getAppUserByServiceUser(appId, user.id, appUserId);
+        const appUser = await this.appUsersService.getAppUser(appId, appUserId);
         return new AppUserWithRolesAndPermissionsResponseDto(appUser);
     }
 
     @Put(':appUserId')
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'Update app user',
         description: 'Updates user email.',
@@ -150,22 +147,16 @@ export class ServiceAppUsersController {
         description: 'Conflict',
     })
     async updateAppUser(
-        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('appUserId', ParseIntPipe) appUserId: number,
         @Body() updateAppUserDto: UpdateAppUserRequestDto,
     ): Promise<AppUserResponseDto> {
-        const appUser = await this.appUsersService.updateAppUserByServiceUser(
-            appId,
-            user.id,
-            appUserId,
-            updateAppUserDto.email,
-        );
+        const appUser = await this.appUsersService.updateAppUser(appId, appUserId, updateAppUserDto.email);
         return new AppUserResponseDto(appUser);
     }
 
     @Delete(':appUserId')
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'Delete app user',
         description: 'Removes a user from the application.',
@@ -196,16 +187,15 @@ export class ServiceAppUsersController {
         description: 'App or User not found',
     })
     async deleteAppUser(
-        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('appUserId', ParseIntPipe) appUserId: number,
     ): Promise<MessageResponseDto> {
-        await this.appUsersService.deleteAppUserByServiceUser(appId, user.id, appUserId);
+        await this.appUsersService.deleteAppUser(appId, appUserId);
         return { message: 'User deleted successfully' };
     }
 
     @Get(':appUserId/roles')
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'Get user roles',
         description: 'Retrieves all roles assigned to the user.',
@@ -237,18 +227,17 @@ export class ServiceAppUsersController {
         description: 'App or User not found',
     })
     async getAppUserRoles(
-        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('appUserId', ParseIntPipe) appUserId: number,
     ): Promise<AppRoleWithPermissionsResponseDto[]> {
-        const roles = await this.appUsersService.getAppUserRolesByServiceUser(appId, user.id, appUserId);
+        const roles = await this.appUsersService.getAppUserRoles(appId, appUserId);
         return roles.map((role) => {
             return new AppRoleWithPermissionsResponseDto(role);
         });
     }
 
     @Post(':appUserId/roles/:roleId')
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'Add role to user',
         description: 'Assigns a specific role to the user.',
@@ -291,17 +280,16 @@ export class ServiceAppUsersController {
         description: 'Conflict - User already has this role',
     })
     async addRoleToAppUser(
-        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('appUserId', ParseIntPipe) appUserId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<MessageResponseDto> {
-        await this.appUsersService.addRoleToAppUserByServiceUser(appId, user.id, appUserId, roleId);
+        await this.appUsersService.addRoleToAppUser(appId, appUserId, roleId);
         return { message: 'Role added successfully' };
     }
 
     @Delete(':appUserId/roles/:roleId')
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'Remove role from user',
         description: 'Removes a specific role from the user.',
@@ -336,12 +324,11 @@ export class ServiceAppUsersController {
         description: 'App, User, Role not found, or User does not have this role',
     })
     async removeRoleFromAppUser(
-        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('appUserId', ParseIntPipe) appUserId: number,
         @Param('roleId', ParseIntPipe) roleId: number,
     ): Promise<MessageResponseDto> {
-        await this.appUsersService.removeRoleFromAppUserByServiceUser(appId, user.id, appUserId, roleId);
+        await this.appUsersService.removeRoleFromAppUser(appId, appUserId, roleId);
         return { message: 'Role removed successfully' };
     }
 }

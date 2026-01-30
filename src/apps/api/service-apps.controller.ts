@@ -3,12 +3,13 @@ import { CreateAppRequestDto } from './dto/create-app-request.dto';
 import { AppResponseDto } from './dto/app-response.dto';
 import { UpdateAppRequestDto } from './dto/update-app-request.dto';
 import { MessageResponseDto } from 'src/common/api/dto/message-response.dto';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtServiceAuthGuard } from 'src/auth/guards/jwt-service-auth.guard';
 import { AppsService } from '../service/apps.service';
 import { ServiceUser } from 'src/common/decorators/service-user.decorator';
 import { IsGodGuard } from 'src/auth/guards/is-god.guard';
 import { type AuthenticatedServiceUser } from 'src/auth/interfaces/authenticated-service-user.interface';
+import { AppAccessGuard } from 'src/auth/guards/app-access.guard';
 
 @ApiTags('Service (Apps Management)')
 @ApiBearerAuth('JWT-auth-service')
@@ -24,7 +25,7 @@ export class ServiceAppsController {
     })
     @ApiResponse({
         status: 201,
-        description: 'App created successfully',
+        description: 'Application created successfully',
         type: AppResponseDto,
     })
     @ApiResponse({
@@ -39,7 +40,7 @@ export class ServiceAppsController {
         @ServiceUser() user: AuthenticatedServiceUser,
         @Body() createAppDto: CreateAppRequestDto,
     ): Promise<AppResponseDto> {
-        const app = await this.appsService.createByServiceUser(user.id, createAppDto.name, createAppDto.description);
+        const app = await this.appsService.createApp(user.id, createAppDto.name, createAppDto.description);
         return new AppResponseDto(app);
     }
 
@@ -60,21 +61,21 @@ export class ServiceAppsController {
         description: 'Unauthorized',
     })
     async findAllApps(): Promise<AppResponseDto[]> {
-        const apps = await this.appsService.findAllAppsByServiceUser();
+        const apps = await this.appsService.findAllApps();
         return apps.map((app) => {
             return new AppResponseDto(app);
         });
     }
 
     @Get(':appId')
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'Get app by ID',
         description: 'Returns details of a specific application.',
     })
     @ApiResponse({
         status: 200,
-        description: 'App details found',
+        description: 'Application details found',
         type: AppResponseDto,
     })
     @ApiResponse({
@@ -85,24 +86,21 @@ export class ServiceAppsController {
         status: 403,
         description: 'Forbidden - can only view own apps or requires god-mode',
     })
-    @ApiResponse({ status: 404, description: 'App not found' })
-    async findAppById(
-        @ServiceUser() user: AuthenticatedServiceUser,
-        @Param('appId', ParseIntPipe) appId: number,
-    ): Promise<AppResponseDto> {
-        const app = await this.appsService.findAppByIdByServiceUser(appId, user.id);
+    @ApiResponse({ status: 404, description: 'Application not found' })
+    async findAppById(@Param('appId', ParseIntPipe) appId: number): Promise<AppResponseDto> {
+        const app = await this.appsService.findAppById(appId);
         return new AppResponseDto(app);
     }
 
     @Put(':appId')
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'Update application',
         description: 'Updates name or description of the application.',
     })
     @ApiResponse({
         status: 200,
-        description: 'App updated',
+        description: 'Application updated',
         type: AppResponseDto,
     })
     @ApiResponse({
@@ -119,31 +117,25 @@ export class ServiceAppsController {
     })
     @ApiResponse({
         status: 404,
-        description: 'App not found',
+        description: 'Application not found',
     })
     async updateApp(
-        @ServiceUser() user: AuthenticatedServiceUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Body() updateAppDto: UpdateAppRequestDto,
     ): Promise<AppResponseDto> {
-        const app = await this.appsService.updateByServiceUser(
-            appId,
-            user.id,
-            updateAppDto.name,
-            updateAppDto.description,
-        );
+        const app = await this.appsService.updateApp(appId, updateAppDto.name, updateAppDto.description);
         return new AppResponseDto(app);
     }
 
     @Delete(':appId')
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'Delete application',
         description: 'Deletes the application and all associated users/roles definitively.',
     })
     @ApiResponse({
         status: 200,
-        description: 'App deleted',
+        description: 'Application deleted',
         type: MessageResponseDto,
     })
     @ApiResponse({
@@ -156,26 +148,23 @@ export class ServiceAppsController {
     })
     @ApiResponse({
         status: 404,
-        description: 'App not found',
+        description: 'Application not found',
     })
-    async deleteApp(
-        @ServiceUser() user: AuthenticatedServiceUser,
-        @Param('appId', ParseIntPipe) appId: number,
-    ): Promise<MessageResponseDto> {
-        await this.appsService.deleteByServiceUser(appId, user.id);
-        return { message: 'Application deleted successfully' };
+    async deleteApp(@Param('appId', ParseIntPipe) appId: number): Promise<MessageResponseDto> {
+        await this.appsService.deleteApp(appId);
+        return { message: 'Applicationication deleted successfully' };
     }
 
     @Post(':appId/regenerate')
     @HttpCode(200)
-    @UseGuards(JwtServiceAuthGuard)
+    @UseGuards(JwtServiceAuthGuard, AppAccessGuard)
     @ApiOperation({
         summary: 'Regenerate application secret',
         description: 'Generates a new JWT secret for the application. ALL existing tokens will be invalidated.',
     })
     @ApiResponse({
         status: 200,
-        description: 'App secret regenerated successfully',
+        description: 'Application secret regenerated successfully',
         type: MessageResponseDto,
     })
     @ApiResponse({
@@ -188,13 +177,10 @@ export class ServiceAppsController {
     })
     @ApiResponse({
         status: 404,
-        description: 'App not found',
+        description: 'Application not found',
     })
-    async regenerateSecret(
-        @ServiceUser() user: AuthenticatedServiceUser,
-        @Param('appId', ParseIntPipe) appId: number,
-    ): Promise<MessageResponseDto> {
-        await this.appsService.regenerateSecretByServiceUser(appId, user.id);
-        return { message: 'App secret regenerated successfully' };
+    async regenerateSecret(@Param('appId', ParseIntPipe) appId: number): Promise<MessageResponseDto> {
+        await this.appsService.regenerateSecret(appId);
+        return { message: 'Application secret regenerated successfully' };
     }
 }
