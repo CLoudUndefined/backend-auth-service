@@ -54,6 +54,18 @@ export class AppRolesRepository {
             .castTo<ApplicationRoleWithPermissionsModel>();
     }
 
+    async findByIdsWithPermissions(roleIds: number[]): Promise<ApplicationRoleWithPermissionsModel[]> {
+        if (roleIds.length === 0) {
+            return [];
+        }
+
+        return this.model
+            .query()
+            .findByIds(roleIds)
+            .withGraphFetched('permissions')
+            .castTo<ApplicationRoleWithPermissionsModel[]>();
+    }
+
     async update(
         id: number,
         data: Partial<Pick<ApplicationRoleModel, 'name' | 'description'>>,

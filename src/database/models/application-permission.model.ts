@@ -23,7 +23,6 @@ export class ApplicationPermissionModel extends BaseModel {
                     through: {
                         from: 'applicationRolePermission.permissionId',
                         to: 'applicationRolePermission.roleId',
-                        extra: ['createdAt'],
                     },
                     to: 'applicationRoles.id',
                 },
