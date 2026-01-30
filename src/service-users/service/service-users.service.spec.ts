@@ -1,18 +1,160 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ServiceUsersService } from './service-users.service';
+import { ServiceUsersRepository } from 'src/database/repositories/service-users.repository';
+import { AppsRepository } from 'src/database/repositories/apps.repository';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 
 describe('ServiceUsersService', () => {
     let service: ServiceUsersService;
+    const mockServiceUsersRepository = {
+        findAll: jest.fn(),
+        findByEmail: jest.fn(),
+        findById: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+    };
+    const mockAppsRepository = {
+        existsByOwnerId: jest.fn(),
+        findAllByOwnerIdWithOwner: jest.fn(),
+    };
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            providers: [ServiceUsersService],
+            providers: [
+                ServiceUsersService,
+                { provide: ServiceUsersRepository, useValue: mockServiceUsersRepository },
+                { provide: AppsRepository, useValue: mockAppsRepository },
+            ],
         }).compile();
 
         service = module.get<ServiceUsersService>(ServiceUsersService);
+
+        jest.clearAllMocks();
     });
 
     it('should be defined', () => {
         expect(service).toBeDefined();
+    });
+
+    describe('update', () => {
+        const userId = 1;
+        const anotherUserId = 2;
+        const email = 'developer@example.com';
+
+        it('should throw ConflictException if email already exists for another user', async () => {
+            mockServiceUsersRepository.findByEmail.mockResolvedValue({ id: anotherUserId });
+
+            await expect(service.update(userId, email)).rejects.toThrow(ConflictException);
+
+            expect(mockServiceUsersRepository.findByEmail).toHaveBeenCalledWith(email);
+        });
+
+        it('should throw NotFoundException if update user not found', async () => {
+            mockServiceUsersRepository.findByEmail.mockResolvedValue(undefined);
+            mockServiceUsersRepository.update.mockResolvedValue(undefined);
+
+            await expect(service.update(userId, email)).rejects.toThrow(NotFoundException);
+
+            expect(mockServiceUsersRepository.update).toHaveBeenCalledWith(userId, { email });
+        });
+
+        it('should successfully update user when email is not taken', async () => {
+            mockServiceUsersRepository.findByEmail.mockResolvedValue(null);
+            mockServiceUsersRepository.update.mockResolvedValue({ id: userId, email });
+
+            const result = await service.update(userId, email);
+
+            expect(result).toEqual({ id: userId, email });
+            expect(mockServiceUsersRepository.findByEmail).toHaveBeenCalledWith(email);
+            expect(mockServiceUsersRepository.update).toHaveBeenCalledWith(userId, { email });
+        });
+    });
+
+    describe('delete', () => {
+        const userId = 1;
+
+        it('should throw NotFoundException if user does not exist', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue(undefined);
+
+            await expect(service.delete(userId)).rejects.toThrow(NotFoundException);
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(userId);
+        });
+
+        it('should throw ConflictException if user has existing applications', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({ id: userId });
+            mockAppsRepository.existsByOwnerId.mockResolvedValue(true);
+
+            await expect(service.delete(userId)).rejects.toThrow(ConflictException);
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(userId);
+            expect(mockAppsRepository.existsByOwnerId).toHaveBeenCalledWith(userId);
+        });
+
+        it('should successfully delete user when user exists and has no applications', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({ id: userId });
+            mockAppsRepository.existsByOwnerId.mockResolvedValue(false);
+
+            await service.delete(userId);
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(userId);
+            expect(mockAppsRepository.existsByOwnerId).toHaveBeenCalledWith(userId);
+            expect(mockServiceUsersRepository.delete).toHaveBeenCalledWith(userId);
+        });
+    });
+
+    describe('findByIdOrThrow', () => {
+        const userId = 1;
+
+        it('should throw NotFoundException if user does not exist', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue(null);
+
+            await expect(service.findByIdOrThrow(userId)).rejects.toThrow(NotFoundException);
+            await expect(service.findByIdOrThrow(userId)).rejects.toThrow('User not found');
+
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(userId);
+        });
+
+        it('should successfully return user if user exists', async () => {
+            mockServiceUsersRepository.findById.mockResolvedValue({ id: userId });
+
+            const result = await service.findByIdOrThrow(userId);
+
+            expect(result).toEqual({ id: userId });
+            expect(mockServiceUsersRepository.findById).toHaveBeenCalledWith(userId);
+        });
+    });
+
+    describe('findAll', () => {
+        const users = [
+            { id: 1, email: 'developer-1@example.com' },
+            { id: 2, email: 'developer-2@example.com' },
+        ];
+
+        it('should successfully return all service users', async () => {
+            mockServiceUsersRepository.findAll.mockResolvedValue(users);
+
+            const result = await service.findAll();
+
+            expect(result).toEqual(users);
+            expect(mockServiceUsersRepository.findAll).toHaveBeenCalledWith();
+        });
+    });
+
+    describe('findAllAppsByOwnerId', () => {
+        const ownerId = 1;
+        const apps = [
+            { id: 1, name: 'mock-app-name-1', ownerId, owner: { id: ownerId } },
+            { id: 2, name: 'mock-app-name-2', ownerId, owner: { id: ownerId } },
+        ];
+
+        it('should successfully return all apps for given owner', async () => {
+            mockAppsRepository.findAllByOwnerIdWithOwner.mockResolvedValue(apps);
+
+            const result = await service.findAllAppsByOwnerId(ownerId);
+
+            expect(result).toEqual(apps);
+            expect(mockAppsRepository.findAllByOwnerIdWithOwner).toHaveBeenCalledWith(ownerId);
+        });
     });
 });
