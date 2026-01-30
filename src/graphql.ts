@@ -1,3 +1,4 @@
+
 /*
  * -------------------------------------------------------
  * THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
@@ -31,9 +32,9 @@ export abstract class IQuery {
 
     abstract permission(id: string): Nullable<AppPermission> | Promise<Nullable<AppPermission>>;
 
-    abstract appRoles(): AppRole[] | Promise<AppRole[]>;
+    abstract roles(): AppRole[] | Promise<AppRole[]>;
 
-    abstract appRole(id: number): AppRole | Promise<AppRole>;
+    abstract role(id: number): AppRole | Promise<AppRole>;
 }
 
 export class AppRole {

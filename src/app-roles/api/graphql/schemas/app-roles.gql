@@ -20,8 +20,8 @@ input UpdateAppRoleInput {
 }
 
 type Query {
-    appRoles: [AppRole!]!
-    appRole(id: Int!): AppRole!
+    roles: [AppRole!]!
+    role(id: Int!): AppRole!
 }
 
 type Mutation {
