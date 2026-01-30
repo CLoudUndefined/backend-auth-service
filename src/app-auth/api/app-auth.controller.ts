@@ -13,11 +13,11 @@ import { ListRecoveryResponseDto } from 'src/common/api/dto/auth/list-recovery-r
 import { AppAuthService } from '../service/app-auth.service';
 import { JwtAppAuthGuard } from '../guards/jwt-app-auth.guard';
 import { AppUser } from 'src/common/decorators/app-user.decorator';
-import { ApplicationUserModel } from 'src/database/models/application-user.model';
 import { RemoveRecoveryRequestDto } from 'src/common/api/dto/auth/remove-recovery-request.dto';
 import { JwtAppRefreshGuard } from '../guards/jwt-refresh.guard';
 import { BearerToken } from 'src/common/decorators/bearer-token.decorator';
 import { TokensResponseDto } from 'src/common/api/dto/auth/tokens-response.dto';
+import { type AuthenticatedAppUser } from '../interfaces/authenticated-app-user.interface';
 
 @ApiTags('App (User Auth)')
 @Controller('apps/:appId/auth')
@@ -131,7 +131,7 @@ export class AppAuthController {
         description: 'App or user not found',
     })
     async changePassword(
-        @AppUser() user: ApplicationUserModel,
+        @AppUser() user: AuthenticatedAppUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Body() changePasswordDto: ChangePasswordRequestDto,
     ): Promise<MessageResponseDto> {
@@ -210,7 +210,7 @@ export class AppAuthController {
         description: 'App or user not found',
     })
     async addRecovery(
-        @AppUser() user: ApplicationUserModel,
+        @AppUser() user: AuthenticatedAppUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Body() addRecoveryDto: AddRecoveryRequestDto,
     ): Promise<MessageResponseDto> {
@@ -245,7 +245,7 @@ export class AppAuthController {
         description: 'App or user not found',
     })
     async listRecovery(
-        @AppUser() user: ApplicationUserModel,
+        @AppUser() user: AuthenticatedAppUser,
         @Param('appId', ParseIntPipe) appId: number,
     ): Promise<ListRecoveryResponseDto> {
         return this.appAuthService.listRecovery(appId, user.id);
@@ -363,7 +363,7 @@ export class AppAuthController {
         description: 'App, user or recovery question not found',
     })
     async updateRecovery(
-        @AppUser() user: ApplicationUserModel,
+        @AppUser() user: AuthenticatedAppUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('recoveryId', ParseIntPipe) recoveryId: number,
         @Body() updateRecoveryDto: UpdateRecoveryRequestDto,
@@ -416,7 +416,7 @@ export class AppAuthController {
         description: 'App, user or recovery question not found',
     })
     async removeRecovery(
-        @AppUser() user: ApplicationUserModel,
+        @AppUser() user: AuthenticatedAppUser,
         @Param('appId', ParseIntPipe) appId: number,
         @Param('recoveryId', ParseIntPipe) recoveryId: number,
         @Body() removeRecoveryDto: RemoveRecoveryRequestDto,
